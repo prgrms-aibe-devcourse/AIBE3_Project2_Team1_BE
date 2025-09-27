@@ -11,7 +11,7 @@ import com.hotsix.server.user.entity.User;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "proposals")
+@Table(name = "proposals") // 프리랜서가 클라이언트에게 프로젝트를 하고싶다고 보낸 제안서 관련 테이블
 public class Proposal extends BaseEntity {
 
     @Id
@@ -32,5 +32,5 @@ public class Proposal extends BaseEntity {
     private Integer proposedAmount;
 
     @Enumerated(EnumType.STRING)
-    private Status status; // SENT, ACCEPTED, REJECTED
+    private ProposalStatus proposalStatus; // SENT, ACCEPTED, REJECTED
 }
