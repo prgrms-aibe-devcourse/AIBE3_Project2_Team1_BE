@@ -1,6 +1,7 @@
 package com.hotsix.server.user.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
+import com.hotsix.server.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 
