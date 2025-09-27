@@ -25,8 +25,15 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // CLIENT, FREELANCER
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "login_type", nullable = false)
+    private LoginType loginType; // 유저가 로그인 하는 타입 (이메일,카카오,네이버)
+
     private String name;
     private String nickname;
     private String phoneNumber;
     private LocalDate birthDate;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Profile profile;
 }
