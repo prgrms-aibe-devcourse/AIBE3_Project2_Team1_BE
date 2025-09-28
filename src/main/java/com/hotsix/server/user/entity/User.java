@@ -1,0 +1,40 @@
+package com.hotsix.server.user.entity;
+
+import com.hotsix.server.global.entity.BaseEntity;
+import com.hotsix.server.profile.entity.Profile;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "users")
+public class User extends BaseEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role; // CLIENT, FREELANCER
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "login_type", nullable = false)
+    private LoginType loginType; // 유저가 로그인 하는 타입 (이메일,카카오,네이버)
+
+    private String name;
+    private String nickname;
+    private String phoneNumber;
+    private LocalDate birthDate;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Profile profile;
+}
