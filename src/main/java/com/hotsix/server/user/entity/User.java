@@ -1,6 +1,6 @@
 package com.hotsix.server.user.entity;
 
-import com.hotsix.server.global.entity.BaseEntity;
+import com.hotsix.server.global.jpa.entity.BaseEntity;
 import com.hotsix.server.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,10 +14,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
-
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -26,15 +22,26 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // CLIENT, FREELANCER
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "login_type", nullable = false)
-    private LoginType loginType; // 유저가 로그인 하는 타입 (이메일,카카오,네이버)
 
     private String name;
     private String nickname;
     private String phoneNumber;
     private LocalDate birthDate;
+    private String apiKey;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
+
+    public User (String name, String password, String nickname){
+        this.name = name;
+        this.password = password;
+        this.nickname = nickname;
+    }
+
+    public User (String name, String password, String nickname, Profile profile){
+        this.name = name;
+        this.password = password;
+        this.nickname = nickname;
+        this.profile = profile;
+    }
 }

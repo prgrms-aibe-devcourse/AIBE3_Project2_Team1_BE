@@ -1,14 +1,15 @@
 package com.hotsix.server.user.dto;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Builder
-public class UserResponseDto {
-    private Long id;
+@Setter
+public class UserRegisterRequestDto {
     private String email;
+    private String password;
     private String name;
     private String nickname;
     private String phoneNumber;
+    private String birthDate; // yyyy-MM-dd 형식
 }
