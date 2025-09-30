@@ -25,6 +25,11 @@ import java.util.List;
 public class ProposalController {
     private final ProposalService proposalService;
 
+    /**
+     * Retrieve all proposals.
+     *
+     * @return a CommonResponse containing a list of ProposalResponseDto objects representing all proposals
+     */
     @Transactional(readOnly = true)
     @GetMapping
     @Operation(summary = "제안서 다건 조회")
@@ -36,6 +41,12 @@ public class ProposalController {
         );
     }
 
+    /**
+     * Retrieve a single proposal by its identifier.
+     *
+     * @param id the id of the proposal to retrieve
+     * @return a CommonResponse containing the ProposalResponseDto for the specified proposal
+     */
     @Transactional(readOnly = true)
     @GetMapping("/{id}")
     @Operation(summary = "제안서 단건 조회")
@@ -49,6 +60,15 @@ public class ProposalController {
         );
     }
 
+    /**
+     * Create a new proposal from the provided request data.
+     *
+     * Creates a proposal in draft status for the (temporary) freelancer using the project ID,
+     * description, and proposed amount from the request, and returns the created proposal as a DTO.
+     *
+     * @param proposalRequestDto the request payload containing `projectId`, `description`, and `proposedAmount`
+     * @return a CommonResponse containing the created ProposalResponseDto
+     */
     @Transactional
     @PostMapping
     @Operation(summary = "제안서 작성")
@@ -70,6 +90,12 @@ public class ProposalController {
         );
     }
 
+    /**
+     * Deletes a proposal by its identifier.
+     *
+     * @param id the id of the proposal to delete
+     * @return the deleted proposal wrapped in a ProposalResponseDto
+     */
     @Transactional
     @DeleteMapping("/{id}")
     @Operation(summary = "삭제")
@@ -84,6 +110,13 @@ public class ProposalController {
         return CommonResponse.success(proposalResponseDto);
     }
 
+    /**
+     * Update an existing proposal's description and proposed amount.
+     *
+     * @param id the identifier of the proposal to update
+     * @param requestBody DTO containing the new description and proposed amount
+     * @return a confirmation message indicating the proposal identified by {@code id} was updated
+     */
     @Transactional
     @PutMapping("/{id}")
     @Operation(summary = "수정")

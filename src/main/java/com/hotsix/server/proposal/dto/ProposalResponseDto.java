@@ -17,6 +17,13 @@ public record ProposalResponseDto (
         @NonNull Integer proposedAmount,
         @NonNull ProposalStatus proposalStatus
 ){
+    /**
+     * Creates a ProposalResponseDto populated from the given Proposal entity.
+     *
+     * The record components are initialized from the corresponding properties of the provided proposal.
+     *
+     * @param proposal the Proposal entity to extract values from; must not be null
+     */
     public ProposalResponseDto(Proposal proposal){
         this(
                 proposal.getProposalId(),
