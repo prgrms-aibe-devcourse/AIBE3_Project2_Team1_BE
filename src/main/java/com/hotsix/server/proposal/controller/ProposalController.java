@@ -2,6 +2,7 @@ package com.hotsix.server.proposal.controller;
 
 
 import com.hotsix.server.global.response.CommonResponse;
+import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
@@ -54,7 +55,7 @@ public class ProposalController {
     public CommonResponse<ProposalResponseDto> createProposal(
             @Valid @RequestBody ProposalRequestDto proposalRequestDto
     ){
-        //User 임의 생성
+        //User 임시 생성
         User freelancer = User.builder().build();
         Proposal proposal = proposalService.create(
                 proposalRequestDto.projectId(),
@@ -67,5 +68,34 @@ public class ProposalController {
         return CommonResponse.success(
                 new ProposalResponseDto(proposal)
         );
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}")
+    @Operation(summary = "삭제")
+    public CommonResponse<ProposalResponseDto> deleteProposal(
+            @PathVariable long id
+    ){
+        //User 임시 생성
+        User freelancer = User.builder().build();
+
+        ProposalResponseDto proposalResponseDto = proposalService.delete(freelancer, id);
+
+        return CommonResponse.success(proposalResponseDto);
+    }
+
+    @Transactional
+    @PutMapping("/{id}")
+    @Operation(summary = "수정")
+    public CommonResponse<String> updateProposal(
+            @PathVariable long id,
+            @Valid @RequestBody ProposalRequestBody requestBody
+    ){
+        //User 임시 생성
+        User freelancer = User.builder().build();
+
+        proposalService.update(freelancer, id, requestBody.description(), requestBody.proposedAmount());
+
+        return CommonResponse.success("%d번 게시글이 수정되었습니다.".formatted(id));
     }
 }

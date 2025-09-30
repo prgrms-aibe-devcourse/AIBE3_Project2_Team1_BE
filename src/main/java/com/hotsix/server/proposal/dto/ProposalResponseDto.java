@@ -1,6 +1,5 @@
 package com.hotsix.server.proposal.dto;
 
-import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.user.entity.User;

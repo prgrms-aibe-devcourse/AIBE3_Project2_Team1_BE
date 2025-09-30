@@ -2,11 +2,14 @@ package com.hotsix.server.proposal.service;
 
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
+import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.repository.ProposalRepository;
 import com.hotsix.server.user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,4 +40,19 @@ public class ProposalService {
     }
 
 
+    public ProposalResponseDto delete(User freelancer, long id) {
+        Proposal proposal = findById(id);
+
+        proposal.checkCanDelete(freelancer);
+
+        proposalRepository.delete(proposal);
+
+        return new ProposalResponseDto(proposal);
+    }
+
+    public void update(User freelancer, long id, String description, Integer proposedAmount) {
+        Proposal proposal = findById(id);
+        proposal.checkCanModify(freelancer);
+        proposal.modify(description, proposedAmount);
+    }
 }
