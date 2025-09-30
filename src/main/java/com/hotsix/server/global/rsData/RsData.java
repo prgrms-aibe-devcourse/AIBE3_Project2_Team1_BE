@@ -3,6 +3,7 @@ package com.hotsix.server.global.rsData;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.lang.NonNull;
 
+
 public record RsData<T>(
         @NonNull String resultCode,
         @JsonIgnore int statusCode,
