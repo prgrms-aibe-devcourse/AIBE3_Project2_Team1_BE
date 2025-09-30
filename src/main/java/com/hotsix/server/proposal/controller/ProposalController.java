@@ -25,7 +25,6 @@ import java.util.List;
 public class ProposalController {
     private final ProposalService proposalService;
 
-    @Transactional(readOnly = true)
     @GetMapping
     @Operation(summary = "제안서 다건 조회")
     public CommonResponse<List<ProposalResponseDto>> getProposals() {
@@ -36,7 +35,6 @@ public class ProposalController {
         );
     }
 
-    @Transactional(readOnly = true)
     @GetMapping("/{id}")
     @Operation(summary = "제안서 단건 조회")
     public CommonResponse<ProposalResponseDto> getProposal(
@@ -49,7 +47,6 @@ public class ProposalController {
         );
     }
 
-    @Transactional
     @PostMapping
     @Operation(summary = "제안서 작성")
     public CommonResponse<ProposalResponseDto> createProposal(
@@ -70,7 +67,6 @@ public class ProposalController {
         );
     }
 
-    @Transactional
     @DeleteMapping("/{id}")
     @Operation(summary = "삭제")
     public CommonResponse<ProposalResponseDto> deleteProposal(
@@ -84,7 +80,6 @@ public class ProposalController {
         return CommonResponse.success(proposalResponseDto);
     }
 
-    @Transactional
     @PutMapping("/{id}")
     @Operation(summary = "수정")
     public CommonResponse<String> updateProposal(
