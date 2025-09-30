@@ -11,6 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: hotsix_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -p${{ secrets.MYSQL_PASSWORD }}"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
       redis:
         image: redis:7.2
         ports:
@@ -26,7 +39,7 @@ jobs:
       SPRING_DATA_REDIS_HOST: localhost
       SPRING_DATA_REDIS_PORT: 6379
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      SPRING_DATA_REDIS_PASSWORD: ${{ secrets.REDIS_DEV_PASSWORD }}
+      SPRING_DATA_REDIS_PASSWORD: ""
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
