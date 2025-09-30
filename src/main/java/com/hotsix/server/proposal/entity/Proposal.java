@@ -33,4 +33,12 @@ public class Proposal extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
+
+    public Proposal(Project project, User freelancer, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
+        this.project = project;
+        this.freelancer = freelancer;
+        this.description = description;
+        this.proposedAmount = proposedAmount;
+        this.proposalStatus = proposalStatus;
+    }
 }
