@@ -96,6 +96,6 @@ public class ProposalController {
 
         proposalService.update(freelancer, id, requestBody.description(), requestBody.proposedAmount());
 
-        return CommonResponse.success("%d번 게시글이 수정되었습니다.".formatted(id));
+        return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }
 }
