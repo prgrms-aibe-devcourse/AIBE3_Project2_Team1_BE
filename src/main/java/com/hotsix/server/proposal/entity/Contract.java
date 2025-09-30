@@ -26,7 +26,7 @@ public class Contract extends BaseEntity {
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
-    private ContractStatus contractStatus; // DFAFT, REVIEW, COMPLETED, TERMINATED, CANCELLED
+    private ContractStatus contractStatus; // DRAFT, REVIEW, COMPLETED, TERMINATED, CANCELLED
 
 
 }

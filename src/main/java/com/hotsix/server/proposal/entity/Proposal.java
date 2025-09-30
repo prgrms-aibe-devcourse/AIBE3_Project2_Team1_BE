@@ -1,11 +1,12 @@
 package com.hotsix.server.proposal.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
+import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
 import com.hotsix.server.user.entity.User;
-import org.hibernate.service.spi.ServiceException;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -45,13 +46,13 @@ public class Proposal extends BaseEntity {
 
     public void checkCanDelete(User freelancer) {
         if(!freelancer.getName().equals(this.freelancer.getName())){
-            throw new ServiceException("%d번 글 삭제 권한이 없습니다.".formatted(getProposalId()));
+            throw new ApplicationException(ProposalErrorCase.FORBIDDEN_DELETE);
         }
     }
 
     public void checkCanModify(User freelancer) {
         if(!freelancer.getName().equals(this.freelancer.getName())){
-            throw new ServiceException("%d번 글 수정 권한이 없습니다.".formatted(getProposalId()));
+            throw new ApplicationException(ProposalErrorCase.FORBIDDEN_UPDATE);
         }
     }
 
