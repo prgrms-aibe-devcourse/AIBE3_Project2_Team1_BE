@@ -3,13 +3,15 @@ package com.hotsix.server.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Table(name = "refresh_token")
-public class RefreshToken {
+public class RefreshToken implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
