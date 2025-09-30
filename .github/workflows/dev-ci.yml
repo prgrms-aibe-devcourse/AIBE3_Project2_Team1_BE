@@ -16,25 +16,25 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --requirepass ${{ secrets.REDIS_DEV_PASSWORD }}
-          --health-cmd "redis-cli -a ${{ secrets.REDIS_DEV_PASSWORD }} ping"
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
     env:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: ci
       SPRING_DATA_REDIS_HOST: localhost
       SPRING_DATA_REDIS_PORT: 6379
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       SPRING_DATA_REDIS_PASSWORD: ${{ secrets.REDIS_DEV_PASSWORD }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -43,7 +43,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Cache Gradle dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
