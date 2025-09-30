@@ -51,9 +51,10 @@ public class ProposalService {
 
         proposal.checkCanDelete(freelancer);
 
+        ProposalResponseDto responseDto = new ProposalResponseDto(proposal);
         proposalRepository.delete(proposal);
 
-        return new ProposalResponseDto(proposal);
+        return responseDto;
     }
 
     @Transactional
