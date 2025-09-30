@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hotsix-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_DEV_PASSWORD}
+      TZ: Asia/Seoul
+    restart: always
+    volumes:
+      - ./logs:/app/logs
+
+  redis:
+    image: redis:7.2
+    container_name: hotsix-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--requirepass", "${REDIS_DEV_PASSWORD}"]
+    restart: always
+
+volumes:
+  redis-data:
