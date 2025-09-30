@@ -26,11 +26,11 @@ public class Proposal extends BaseEntity {
     @JoinColumn(name = "freelancer_user_id", nullable = false)
     private User freelancer;
 
-    @Lob
+    @Lob //JPA에서 긴 텍스트(CLOB)나 바이너리(BLOB) 데이터를 DB에 저장할 때 쓰는 어노테이션
     private String description;
 
     private Integer proposedAmount;
 
     @Enumerated(EnumType.STRING)
-    private ProposalStatus proposalStatus; // SENT, ACCEPTED, REJECTED
+    private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
 }
