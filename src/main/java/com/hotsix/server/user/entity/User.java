@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,21 +28,24 @@ public class User extends BaseEntity {
     private String nickname;
     private String phoneNumber;
     private LocalDate birthDate;
+    @Column(unique = true)
     private String apiKey;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
 
-    public User (String name, String password, String nickname){
-        this.name = name;
+    public User (String email, String password, String nickname){
+        this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.apiKey = UUID.randomUUID().toString();
     }
 
-    public User (String name, String password, String nickname, Profile profile){
-        this.name = name;
+    public User (String email, String password, String nickname, Profile profile){
+        this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.profile = profile;
+        this.apiKey = UUID.randomUUID().toString();
     }
 }
