@@ -45,13 +45,13 @@ public class Proposal extends BaseEntity {
     }
 
     public void checkCanDelete(User freelancer) {
-        if(!freelancer.getName().equals(this.freelancer.getName())){
+        if(!freelancer.getUserId().equals(this.freelancer.getUserId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_DELETE);
         }
     }
 
     public void checkCanModify(User freelancer) {
-        if(!freelancer.getName().equals(this.freelancer.getName())){
+        if(!freelancer.getUserId().equals(this.freelancer.getUserId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_UPDATE);
         }
     }
