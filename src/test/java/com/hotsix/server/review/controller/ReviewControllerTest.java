@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.core.MethodParameter;
+import static org.mockito.ArgumentMatchers.argThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -61,8 +63,17 @@ class ReviewControllerTest {
                 List.of("https://s3.aws.com/image1.jpg")
         );
 
-        when(currentUserArgumentResolver.supportsParameter(any())).thenReturn(true);
-        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
+        when(currentUserArgumentResolver.supportsParameter(any()))
+                .thenAnswer(invocation -> {
+                    MethodParameter parameter = invocation.getArgument(0);
+                    return parameter.hasParameterAnnotation(com.hotsix.server.auth.resolver.CurrentUser.class);
+                });
+        when(currentUserArgumentResolver.resolveArgument(
+                argThat(parameter -> parameter.hasParameterAnnotation(com.hotsix.server.auth.resolver.CurrentUser.class)),
+                        any(),
+                        any(),
+                        any())
+        ).thenReturn(userId);
 
         mockMvc.perform(post("/api/v1/reviews")
                         .contentType(MediaType.APPLICATION_JSON)

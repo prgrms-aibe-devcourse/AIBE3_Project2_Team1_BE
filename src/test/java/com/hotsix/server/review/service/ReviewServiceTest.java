@@ -102,7 +102,7 @@ class ReviewServiceTest {
             assertThat(saved.getComment()).isEqualTo("좋은 프로젝트였습니다. 감사합니다!");
             assertThat(saved.getToUser().getUserId()).isEqualTo(toUser.getUserId());
 
-            verify(reviewImageRepository, times(1)).save(any(ReviewImage.class));
+            verify(reviewImageRepository).saveAll(anyList());
         }
 
         @Test
