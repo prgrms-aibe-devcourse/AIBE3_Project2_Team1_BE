@@ -98,8 +98,27 @@ public class UserController {
         );
     }
 
+    @GetMapping("/info")
+    @Operation(
+            summary = "내 정보 조회",
+            description = "현재 로그인한 사용자의 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+            }
+    )
+    public RsData<UserDto> getMyInfo() {
+        User currentUser = rq.getUser();
+
+        return new RsData<>(
+                "200-5",
+                "내 정보 조회 성공",
+                new UserDto(currentUser)
+        );
+    }
+
     @Transactional
-    @PutMapping("/{id}")
+    @PutMapping("/info/{id}")
     @Operation(
             summary = "회원정보 수정",
             description = "본인 계정의 이름, 닉네임, 전화번호, 생년월일을 수정합니다.",
@@ -123,7 +142,7 @@ public class UserController {
     }
 
     @Transactional
-    @PatchMapping("/{id}/password")
+    @PatchMapping("/info/{id}/password")
     @Operation(
             summary = "비밀번호 변경",
             description = "본인 계정의 현재 비밀번호를 확인한 후 새 비밀번호로 변경합니다.",
