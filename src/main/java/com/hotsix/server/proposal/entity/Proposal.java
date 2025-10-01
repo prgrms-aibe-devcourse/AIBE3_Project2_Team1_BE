@@ -37,6 +37,7 @@ public class Proposal extends BaseEntity {
 
     private Integer proposedAmount;
 
+    @Builder.Default
     @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProposalFile> portfolioFiles = new ArrayList<>();
 

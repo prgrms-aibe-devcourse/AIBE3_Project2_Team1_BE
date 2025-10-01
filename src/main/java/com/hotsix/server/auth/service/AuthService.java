@@ -13,7 +13,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public String genAccessToken(User user) {
-        return jwtTokenProvider.generateToken(user.getId(), user.getRole().name());
+        return jwtTokenProvider.generateToken(user.getUserId(), user.getRole().name());
     }
 
     public Map<String, Object> payload(String accessToken) {
