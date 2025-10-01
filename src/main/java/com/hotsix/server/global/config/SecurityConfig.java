@@ -1,11 +1,14 @@
 package com.hotsix.server.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotsix.server.global.config.security.jwt.JwtAuthenticationFilter;
 import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
+import com.hotsix.server.global.response.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,6 +28,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtProvider;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,12 +45,23 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/v1/users/login",
+                                "/api/v1/users/signup"
                         ).permitAll()
-                        .anyRequest().permitAll() // TODO: 로그인, 회원가입 개발 후 .anyRequest().authenticated() 으로 변경
-                );
-                // TODO: 로그인,회원가입 api 개발 후 아래 코드 주석 제거
-                //.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("UTF-8");
+
+                            CommonResponse<?> errorResponse = CommonResponse.error(401, "로그인 후 이용해주세요.");
+                            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+                        })
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

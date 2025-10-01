@@ -1,19 +1,19 @@
 package com.hotsix.server.proposal.controller;
 
-
+import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
+import com.hotsix.server.proposal.dto.ProposalStatusRequestBody;
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.service.ProposalService;
-import com.hotsix.server.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +24,7 @@ import java.util.List;
 @Tag(name = "ProposalController", description = "API 제안서 컨트롤러")
 public class ProposalController {
     private final ProposalService proposalService;
+    private final Rq rq;
 
     @GetMapping
     @Operation(summary = "제안서 다건 조회")
@@ -47,19 +48,18 @@ public class ProposalController {
         );
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "제안서 작성")
     public CommonResponse<ProposalResponseDto> createProposal(
             @Valid @RequestBody ProposalRequestDto proposalRequestDto
     ){
-        //User 임시 생성
-        User freelancer = User.builder().build();
+
         Proposal proposal = proposalService.create(
                 proposalRequestDto.projectId(),
-                freelancer,
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
-                ProposalStatus.DRAFT
+                proposalRequestDto.portfolioFiles(),
+                ProposalStatus.SUBMITTED
         );
 
         return CommonResponse.success(
@@ -72,10 +72,7 @@ public class ProposalController {
     public CommonResponse<ProposalResponseDto> deleteProposal(
             @PathVariable long id
     ){
-        //User 임시 생성
-        User freelancer = User.builder().build();
-
-        ProposalResponseDto proposalResponseDto = proposalService.delete(freelancer, id);
+        ProposalResponseDto proposalResponseDto = proposalService.delete(id);
 
         return CommonResponse.success(proposalResponseDto);
     }
@@ -86,11 +83,20 @@ public class ProposalController {
             @PathVariable long id,
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
-        //User 임시 생성
-        User freelancer = User.builder().build();
-
-        proposalService.update(freelancer, id, requestBody.description(), requestBody.proposedAmount());
+        proposalService.update(id, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }
+
+    @PutMapping("/{id}/status")
+    @Operation(summary = "제안서 상태 변경")
+    public CommonResponse<String> updateStatus(
+            @PathVariable long id,
+            @RequestBody ProposalStatusRequestBody requestBody
+    ){
+        proposalService.update(id, requestBody.proposalStatus());
+        return CommonResponse.success("%d 번 제안서가 %s 되었습니다."
+                .formatted(id, requestBody.proposalStatus()));
+    }
+
 }

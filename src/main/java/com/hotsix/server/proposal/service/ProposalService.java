@@ -1,10 +1,12 @@
 package com.hotsix.server.proposal.service;
 
+import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
+import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProposalService {
     private final ProposalRepository proposalRepository;
+    private final Rq rq;
     private final ProjectService projectService;
 
     @Transactional(readOnly = true)
@@ -33,23 +36,27 @@ public class ProposalService {
     }
 
     @Transactional
-    public Proposal create(Long projectId, User freelancer, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
+    public Proposal create(Long projectId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles, ProposalStatus proposalStatus) {
         //Project 임시 생성
         Project project =  Project.builder().build();
 
 //        Project project = projectService.findById(projectId)
 //                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROJECT_NOT_FOUND));
 
-        Proposal proposal = new Proposal(project, freelancer, description, proposedAmount, proposalStatus);
+        User actor = rq.getUser();
+
+        Proposal proposal = new Proposal(project, actor, description, proposedAmount, proposalFiles, proposalStatus);
 
         return proposalRepository.save(proposal);
     }
 
     @Transactional
-    public ProposalResponseDto delete(User freelancer, long id) {
+    public ProposalResponseDto delete(long id) {
         Proposal proposal = findById(id);
 
-        proposal.checkCanDelete(freelancer);
+        User actor = rq.getUser();
+
+        proposal.checkCanDelete(actor);
 
         ProposalResponseDto responseDto = new ProposalResponseDto(proposal);
         proposalRepository.delete(proposal);
@@ -58,9 +65,19 @@ public class ProposalService {
     }
 
     @Transactional
-    public void update(User freelancer, long id, String description, Integer proposedAmount) {
+    public void update(long id, String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
         Proposal proposal = findById(id);
-        proposal.checkCanModify(freelancer);
-        proposal.modify(description, proposedAmount);
+        User actor = rq.getUser();
+        proposal.checkCanModify(actor);
+        proposal.modify(description, proposedAmount, proposalFiles);
+    }
+
+    @Transactional
+    public void update(long id, ProposalStatus proposalStatus) {
+        Proposal proposal = findById(id);
+
+        User actor = rq.getUser();
+
+        proposal.modify(proposalStatus);
     }
 }

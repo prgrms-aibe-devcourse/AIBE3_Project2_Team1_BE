@@ -4,6 +4,7 @@ import com.hotsix.server.global.response.CommonResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,14 @@ public class GlobalExceptionHandler {
         CommonResponse<?> response = CommonResponse.error(400, message);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<CommonResponse<?>> handleAuthenticationException(AuthenticationException e) {
+        CommonResponse<?> response = CommonResponse.error(401, "로그인 후 이용해주세요.");  // ✅ CommonResponse로 통일
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(response);
     }
 
