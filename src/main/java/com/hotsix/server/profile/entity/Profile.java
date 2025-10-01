@@ -11,10 +11,6 @@ import lombok.*;
 @Builder
 @Entity
 public class Profile extends BaseEntity {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long profileId;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
@@ -29,4 +25,8 @@ public class Profile extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility; // PUBLIC, PRIVATE (프로필 공개 여부)
+
+    public void assignUser(User user) {
+        this.user = user;
+    }
 }

@@ -1,14 +1,14 @@
 package com.hotsix.server.user.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class UserResponseDto {
-    private Long userId;
+    private Long id;
     private String email;
+    private String name;
     private String nickname;
+    private String phoneNumber;
 }

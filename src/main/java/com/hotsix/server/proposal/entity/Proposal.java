@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "proposals") // 프리랜서 -> 클라이언트 or 클라이언트 -> 프리랜서 에게 프로젝트를 하고싶다고 보낸 제안서 관련 테이블
+@Table(name = "proposals") // 프리랜서가 클라이언트에게 프로젝트를 하고싶다고 보낸 제안서 관련 테이블
 public class Proposal extends BaseEntity {
 
     @Id
@@ -53,13 +53,13 @@ public class Proposal extends BaseEntity {
     }
 
     public void checkCanDelete(User sender) {
-        if(!sender.getUserId().equals(this.sender.getUserId())){
+        if(!sender.getId().equals(this.sender.getId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_DELETE);
         }
     }
 
     public void checkCanModify(User sender) {
-        if(!sender.getUserId().equals(this.sender.getUserId())){
+        if(!sender.getId().equals(this.sender.getId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_UPDATE);
         }
     }

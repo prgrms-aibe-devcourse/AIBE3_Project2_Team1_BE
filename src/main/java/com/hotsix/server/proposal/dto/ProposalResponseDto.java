@@ -25,7 +25,7 @@ public record ProposalResponseDto (
                 proposal.getProposalId(),
                 proposal.getCreatedAt(),
                 proposal.getUpdatedAt(),
-                proposal.getProject().getProjectId(),
+                proposal.getProject().getId(),
                 proposal.getSender(),
                 proposal.getDescription(),
                 proposal.getProposedAmount(),

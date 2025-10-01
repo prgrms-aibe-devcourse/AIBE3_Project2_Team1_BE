@@ -11,11 +11,6 @@ import lombok.*;
 @Entity
 @Table(name = "deliverables")
 public class Deliverable extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long deliverableId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "milestone_id", nullable = false)
     private Milestone milestone;
