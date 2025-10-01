@@ -27,11 +27,11 @@ public class Review extends BaseEntity {
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "from_user_id", referencedColumnName = "userId", nullable = false)
     private User fromUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_user_id", referencedColumnName = "id",  nullable = false)
+    @JoinColumn(name = "to_user_id", referencedColumnName = "userId",  nullable = false)
     private User toUser;
 
     private BigDecimal rating;

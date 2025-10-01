@@ -29,7 +29,7 @@ public class Proposal extends BaseEntity {
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_user_id", nullable = false)
+    @JoinColumn(name = "sender_user_id", referencedColumnName = "userId", nullable = false)
     private User sender;
 
     @Lob //JPA에서 긴 텍스트(CLOB)나 바이너리(BLOB) 데이터를 DB에 저장할 때 쓰는 어노테이션

@@ -19,11 +19,11 @@ public class Project extends BaseEntity {
     private Long projectId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "client_user_id", referencedColumnName = "userId", nullable = false)
     private User client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "freelancer_user_id", nullable = false)
+    @JoinColumn(name = "freelancer_user_id", referencedColumnName = "userId", nullable = false)
     private User freelancer;
 
     private String title;
