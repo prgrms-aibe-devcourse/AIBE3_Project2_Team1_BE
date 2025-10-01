@@ -1,6 +1,5 @@
 package com.hotsix.server.user.service;
 
-import com.hotsix.server.auth.service.AuthService;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.user.dto.UserPasswordChangeRequestDto;
 import com.hotsix.server.user.dto.UserUpdateRequestDto;
@@ -14,12 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final AuthService authService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -81,16 +78,4 @@ public class UserService {
 
         userRepository.delete(user);
     }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public void checkPassword(User user, String password) {
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ApplicationException(UserErrorCase.INVALID_PASSWORD);
-        }
-    }
-    
-    
 }
