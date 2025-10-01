@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 public enum ReviewErrorCase implements ErrorCase {
 
     REVIEW_NOT_FOUND(404, 9001, "리뷰를 찾을 수 없습니다."),
-    INVALID_RATING(400, 9002, "평점은 1~5 사이여야 합니다.");
+    INVALID_RATING(400, 9002, "평점은 1~5 사이여야 합니다."),
+    PROJECT_NOT_FOUND(404, 9003, "프로젝트를 찾을 수 없습니다."),
+    PROJECT_NOT_COMPLETED(400, 9004, "리뷰는 완료된 프로젝트에만 작성할 수 있습니다."),
+    REVIEW_ALREADY_EXISTS(400, 9005, "이미 리뷰를 작성한 프로젝트입니다.");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;
