@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,12 @@ public class ReviewService {
             throw new ApplicationException(ReviewErrorCase.PROJECT_NOT_COMPLETED);
         }
 
+        if (dto.rating() == null ||
+                dto.rating().compareTo(new BigDecimal("1.0")) < 0 ||
+                dto.rating().compareTo(new BigDecimal("5.0")) > 0) {
+            throw new ApplicationException(ReviewErrorCase.INVALID_RATING);
+        }
+
         if (reviewRepository.existsByProject_ProjectIdAndFromUser_UserId(project.getProjectId(), fromUserId)) {
             throw new ApplicationException(ReviewErrorCase.REVIEW_ALREADY_EXISTS);
         }
@@ -50,7 +57,7 @@ public class ReviewService {
         Review review = Review.of(project, fromUser, toUser, dto.rating(), dto.comment());
         reviewRepository.save(review);
 
-        if (dto.images() != null) {
+        if (dto.images() != null && !dto.images().isEmpty()) {
             dto.images().forEach(img -> reviewImageRepository.save(ReviewImage.of(review, img)));
         }
     }
@@ -71,10 +78,11 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    // 프로젝트와 작성자를 기반으로 리뷰 대상 결정
     private User getTargetUser(Project project, User writer) {
-        if (project.getClient().equals(writer)) {
+        if (project.getClient().equals(writer)) { // 프로젝트의 클라이언트가 작성자면 프리랜서 대상
             return project.getFreelancer();
-        } else {
+        } else { // 프리랜서가 작성자면 클라이언트 대상
             return project.getClient();
         }
     }
