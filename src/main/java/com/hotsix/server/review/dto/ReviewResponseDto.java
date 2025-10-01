@@ -6,7 +6,7 @@ import java.util.List;
 
 public record ReviewResponseDto(
         Long reviewId,
-        String reviewerNickname,
+        String targetNickname,
         BigDecimal rating,
         String comment,
         LocalDate createdDate,

@@ -6,8 +6,8 @@ import java.util.List;
 
 public record ReviewRequestDto(
 
-        @NotNull(message = "계약 ID는 필수입니다.")
-        Long contractId,
+        @NotNull(message = "프로젝트 ID는 필수입니다.")
+        Long projectId,
 
         @DecimalMin(value = "1.0", message = "평점은 최소 1.0 이상이어야 합니다.")
         @DecimalMax(value = "5.0", message = "평점은 최대 5.0 이하여야 합니다.")
