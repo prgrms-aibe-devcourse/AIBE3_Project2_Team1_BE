@@ -14,6 +14,11 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "milestones")
 public class Milestone extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long milestoneId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
