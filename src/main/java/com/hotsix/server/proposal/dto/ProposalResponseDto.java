@@ -19,10 +19,10 @@ public record ProposalResponseDto (
 ){
     public ProposalResponseDto(Proposal proposal){
         this(
-                proposal.getProposalId(),
+                proposal.getId(),
                 proposal.getCreatedAt(),
                 proposal.getUpdatedAt(),
-                proposal.getProject().getProjectId(),
+                proposal.getProject().getId(),
                 proposal.getFreelancer(),
                 proposal.getDescription(),
                 proposal.getProposedAmount(),
