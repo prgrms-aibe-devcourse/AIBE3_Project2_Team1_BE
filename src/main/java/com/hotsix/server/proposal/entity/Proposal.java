@@ -20,10 +20,6 @@ import java.util.List;
 @Table(name = "proposals") // 프리랜서가 클라이언트에게 프로젝트를 하고싶다고 보낸 제안서 관련 테이블
 public class Proposal extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long proposalId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -42,15 +38,6 @@ public class Proposal extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
-
-    public Proposal(Project project, User sender, String description, Integer proposedAmount, List<ProposalFile> proposalFiles, ProposalStatus proposalStatus) {
-        this.project = project;
-        this.sender = sender;
-        this.description = description;
-        this.proposedAmount = proposedAmount;
-        this.portfolioFiles = proposalFiles;
-        this.proposalStatus = proposalStatus;
-    }
 
     public void checkCanDelete(User sender) {
         if(!sender.getId().equals(this.sender.getId())){
