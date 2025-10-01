@@ -12,13 +12,8 @@ import lombok.*;
 @Entity
 @Table(name = "reports")
 public class Report extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reportId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_user_id", referencedColumnName = "userId", nullable = false)
+    @JoinColumn(name = "reporter_user_id", referencedColumnName = "id", nullable = false)
     private User reporter;
 
     private String targetType; // USER, PROJECT, REVIEW, MESSAGE

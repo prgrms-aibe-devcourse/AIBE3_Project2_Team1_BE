@@ -14,11 +14,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "notifications") // 알림은 메시지 우선으로 하고 시간이 된다면 구현
 public class Notification extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long notificationId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

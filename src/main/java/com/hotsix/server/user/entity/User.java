@@ -1,6 +1,6 @@
 package com.hotsix.server.user.entity;
 
-import com.hotsix.server.global.jpa.entity.BaseEntity;
+import com.hotsix.server.global.entity.BaseEntity;
 import com.hotsix.server.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,9 +15,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
-
     @Column(nullable = false, unique = true)
     private String email;
 
