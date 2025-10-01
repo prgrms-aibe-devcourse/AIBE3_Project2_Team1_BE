@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,4 +38,18 @@ public class Review extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewImage> reviewImageList = new ArrayList<>();
+
+    public static Review of(Contract contract, User fromUser, User toUser, BigDecimal rating, String comment) {
+        return Review.builder()
+                .contract(contract)
+                .fromUser(fromUser)
+                .toUser(toUser)
+                .rating(rating)
+                .comment(comment)
+                .build();
+    }
 }
