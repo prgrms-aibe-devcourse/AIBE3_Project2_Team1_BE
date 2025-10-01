@@ -90,7 +90,15 @@ class ReviewServiceTest {
             given(projectRepository.findById(projectId)).willReturn(Optional.of(project));
             given(userRepository.findById(fromUserId)).willReturn(Optional.of(fromUser));
             given(reviewRepository.existsByProject_ProjectIdAndFromUser_UserId(projectId, fromUserId)).willReturn(false);
-            given(reviewRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
+            given(reviewRepository.save(any())).willAnswer(invocation -> {
+                Review review = invocation.getArgument(0);
+
+                Field field = Review.class.getDeclaredField("reviewId");
+                field.setAccessible(true);
+                field.set(review, 1L);
+
+                return review;
+            });
 
             reviewService.registerReview(fromUserId, dto);
 
