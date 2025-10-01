@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,7 @@ public class ProposalController {
         );
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "제안서 작성")
     public CommonResponse<ProposalResponseDto> createProposal(
             @Valid @RequestBody ProposalRequestDto proposalRequestDto
@@ -59,6 +60,7 @@ public class ProposalController {
                 sender,
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
+                proposalRequestDto.portfolioFiles(),
                 ProposalStatus.DRAFT
         );
 
@@ -89,7 +91,7 @@ public class ProposalController {
         //User 임시 생성
         User sender = User.builder().build();
 
-        proposalService.update(sender, id, requestBody.description(), requestBody.proposedAmount());
+        proposalService.update(sender, id, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }

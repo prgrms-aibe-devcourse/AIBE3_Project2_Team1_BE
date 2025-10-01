@@ -5,6 +5,7 @@ import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
+import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
@@ -33,14 +34,14 @@ public class ProposalService {
     }
 
     @Transactional
-    public Proposal create(Long projectId, User sender, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
+    public Proposal create(Long projectId, User sender, String description, Integer proposedAmount, List<ProposalFile> proposalFiles, ProposalStatus proposalStatus) {
         //Project 임시 생성
         Project project =  Project.builder().build();
 
 //        Project project = projectService.findById(projectId)
 //                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROJECT_NOT_FOUND));
 
-        Proposal proposal = new Proposal(project, sender, description, proposedAmount, proposalStatus);
+        Proposal proposal = new Proposal(project, sender, description, proposedAmount, proposalFiles, proposalStatus);
 
         return proposalRepository.save(proposal);
     }
@@ -58,9 +59,9 @@ public class ProposalService {
     }
 
     @Transactional
-    public void update(User sender, long id, String description, Integer proposedAmount) {
+    public void update(User sender, long id, String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
         Proposal proposal = findById(id);
         proposal.checkCanModify(sender);
-        proposal.modify(description, proposedAmount);
+        proposal.modify(description, proposedAmount, proposalFiles);
     }
 }
