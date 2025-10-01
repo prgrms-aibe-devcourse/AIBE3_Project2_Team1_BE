@@ -18,7 +18,7 @@ public class Report extends BaseEntity {
     private Long reportId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_user_id", nullable = false)
+    @JoinColumn(name = "reporter_user_id", referencedColumnName = "userId", nullable = false)
     private User reporter;
 
     private String targetType; // USER, PROJECT, REVIEW, MESSAGE
