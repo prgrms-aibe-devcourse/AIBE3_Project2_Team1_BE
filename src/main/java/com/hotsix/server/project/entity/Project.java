@@ -23,6 +23,10 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "client_user_id", nullable = false)
     private User client;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "freelancer_user_id", nullable = false)
+    private User freelancer;
+
     private String title;
 
     private String description;
