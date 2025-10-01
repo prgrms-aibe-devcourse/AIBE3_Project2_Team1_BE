@@ -52,4 +52,15 @@ public class User extends BaseEntity {
         this.profile = profile;
         this.apiKey = UUID.randomUUID().toString();
     }
+
+    public void update(String name, String nickname, String phoneNumber, LocalDate birthDate) {
+        this.name = name;
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.birthDate = birthDate;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

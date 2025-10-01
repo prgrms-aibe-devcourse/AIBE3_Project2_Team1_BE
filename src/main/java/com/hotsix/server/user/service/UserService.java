@@ -2,6 +2,8 @@ package com.hotsix.server.user.service;
 
 import com.hotsix.server.auth.service.AuthService;
 import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.user.dto.UserPasswordChangeRequestDto;
+import com.hotsix.server.user.dto.UserUpdateRequestDto;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
@@ -42,6 +44,44 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User updateUser(Long userId, UserUpdateRequestDto dto, User loginUser) {
+        if (!userId.equals(loginUser.getId())) {
+            throw new ApplicationException(UserErrorCase.NO_PERMISSION);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
+
+        user.update(dto.name(), dto.nickname(), dto.phoneNumber(), dto.birthDate());
+
+        return user;
+    }
+
+    public void changePassword(Long userId, UserPasswordChangeRequestDto dto, User loginUser) {
+        if (!userId.equals(loginUser.getId())) {
+            throw new ApplicationException(UserErrorCase.NO_PERMISSION);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
+
+        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
+            throw new ApplicationException(UserErrorCase.INVALID_PASSWORD);
+        }
+
+        user.updatePassword(passwordEncoder.encode(dto.newPassword()));
+    }
+
+    public void deleteUser(Long userId, User loginUser) {
+        if (!userId.equals(loginUser.getId())) {
+            throw new ApplicationException(UserErrorCase.NO_PERMISSION);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
+
+        userRepository.delete(user);
+    }
 
     public Optional<User> findByApiKey(String apiKey) {
         return userRepository.findByApiKey(apiKey);

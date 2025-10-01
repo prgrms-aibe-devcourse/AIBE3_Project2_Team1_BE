@@ -3,10 +3,7 @@ package com.hotsix.server.user.controller;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.global.rsData.RsData;
-import com.hotsix.server.user.dto.UserDto;
-import com.hotsix.server.user.dto.UserLoginRequestDto;
-import com.hotsix.server.user.dto.UserLoginResponeDto;
-import com.hotsix.server.user.dto.UserRegisterRequestDto;
+import com.hotsix.server.user.dto.*;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.service.UserService;
@@ -98,6 +95,78 @@ public class UserController {
         return new RsData<>(
                 "200-1",
                 "로그아웃 되었습니다."
+        );
+    }
+
+    @Transactional
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "회원정보 수정",
+            description = "본인 계정의 이름, 닉네임, 전화번호, 생년월일을 수정합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "회원정보 수정 성공", content = @Content(schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "403", description = "권한 없음"),
+                    @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
+            }
+    )
+    public RsData<UserDto> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserUpdateRequestDto reqBody
+    ) {
+        User updatedUser = userService.updateUser(id, reqBody, rq.getUser());
+
+        return new RsData<>(
+                "200-3",
+                "회원정보가 수정되었습니다.",
+                new UserDto(updatedUser)
+        );
+    }
+
+    @Transactional
+    @PatchMapping("/{id}/password")
+    @Operation(
+            summary = "비밀번호 변경",
+            description = "본인 계정의 현재 비밀번호를 확인한 후 새 비밀번호로 변경합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
+                    @ApiResponse(responseCode = "400", description = "현재 비밀번호 불일치"),
+                    @ApiResponse(responseCode = "403", description = "권한 없음"),
+                    @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
+            }
+    )
+    public RsData<Void> changePassword(
+            @PathVariable Long id,
+            @Valid @RequestBody UserPasswordChangeRequestDto reqBody
+    ) {
+        userService.changePassword(id, reqBody, rq.getUser());
+
+        return new RsData<>(
+                "200-4",
+                "비밀번호가 변경되었습니다."
+        );
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "회원탈퇴",
+            description = "본인 계정의 회원탈퇴를 처리합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "회원탈퇴 성공"),
+                    @ApiResponse(responseCode = "403", description = "권한 없음"),
+                    @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
+            }
+    )
+    public RsData<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id, rq.getUser());
+
+        // 쿠키 삭제
+        rq.deleteCookie("apiKey");
+        rq.deleteCookie("accessToken");
+
+        return new RsData<>(
+                "200-2",
+                "회원탈퇴가 완료되었습니다."
         );
     }
 }

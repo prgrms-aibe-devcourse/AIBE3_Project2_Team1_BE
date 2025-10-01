@@ -1,46 +1,28 @@
 package com.hotsix.server.auth.service;
 
-import com.hotsix.server.global.standard.util.Ut;
+import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
 import com.hotsix.server.user.entity.User;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    @Value("${jwt.secret}")
-    private String jwtSecretKey;
-
-    @Value("${jwt.access-exp}")
-    private int accessTokenExpireSeconds;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public String genAccessToken(User user) {
-        long id = user.getId();
-        String username = user.getName();
-        String nickname = user.getNickname();
-
-        Map<String, Object> claims = Map.of("id", id, "username", username, "nickname", nickname);
-
-        return Ut.jwt.toString(
-                jwtSecretKey,
-                accessTokenExpireSeconds,
-                claims
-        );
+        return jwtTokenProvider.generateToken(user.getId(), user.getRole().name());
     }
 
-    public Map<String, Object> payload(String assessToken) {
-        Map<String, Object> parsedPayload = Ut.jwt.payload(jwtSecretKey, assessToken);
+    public Map<String, Object> payload(String accessToken) {
+        if (!jwtTokenProvider.validateToken(accessToken)) {
+            return null;
+        }
 
-        if (parsedPayload == null) return null;
+        Long userId = jwtTokenProvider.getUserId(accessToken);
 
-        // 값이 Integer든 Long이든 Number로 받아서 longValue() 하면 공통적으로 처리 가능
-        long id = ((Number) parsedPayload.get("id")).longValue();
-
-        String username = (String) parsedPayload.get("username");
-
-        String nickname = (String) parsedPayload.get("nickname");
-
-        return Map.of("id", id, "username", username, "nickname", nickname);
+        return Map.of("id", userId);
     }
 }
