@@ -1,9 +1,10 @@
 package com.hotsix.server.user.service;
 
 import com.hotsix.server.auth.service.AuthService;
-import com.hotsix.server.global.exception.ServiceException;
+import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
+import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +29,7 @@ public class UserService {
     public User signUp(String email, String password, LocalDate birthdate, String name, String nickname, String phoneNumber, Role role) {
         userRepository.findByEmail(email)
                 .ifPresent(_user -> {
-                    throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
+                    throw new ApplicationException(UserErrorCase.EMAIL_ALREADY_EXISTS);
                 });
 
         if (role == null) {
@@ -68,7 +69,7 @@ public class UserService {
 
     public void checkPassword(User user, String password) {
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ServiceException("401-1", "비밀번호가 일치 하지 않습니다.");
+            throw new ApplicationException(UserErrorCase.INVALID_PASSWORD);
         }
     }
     

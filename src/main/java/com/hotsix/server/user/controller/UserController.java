@@ -1,19 +1,20 @@
 package com.hotsix.server.user.controller;
 
 import com.hotsix.server.global.Rq.Rq;
-import com.hotsix.server.global.exception.ServiceException;
+import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.global.rsData.RsData;
 import com.hotsix.server.user.dto.UserDto;
 import com.hotsix.server.user.dto.UserLoginRequestDto;
 import com.hotsix.server.user.dto.UserLoginResponeDto;
 import com.hotsix.server.user.dto.UserRegisterRequestDto;
 import com.hotsix.server.user.entity.User;
+import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +62,7 @@ public class UserController {
             @Valid @RequestBody UserLoginRequestDto reqBody
     ) {
         User user = userService.findByEmail(reqBody.email())
-                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
 
         userService.checkPassword(user, reqBody.password());
 
