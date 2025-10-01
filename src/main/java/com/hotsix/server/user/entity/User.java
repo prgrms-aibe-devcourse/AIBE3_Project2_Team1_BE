@@ -55,26 +55,39 @@ public class User extends BaseEntity {
     public User(String email,
                 String password,
                 String nickname,
-                Profile profile) {
+                Profile profile,
+                Role role
+    ) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.profile = profile;
-        this.apiKey = UUID.randomUUID().toString();
         if (profile != null) {
-            profile.setUser(this);
+            profile.assignUser(this);
         }
+
+        this.apiKey = UUID.randomUUID().toString();
+
+        if(role == null) this.role = Role.CLIENT;
+        else this.role = role;
+
     }
 
     @PrePersist
     @PreUpdate
     private void syncProfileRelation() {
         if (profile != null && profile.getUser() != this) {
-            profile.setUser(this);
+            profile.assignUser(this);
         }
     }
 
     public void update(String name, String nickname, String phoneNumber, LocalDate birthDate) {
+        if (nickname == null || nickname.isBlank()) {
+                        throw new IllegalArgumentException("닉네임을 입력해주세요");
+                    }
+                if (birthDate != null && birthDate.isAfter(LocalDate.now())) {
+                        throw new IllegalArgumentException("생일을 다시 입력해주세요");
+                    }
         this.name = name;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;

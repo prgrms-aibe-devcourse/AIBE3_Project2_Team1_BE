@@ -13,7 +13,6 @@ import lombok.*;
 public class Profile extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    @Setter
     private User user;
 
     private String title;
@@ -26,4 +25,8 @@ public class Profile extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility; // PUBLIC, PRIVATE (프로필 공개 여부)
+
+    public void assignUser(User user) {
+        this.user = user;
+    }
 }

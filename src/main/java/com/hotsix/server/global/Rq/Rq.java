@@ -31,7 +31,7 @@ public class Rq {
         Long userId = (Long) authentication.getPrincipal();
 
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException(UserErrorCase.USER_NOT_FOUND));
     }
 
     public void setCookie(String name, String value) {
