@@ -14,6 +14,10 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "projects")
 public class Project extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long projectId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_user_id", referencedColumnName = "id", nullable = false)
     private User client;

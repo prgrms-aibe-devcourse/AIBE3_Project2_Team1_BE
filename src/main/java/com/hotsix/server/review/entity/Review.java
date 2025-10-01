@@ -17,6 +17,11 @@ import java.util.List;
 @Entity
 @Table(name = "reviews")
 public class Review extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long reviewId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
