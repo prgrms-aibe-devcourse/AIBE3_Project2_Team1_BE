@@ -51,11 +51,11 @@ public class UserController {
             summary = "로그인",
             description = "이메일과 비밀번호로 로그인합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = UserLoginResponeDto.class))),
+                    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = UserLoginResponseDto.class))),
                     @ApiResponse(responseCode = "401", description = "존재하지 않는 회원 또는 비밀번호 불일치")
             }
     )
-    public RsData<UserLoginResponeDto> login(
+    public RsData<UserLoginResponseDto> login(
             @Valid @RequestBody UserLoginRequestDto reqBody
     ) {
         User user = userService.findByEmail(reqBody.email())
@@ -71,7 +71,7 @@ public class UserController {
         return new RsData<>(
                 "200-1",
                 "%s님 환영합니다.".formatted(user.getNickname()),
-                new UserLoginResponeDto(
+                new UserLoginResponseDto(
                         new UserDto(user),
                         user.getApiKey(),
                         accessToken

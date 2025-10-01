@@ -39,12 +39,11 @@ public class Rq {
 
     public void setHeader(String name, String value) {
         if (value == null) value = "";
-
         if (value.isBlank()) {
-            req.removeAttribute(name);
-        } else {
-            resp.setHeader(name, value);
+            resp.setHeader(name, "");
+            return;
         }
+        resp.setHeader(name, value);
     }
 
     public String getHeader(String name, String defaultValue) {
@@ -69,11 +68,15 @@ public class Rq {
 
     public void setCookie(String name, String value) {
         if (value == null) value = "";
-
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setDomain("localhost");
+        String serverName = req.getServerName();
+
+        if (serverName != null && serverName.contains(".")) {
+            cookie.setDomain(serverName);
+        }
+
         cookie.setSecure(true);
         cookie.setAttribute("SameSite", "Strict");
 

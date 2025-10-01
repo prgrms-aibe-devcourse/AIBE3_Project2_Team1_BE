@@ -3,6 +3,7 @@ package com.hotsix.server.user.dto;
 import com.hotsix.server.user.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
@@ -11,6 +12,7 @@ public record UserRegisterRequestDto(
         @Schema(description = "이메일", example = "test@example.com")
         String email,
 
+        @NotBlank(message = "비밀번호는 필수 입력값입니다.")
         @Schema(description = "비밀번호", example = "password123!")
         String password,
 

@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 
 public record UserDto (
         long id,
-        LocalDateTime createData,
-        LocalDateTime modifyData,
+        LocalDateTime createDate,
+        LocalDateTime modifyDate,
         String nickname
 ){
     public UserDto(User user) {

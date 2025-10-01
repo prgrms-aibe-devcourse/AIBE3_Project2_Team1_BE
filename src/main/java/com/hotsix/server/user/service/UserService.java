@@ -28,18 +28,31 @@ public class UserService {
         return userRepository.count();
     }
 
-    public User signUp(String email, String password, LocalDate birthdate, String name, String nickname, String phoneNumber, Role role) {
+    public User signUp(String email,
+                       String password,
+                       LocalDate birthdate,
+                       String name,
+                       String nickname,
+                       String phoneNumber,
+                       Role role) {
         userRepository.findByEmail(email)
                 .ifPresent(_user -> {
                     throw new ApplicationException(UserErrorCase.EMAIL_ALREADY_EXISTS);
                 });
 
-        if (role == null) {
-            role = Role.CLIENT; // 기본값 지정
-        }
+
+        Role userRole = Role.CLIENT;
         password = passwordEncoder.encode(password);
 
-        User user = new User(email, password, birthdate, name, nickname, phoneNumber, role);
+        User user = new User(
+                email,
+                password,
+                birthdate,
+                name,
+                nickname,
+                phoneNumber,
+                userRole
+        );
 
         return userRepository.save(user);
     }

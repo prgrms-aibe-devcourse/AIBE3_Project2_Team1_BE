@@ -28,8 +28,9 @@ public class User extends BaseEntity {
     private String nickname;
     private String phoneNumber;
     private LocalDate birthDate;
-    @Column(unique = true)
-    private String apiKey;
+    @Column(nullable = false, unique = true)
+    @Builder.Default
+    private String apiKey = UUID.randomUUID().toString();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
@@ -44,13 +45,15 @@ public class User extends BaseEntity {
         this.role = role;
         this.apiKey = UUID.randomUUID().toString();
     }
-
     public User (String email, String password, String nickname, Profile profile){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.profile = profile;
         this.apiKey = UUID.randomUUID().toString();
+        if (profile != null) {
+            profile.setUser(this);
+        }
     }
 
     public void update(String name, String nickname, String phoneNumber, LocalDate birthDate) {

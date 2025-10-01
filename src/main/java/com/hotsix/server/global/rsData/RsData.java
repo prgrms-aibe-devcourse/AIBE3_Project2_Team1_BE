@@ -13,6 +13,13 @@ public record RsData<T>(
         this(resultCode, msg, null);
     }
     public RsData(String resultCode, String msg, T data) {
-        this(resultCode, Integer.parseInt(resultCode.split("-",2)[0]), msg, data);
+        this(resultCode, parseStatusCode(resultCode), msg, data);
+    }
+    private static int parseStatusCode(String resultCode) {
+        try {
+            return Integer.parseInt(resultCode.split("-", 2)[0]);
+        } catch (NumberFormatException e) {
+            return 500; // 기본값
+        }
     }
 }
