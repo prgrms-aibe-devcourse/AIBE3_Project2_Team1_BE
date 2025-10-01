@@ -2,6 +2,7 @@ package com.hotsix.server.proposal.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
 import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.project.entity.Project;
 import jakarta.persistence.*;
@@ -30,10 +31,6 @@ public class Proposal extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_user_id", nullable = false)
     private User sender;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "receiver_user_id", nullable = false)
-//    private User receiver;
 
     @Lob //JPA에서 긴 텍스트(CLOB)나 바이너리(BLOB) 데이터를 DB에 저장할 때 쓰는 어노테이션
     private String description;
@@ -71,5 +68,9 @@ public class Proposal extends BaseEntity {
         this.description = description;
         this.proposedAmount = proposedAmount;
         this.portfolioFiles = proposalFiles;
+    }
+
+    public void modify(ProposalStatus proposalStatus) {
+        this.proposalStatus = proposalStatus;
     }
 }

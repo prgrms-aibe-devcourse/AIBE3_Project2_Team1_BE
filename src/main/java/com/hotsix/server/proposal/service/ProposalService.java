@@ -5,7 +5,7 @@ import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
-import com.hotsix.server.proposal.entity.ProposalFile;
+import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
@@ -63,5 +63,14 @@ public class ProposalService {
         Proposal proposal = findById(id);
         proposal.checkCanModify(sender);
         proposal.modify(description, proposedAmount, proposalFiles);
+    }
+
+    @Transactional
+    public void update(long id, ProposalStatus proposalStatus) {
+        Proposal proposal = findById(id);
+
+        //actor 검증 필요
+
+        proposal.modify(proposalStatus);
     }
 }

@@ -5,6 +5,7 @@ import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
+import com.hotsix.server.proposal.dto.ProposalStatusRequestBody;
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.service.ProposalService;
@@ -61,7 +62,7 @@ public class ProposalController {
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
                 proposalRequestDto.portfolioFiles(),
-                ProposalStatus.DRAFT
+                ProposalStatus.SUBMITTED
         );
 
         return CommonResponse.success(
@@ -95,4 +96,16 @@ public class ProposalController {
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }
+
+    @PutMapping("/{id}/status")
+    @Operation(summary = "제안서 상태 변경")
+    public CommonResponse<String> updateStatus(
+            @PathVariable long id,
+            @RequestBody ProposalStatusRequestBody requestBody
+    ){
+        proposalService.update(id, requestBody.proposalStatus());
+        return CommonResponse.success("%d 번 제안서가 %s 되었습니다."
+                .formatted(id, requestBody.proposalStatus()));
+    }
+
 }

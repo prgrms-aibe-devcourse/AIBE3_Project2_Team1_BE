@@ -1,5 +1,6 @@
-package com.hotsix.server.proposal.entity;
+package com.hotsix.server.proposal.entity.proposalPorfolio;
 
+import com.hotsix.server.proposal.entity.Proposal;
 import jakarta.persistence.*;
 import lombok.*;
 
