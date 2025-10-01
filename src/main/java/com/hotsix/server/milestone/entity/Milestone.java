@@ -9,8 +9,6 @@ import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "milestones")
 public class Milestone extends BaseEntity {
@@ -29,4 +27,12 @@ public class Milestone extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private MilestoneStatus milestoneStatus;
+
+    @Builder
+    public Milestone(Contract contract, String title, LocalDate dueDate, MilestoneStatus milestoneStatus) {
+        this.contract = contract;
+        this.title = title;
+        this.dueDate = dueDate;
+        this.milestoneStatus = milestoneStatus;
+    }
 }
