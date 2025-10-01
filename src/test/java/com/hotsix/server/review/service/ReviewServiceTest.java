@@ -113,7 +113,7 @@ class ReviewServiceTest {
                     projectId,
                     BigDecimal.valueOf(6.0),
                     "평점이 너무 높음",
-                    null
+                    List.of("https://s3.aws.com/image1.png")
             );
 
             given(projectRepository.findById(projectId)).willReturn(Optional.of(project));
@@ -133,7 +133,7 @@ class ReviewServiceTest {
                     999L, // 존재하지 않는 프로젝트 ID 설정
                     BigDecimal.valueOf(4),
                     "프로젝트 없음",
-                    null
+                    List.of("https://s3.aws.com/image1.png")
             );
 
             given(projectRepository.findById(999L)).willReturn(Optional.empty());
