@@ -48,7 +48,7 @@ public class UserService {
     }
     @Transactional
     public User updateUser(Long userId, UserUpdateRequestDto dto, User loginUser) {
-        if (!userId.equals(loginUser.getId())) {
+        if (!userId.equals(loginUser.getUserId())) {
             throw new ApplicationException(UserErrorCase.NO_PERMISSION);
         }
         User user = userRepository.findById(userId)
@@ -60,7 +60,7 @@ public class UserService {
 
     @Transactional
     public void changePassword(Long userId, UserPasswordChangeRequestDto dto, User loginUser) {
-        if (!userId.equals(loginUser.getId())) {
+        if (!userId.equals(loginUser.getUserId())) {
             throw new ApplicationException(UserErrorCase.NO_PERMISSION);
         }
         User user = userRepository.findById(userId)
@@ -72,7 +72,7 @@ public class UserService {
     }
 
     public void deleteUser(Long userId, User loginUser) {
-        if (!userId.equals(loginUser.getId())) {
+        if (!userId.equals(loginUser.getUserId())) {
             throw new ApplicationException(UserErrorCase.NO_PERMISSION);
         }
 

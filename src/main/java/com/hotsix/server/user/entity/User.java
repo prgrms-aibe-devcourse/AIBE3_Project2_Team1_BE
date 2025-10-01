@@ -15,6 +15,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+
     @Column(nullable = false, unique = true)
     private String email;
 

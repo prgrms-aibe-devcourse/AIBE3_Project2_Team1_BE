@@ -45,7 +45,14 @@ public class ProposalService {
 
         User actor = rq.getUser();
 
-        Proposal proposal = new Proposal(project, actor, description, proposedAmount, proposalFiles, proposalStatus);
+        Proposal proposal = Proposal.builder()
+                .project(project)
+                .sender(actor)
+                .description(description)
+                .proposedAmount(proposedAmount)
+                .portfolioFiles(proposalFiles)
+                .proposalStatus(proposalStatus)
+                .build();
 
         return proposalRepository.save(proposal);
     }

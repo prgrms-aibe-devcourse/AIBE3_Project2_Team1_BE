@@ -14,7 +14,7 @@ public class ProposalFile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long proposalFileId;
 
     private String fileName;     // 원본 파일명
     private String filePath;     // 저장된 경로 or URL
