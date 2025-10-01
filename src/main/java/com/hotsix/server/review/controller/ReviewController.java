@@ -51,7 +51,7 @@ public class ReviewController {
     @Operation(summary = "내가 작성한 리뷰 목록 조회", description = "현재 로그인한 사용자가 작성한 리뷰를 모두 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "리뷰 목록 조회 성공",
-                    content = @Content(schema = @Schema(implementation = ReviewResponseDto.class))),
+                    content = @Content(schema = @Schema(implementation = CommonResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자 요청",
                     content = @Content)
     })
