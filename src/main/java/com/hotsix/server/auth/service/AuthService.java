@@ -3,6 +3,7 @@ package com.hotsix.server.auth.service;
 import com.hotsix.server.auth.repository.AuthRepository;
 import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
 import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.user.entity.OAuth2UserInfo;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
