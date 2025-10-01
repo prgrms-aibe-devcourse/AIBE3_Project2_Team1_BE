@@ -1,5 +1,6 @@
 package com.hotsix.server.user.controller;
 
+import com.hotsix.server.auth.service.AuthService;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.global.rsData.RsData;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User API", description = "유저 관련 API 컨트롤러")
 public class UserController {
     private final UserService userService;
+    private final AuthService authService;
     private final Rq rq;
 
     @Transactional
@@ -36,7 +38,7 @@ public class UserController {
             }
     )
     public RsData<UserDto> join(@Valid @RequestBody UserRegisterRequestDto reqBody) {
-        User user = userService.signUp(reqBody.email(), reqBody.password(), reqBody.birthDate(), reqBody.name(), reqBody.nickname(), reqBody.phoneNumber(), reqBody.role());
+        User user = userService.signUp(reqBody.email(), reqBody.password(), reqBody.birthDate(), reqBody.name(), reqBody.nickname(), reqBody.phoneNumber());
 
         return new RsData<>(
                 "201-1",
@@ -63,7 +65,7 @@ public class UserController {
 
         userService.checkPassword(user, reqBody.password());
 
-        String accessToken = userService.genAccessToken(user);
+        String accessToken = authService.genAccessToken(user);
 
         rq.setCookie("apiKey", user.getApiKey());
         rq.setCookie("accessToken", accessToken);

@@ -35,7 +35,13 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
 
-    public User (String email, String password, LocalDate birthDate, String name, String nickname, String phoneNumber, Role role){
+    public User(String email,
+                String password,
+                LocalDate birthDate,
+                String name,
+                String nickname,
+                String phoneNumber,
+                Role role) {
         this.email = email;
         this.password = password;
         this.birthDate = birthDate;
@@ -45,13 +51,25 @@ public class User extends BaseEntity {
         this.role = role;
         this.apiKey = UUID.randomUUID().toString();
     }
-    public User (String email, String password, String nickname, Profile profile){
+
+    public User(String email,
+                String password,
+                String nickname,
+                Profile profile) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.profile = profile;
         this.apiKey = UUID.randomUUID().toString();
         if (profile != null) {
+            profile.setUser(this);
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void syncProfileRelation() {
+        if (profile != null && profile.getUser() != this) {
             profile.setUser(this);
         }
     }

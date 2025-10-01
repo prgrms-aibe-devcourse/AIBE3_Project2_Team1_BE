@@ -14,9 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 public class Rq {
@@ -35,35 +32,6 @@ public class Rq {
 
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
-    }
-
-    public void setHeader(String name, String value) {
-        if (value == null) value = "";
-        if (value.isBlank()) {
-            resp.setHeader(name, "");
-            return;
-        }
-        resp.setHeader(name, value);
-    }
-
-    public String getHeader(String name, String defaultValue) {
-        return Optional
-                .ofNullable(req.getHeader(name))
-                .filter(headerValue -> !headerValue.isBlank())
-                .orElse(defaultValue);
-    }
-
-    public String getCookieValue(String name, String defaultValue) {
-        return Optional
-                .ofNullable(req.getCookies())
-                .flatMap(
-                        cookies ->
-                                Arrays.stream(req.getCookies())
-                                        .filter(cookie -> name.equals(cookie.getName()))
-                                        .map(Cookie::getValue)
-                                        .findFirst()
-                )
-                .orElse(defaultValue);
     }
 
     public void setCookie(String name, String value) {
