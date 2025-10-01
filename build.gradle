@@ -53,11 +53,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+
 	// 테스트용 H2 DB
 	runtimeOnly 'com.h2database:h2'
 
 	// S3
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.681'
+
+    // oauth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 }
 
 tasks.named('test') {
