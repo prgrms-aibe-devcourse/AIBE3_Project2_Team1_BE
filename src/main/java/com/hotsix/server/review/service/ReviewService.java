@@ -58,7 +58,10 @@ public class ReviewService {
         reviewRepository.save(review);
 
         if (dto.images() != null && !dto.images().isEmpty()) {
-            dto.images().forEach(img -> reviewImageRepository.save(ReviewImage.of(review, img)));
+            List<ReviewImage> images = dto.images().stream()
+                    .map(img -> ReviewImage.of(review, img))
+                    .toList();
+            reviewImageRepository.saveAll(images);
         }
     }
 
