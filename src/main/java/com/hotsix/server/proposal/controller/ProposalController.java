@@ -1,6 +1,7 @@
 package com.hotsix.server.proposal.controller;
 
 
+import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
@@ -26,6 +27,7 @@ import java.util.List;
 @Tag(name = "ProposalController", description = "API 제안서 컨트롤러")
 public class ProposalController {
     private final ProposalService proposalService;
+    private final Rq rq;
 
     @GetMapping
     @Operation(summary = "제안서 다건 조회")
@@ -54,11 +56,9 @@ public class ProposalController {
     public CommonResponse<ProposalResponseDto> createProposal(
             @Valid @RequestBody ProposalRequestDto proposalRequestDto
     ){
-        //User 임시 생성
-        User sender = User.builder().build();
+
         Proposal proposal = proposalService.create(
                 proposalRequestDto.projectId(),
-                sender,
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
                 proposalRequestDto.portfolioFiles(),
@@ -75,10 +75,7 @@ public class ProposalController {
     public CommonResponse<ProposalResponseDto> deleteProposal(
             @PathVariable long id
     ){
-        //User 임시 생성
-        User sender = User.builder().build();
-
-        ProposalResponseDto proposalResponseDto = proposalService.delete(sender, id);
+        ProposalResponseDto proposalResponseDto = proposalService.delete(id);
 
         return CommonResponse.success(proposalResponseDto);
     }
@@ -89,10 +86,7 @@ public class ProposalController {
             @PathVariable long id,
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
-        //User 임시 생성
-        User sender = User.builder().build();
-
-        proposalService.update(sender, id, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
+        proposalService.update(id, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }
