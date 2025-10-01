@@ -1,5 +1,7 @@
 package com.hotsix.server.auth.service;
 
+import com.hotsix.server.user.entity.OAuth2UserInfo;
+import com.hotsix.server.user.entity.SecurityUser;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -24,15 +26,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String provider = userRequest.getClientRegistration().getRegistrationId().toUpperCase();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        OAuth2UserInfo userInfo = switch (provider) {
-            case "KAKAO" -> new KakaoUserInfo(attributes);
-            case "NAVER" -> new NaverUserInfo(attributes);
-            case "GOOGLE" -> new GoogleUserInfo(attributes);
-            default -> throw new OAuth2AuthenticationException("지원하지 않는 OAuth2 Provider입니다.");
-        };
+        OAuth2UserInfo userInfo = new OAuth2UserInfo(provider, attributes);
 
         User user = authService.registerOrLogin(userInfo, provider);
 
-        return new SecurityUser(user.getId(), user.getEmail(), user.getPassword(), user.getNickname(), user.getRole());
+        return new SecurityUser(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getNickname(),
+                user.getRole()
+        );
     }
 }
