@@ -34,10 +34,14 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
 
-    public User (String email, String password, String nickname){
+    public User (String email, String password, LocalDate birthDate, String name, String nickname, String phoneNumber, Role role){
         this.email = email;
         this.password = password;
+        this.birthDate = birthDate;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
         this.nickname = nickname;
+        this.role = role;
         this.apiKey = UUID.randomUUID().toString();
     }
 

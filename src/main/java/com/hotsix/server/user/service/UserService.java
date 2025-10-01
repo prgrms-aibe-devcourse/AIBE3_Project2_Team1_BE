@@ -2,13 +2,14 @@ package com.hotsix.server.user.service;
 
 import com.hotsix.server.auth.service.AuthService;
 import com.hotsix.server.global.exception.ServiceException;
-import com.hotsix.server.profile.entity.Profile;
+import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,28 +25,18 @@ public class UserService {
         return userRepository.count();
     }
 
-    public User signUp(String email, String password, String nickname) {
+    public User signUp(String email, String password, LocalDate birthdate, String name, String nickname, String phoneNumber, Role role) {
         userRepository.findByEmail(email)
                 .ifPresent(_user -> {
                     throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
                 });
 
+        if (role == null) {
+            role = Role.CLIENT; // 기본값 지정
+        }
         password = passwordEncoder.encode(password);
 
-        User user = new User(email, password, nickname, null);
-
-        return userRepository.save(user);
-    }
-
-    public User signUp(String email, String password, String nickname, Profile profile) {
-        userRepository.findByEmail(email)
-                .ifPresent(_user -> {
-                    throw new ServiceException("409-1", "이미 존재하는 회원입니다.");
-                });
-
-        password = (password != null && !password.isBlank()) ?  passwordEncoder.encode(password) : null;
-
-        User user = new User(email, password, nickname, profile);
+        User user = new User(email, password, birthdate, name, nickname, phoneNumber, role);
 
         return userRepository.save(user);
     }
