@@ -1,36 +1,40 @@
 package com.hotsix.server.review.service;
 
+import com.hotsix.server.project.repository.ProjectRepository;
+import com.hotsix.server.review.repository.ReviewImageRepository;
+import com.hotsix.server.review.repository.ReviewRepository;
+
 import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.project.entity.Project;
+import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.review.dto.ReviewRequestDto;
 import com.hotsix.server.review.entity.Review;
 import com.hotsix.server.review.entity.ReviewImage;
 import com.hotsix.server.review.exception.ReviewErrorCase;
-import com.hotsix.server.review.repository.ReviewImageRepository;
-import com.hotsix.server.review.repository.ReviewRepository;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.repository.UserRepository;
-import com.hotsix.server.proposal.entity.Contract;
-import com.hotsix.server.proposal.repository.ContractRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 class ReviewServiceTest {
 
     private ReviewRepository reviewRepository;
     private ReviewImageRepository reviewImageRepository;
     private UserRepository userRepository;
-    private ContractRepository contractRepository;
+    private ProjectRepository projectRepository;
 
     private ReviewService reviewService;
 
@@ -39,13 +43,13 @@ class ReviewServiceTest {
         reviewRepository = mock(ReviewRepository.class);
         reviewImageRepository = mock(ReviewImageRepository.class);
         userRepository = mock(UserRepository.class);
-        contractRepository = mock(ContractRepository.class);
+        projectRepository = mock(ProjectRepository.class);
 
         reviewService = new ReviewService(
                 reviewRepository,
                 reviewImageRepository,
                 userRepository,
-                contractRepository
+                projectRepository
         );
     }
 
@@ -54,27 +58,36 @@ class ReviewServiceTest {
     class RegisterReview {
 
         private final Long fromUserId = 1L;
-        private final Long toUserId = 2L;
-        private final Long contractId = 100L;
+        private final Long projectId = 100L;
 
         private final User fromUser = User.builder().userId(fromUserId).nickname("유저1").build();
-        private final User toUser = User.builder().userId(toUserId).nickname("유저2").build();
-        private final Contract contract = Contract.builder().id(contractId).build();
+        private final User toUser = User.builder().userId(2L).nickname("유저2").build();
+
+        private final Project project = Project.builder()
+                .projectId(projectId)
+                .client(fromUser) // fromUser가 client
+                .freelancer(toUser) // toUser가 freelancer
+                .title("테스트 프로젝트")
+                .description("테스트")
+                .budget(1000)
+                .deadline(LocalDate.now())
+                .status(Status.COMPLETED) // 완료 상태
+                .category("디자인")
+                .build();
 
         @Test
         @DisplayName("리뷰 등록 성공")
         void registerReviewSuccess() {
             ReviewRequestDto dto = new ReviewRequestDto(
-                    contractId,
-                    toUserId,
+                    projectId,
                     BigDecimal.valueOf(4.5),
                     "좋은 프로젝트였습니다. 감사합니다!",
                     List.of("https://s3.aws.com/image1.png")
             );
 
+            given(projectRepository.findById(projectId)).willReturn(Optional.of(project));
             given(userRepository.findById(fromUserId)).willReturn(Optional.of(fromUser));
-            given(userRepository.findById(toUserId)).willReturn(Optional.of(toUser));
-            given(contractRepository.findById(contractId)).willReturn(Optional.of(contract));
+            given(reviewRepository.existsByProject_ProjectIdAndFromUser_UserId(projectId, fromUserId)).willReturn(false);
             given(reviewRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
 
             reviewService.registerReview(fromUserId, dto);
@@ -85,7 +98,7 @@ class ReviewServiceTest {
             Review saved = captor.getValue();
             assertThat(saved.getRating()).isEqualByComparingTo("4.5");
             assertThat(saved.getComment()).isEqualTo("좋은 프로젝트였습니다. 감사합니다!");
-            assertThat(saved.getToUser().getUserId()).isEqualTo(toUserId);
+            assertThat(saved.getToUser().getUserId()).isEqualTo(toUser.getUserId());
 
             verify(reviewImageRepository, times(1)).save(any(ReviewImage.class));
         }
@@ -93,14 +106,17 @@ class ReviewServiceTest {
         @Test
         @DisplayName("평점 범위 벗어남 - 예외 발생")
         void registerReviewInvalidRating() {
+            // 별점 범위 밖으로 설정
             ReviewRequestDto dto = new ReviewRequestDto(
-                    contractId,
-                    toUserId,
-                    BigDecimal.valueOf(6),
+                    projectId,
+                    BigDecimal.valueOf(6.0),
                     "평점이 너무 높음",
                     null
             );
-            
+
+            given(projectRepository.findById(projectId)).willReturn(Optional.of(project));
+            given(userRepository.findById(fromUserId)).willReturn(Optional.of(fromUser));
+
             assertThatThrownBy(() -> reviewService.registerReview(fromUserId, dto))
                     .isInstanceOf(ApplicationException.class)
                     .hasMessageContaining(ReviewErrorCase.INVALID_RATING.getMessage());
@@ -109,17 +125,16 @@ class ReviewServiceTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 계약 ID")
-        void registerReviewInvalidContract() {
+        @DisplayName("존재하지 않는 프로젝트 ID")
+        void registerReviewInvalidProject() {
             ReviewRequestDto dto = new ReviewRequestDto(
-                    999L,
-                    toUserId,
+                    999L, // 존재하지 않는 프로젝트 ID 설정
                     BigDecimal.valueOf(4),
-                    "계약 없음",
+                    "프로젝트 없음",
                     null
             );
 
-            given(contractRepository.findById(999L)).willReturn(Optional.empty());
+            given(projectRepository.findById(999L)).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> reviewService.registerReview(fromUserId, dto))
                     .isInstanceOf(ApplicationException.class);
@@ -133,13 +148,14 @@ class ReviewServiceTest {
     class GetReview {
 
         @Test
-        @DisplayName("유저 리뷰 리스트 조회 성공")
-        void getReviewListSuccess() {
-            Long targetUserId = 2L;
+        @DisplayName("내가 쓴 리뷰 리스트 조회 성공")
+        void getReviewListSuccess() throws Exception {
+            Long fromUserId = 1L;
+
             Review review = Review.builder()
                     .reviewId(1L)
-                    .fromUser(User.builder().userId(1L).nickname("작성자").build())
-                    .toUser(User.builder().userId(targetUserId).build())
+                    .fromUser(User.builder().userId(fromUserId).nickname("작성자").build())
+                    .toUser(User.builder().userId(2L).nickname("상대방").build())
                     .comment("굿굿")
                     .rating(BigDecimal.valueOf(5))
                     .reviewImageList(List.of(
@@ -148,9 +164,13 @@ class ReviewServiceTest {
                     ))
                     .build();
 
-            given(reviewRepository.findAllByToUser_UserId(targetUserId)).willReturn(List.of(review));
+            Field createdAtField = Review.class.getSuperclass().getDeclaredField("createdAt");
+            createdAtField.setAccessible(true);
+            createdAtField.set(review, LocalDateTime.now());
 
-            var result = reviewService.getReviewsByUserId(targetUserId);
+            given(reviewRepository.findAllByFromUser_UserId(fromUserId)).willReturn(List.of(review));
+
+            var result = reviewService.getReviewsWrittenByUser(fromUserId);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).comment()).contains("굿굿");
@@ -160,12 +180,12 @@ class ReviewServiceTest {
         }
 
         @Test
-        @DisplayName("유저 리뷰 없음 = 빈 리스트 반환")
+        @DisplayName("내가 쓴 리뷰 없음 = 빈 리스트 반환")
         void getEmptyReviewList() {
             Long userId = 3L;
-            given(reviewRepository.findAllByToUser_UserId(userId)).willReturn(List.of());
+            given(reviewRepository.findAllByFromUser_UserId(userId)).willReturn(List.of());
 
-            var result = reviewService.getReviewsByUserId(userId);
+            var result = reviewService.getReviewsWrittenByUser(userId);
 
             assertThat(result).isEmpty();
         }
