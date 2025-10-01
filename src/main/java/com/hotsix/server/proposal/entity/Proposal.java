@@ -44,13 +44,13 @@ public class Proposal extends BaseEntity {
     private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
 
     public void checkCanDelete(User sender) {
-        if(!sender.getId().equals(this.sender.getId())){
+        if(!sender.getUserId().equals(this.sender.getUserId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_DELETE);
         }
     }
 
     public void checkCanModify(User sender) {
-        if(!sender.getId().equals(this.sender.getId())){
+        if(!sender.getUserId().equals(this.sender.getUserId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_UPDATE);
         }
     }
