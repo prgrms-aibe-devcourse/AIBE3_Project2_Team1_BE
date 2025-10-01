@@ -6,5 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    List<Review> findAllByToUser_UserId(Long toUserId);
+
+    List<Review> findAllByFromUser_UserId(Long fromUserId);
+
+    boolean existsByProject_ProjectIdAndFromUser_UserId(Long projectId, Long fromUserId);
 }
