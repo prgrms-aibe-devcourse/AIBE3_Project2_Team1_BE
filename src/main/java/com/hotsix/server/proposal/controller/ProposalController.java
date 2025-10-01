@@ -53,10 +53,10 @@ public class ProposalController {
             @Valid @RequestBody ProposalRequestDto proposalRequestDto
     ){
         //User 임시 생성
-        User freelancer = User.builder().build();
+        User sender = User.builder().build();
         Proposal proposal = proposalService.create(
                 proposalRequestDto.projectId(),
-                freelancer,
+                sender,
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
                 ProposalStatus.DRAFT
@@ -73,9 +73,9 @@ public class ProposalController {
             @PathVariable long id
     ){
         //User 임시 생성
-        User freelancer = User.builder().build();
+        User sender = User.builder().build();
 
-        ProposalResponseDto proposalResponseDto = proposalService.delete(freelancer, id);
+        ProposalResponseDto proposalResponseDto = proposalService.delete(sender, id);
 
         return CommonResponse.success(proposalResponseDto);
     }
@@ -87,9 +87,9 @@ public class ProposalController {
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
         //User 임시 생성
-        User freelancer = User.builder().build();
+        User sender = User.builder().build();
 
-        proposalService.update(freelancer, id, requestBody.description(), requestBody.proposedAmount());
+        proposalService.update(sender, id, requestBody.description(), requestBody.proposedAmount());
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }

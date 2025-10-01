@@ -12,7 +12,7 @@ public record ProposalResponseDto (
         @NonNull LocalDateTime createDate,
         @NonNull LocalDateTime updateDate,
         @NonNull Long projectId,
-        @NonNull User freelancer,
+        @NonNull User sender,
         @NonNull String description,
         @NonNull Integer proposedAmount,
         @NonNull ProposalStatus proposalStatus
@@ -23,7 +23,7 @@ public record ProposalResponseDto (
                 proposal.getCreatedAt(),
                 proposal.getUpdatedAt(),
                 proposal.getProject().getProjectId(),
-                proposal.getFreelancer(),
+                proposal.getSender(),
                 proposal.getDescription(),
                 proposal.getProposedAmount(),
                 proposal.getProposalStatus()

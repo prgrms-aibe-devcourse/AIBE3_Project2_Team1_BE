@@ -13,7 +13,7 @@ import com.hotsix.server.user.entity.User;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "proposals") // 프리랜서가 클라이언트에게 프로젝트를 하고싶다고 보낸 제안서 관련 테이블
+@Table(name = "proposals") // 프리랜서 -> 클라이언트 or 클라이언트 -> 프리랜서 에게 프로젝트를 하고싶다고 보낸 제안서 관련 테이블
 public class Proposal extends BaseEntity {
 
     @Id
@@ -25,8 +25,12 @@ public class Proposal extends BaseEntity {
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "freelancer_user_id", nullable = false)
-    private User freelancer;
+    @JoinColumn(name = "sender_user_id", nullable = false)
+    private User sender;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "receiver_user_id", nullable = false)
+//    private User receiver;
 
     @Lob //JPA에서 긴 텍스트(CLOB)나 바이너리(BLOB) 데이터를 DB에 저장할 때 쓰는 어노테이션
     private String description;
@@ -36,22 +40,22 @@ public class Proposal extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
 
-    public Proposal(Project project, User freelancer, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
+    public Proposal(Project project, User sender, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
         this.project = project;
-        this.freelancer = freelancer;
+        this.sender = sender;
         this.description = description;
         this.proposedAmount = proposedAmount;
         this.proposalStatus = proposalStatus;
     }
 
-    public void checkCanDelete(User freelancer) {
-        if(!freelancer.getUserId().equals(this.freelancer.getUserId())){
+    public void checkCanDelete(User sender) {
+        if(!sender.getUserId().equals(this.sender.getUserId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_DELETE);
         }
     }
 
-    public void checkCanModify(User freelancer) {
-        if(!freelancer.getUserId().equals(this.freelancer.getUserId())){
+    public void checkCanModify(User sender) {
+        if(!sender.getUserId().equals(this.sender.getUserId())){
             throw new ApplicationException(ProposalErrorCase.FORBIDDEN_UPDATE);
         }
     }

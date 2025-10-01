@@ -33,23 +33,23 @@ public class ProposalService {
     }
 
     @Transactional
-    public Proposal create(Long projectId, User freelancer, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
+    public Proposal create(Long projectId, User sender, String description, Integer proposedAmount, ProposalStatus proposalStatus) {
         //Project 임시 생성
         Project project =  Project.builder().build();
 
 //        Project project = projectService.findById(projectId)
 //                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROJECT_NOT_FOUND));
 
-        Proposal proposal = new Proposal(project, freelancer, description, proposedAmount, proposalStatus);
+        Proposal proposal = new Proposal(project, sender, description, proposedAmount, proposalStatus);
 
         return proposalRepository.save(proposal);
     }
 
     @Transactional
-    public ProposalResponseDto delete(User freelancer, long id) {
+    public ProposalResponseDto delete(User sender, long id) {
         Proposal proposal = findById(id);
 
-        proposal.checkCanDelete(freelancer);
+        proposal.checkCanDelete(sender);
 
         ProposalResponseDto responseDto = new ProposalResponseDto(proposal);
         proposalRepository.delete(proposal);
@@ -58,9 +58,9 @@ public class ProposalService {
     }
 
     @Transactional
-    public void update(User freelancer, long id, String description, Integer proposedAmount) {
+    public void update(User sender, long id, String description, Integer proposedAmount) {
         Proposal proposal = findById(id);
-        proposal.checkCanModify(freelancer);
+        proposal.checkCanModify(sender);
         proposal.modify(description, proposedAmount);
     }
 }
