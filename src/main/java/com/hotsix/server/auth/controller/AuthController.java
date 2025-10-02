@@ -28,7 +28,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    @PostMapping("/basic/login")
+    @PostMapping("/login/basic")
     @Operation(
             summary = "로그인",
             description = "이메일과 비밀번호로 로그인합니다.",
