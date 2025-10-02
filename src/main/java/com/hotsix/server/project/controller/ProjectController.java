@@ -5,6 +5,7 @@ import com.hotsix.server.auth.resolver.CurrentUser;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
+import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +34,23 @@ public class ProjectController {
             @RequestBody @Valid ProjectRequestDto dto
     ) {
         return CommonResponse.success(projectService.registerProject(userId, dto));
+    }
+
+    @PatchMapping("/{projectId}/status")
+    @Operation(summary = "프로젝트 상태 변경", description = "프로젝트의 상태를 변경합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "상태 변경 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "403", description = "권한 없음"),
+            @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없음")
+    })
+    public CommonResponse<ProjectResponseDto> updateProjectStatus(
+            @Parameter(hidden = true) @CurrentUser Long userId,
+            @PathVariable Long projectId,
+            @RequestBody @Valid ProjectStatusUpdateRequestDto dto
+    ) {
+        return CommonResponse.success(projectService.updateProjectStatus(userId, projectId, dto));
     }
 
     // TODO: 프로젝트 상세 조회 API 개발 (GET)
