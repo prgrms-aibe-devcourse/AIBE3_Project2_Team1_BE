@@ -133,12 +133,17 @@ public class ReviewService {
 
         // 이미지 갱신 (기존 이미지 삭제 후 새로 저장)
         reviewImageRepository.deleteAll(review.getReviewImageList());
+        review.getReviewImageList().clear();
+
         if (dto.images() != null && !dto.images().isEmpty()) {
             List<ReviewImage> images = dto.images().stream()
                     .map(img -> ReviewImage.of(review, img))
                     .toList();
-            reviewImageRepository.saveAll(images);
         }
+
+        review.update(dto.rating(), dto.comment());
+
+        reviewRepository.save(review);
     }
 
     @Transactional
