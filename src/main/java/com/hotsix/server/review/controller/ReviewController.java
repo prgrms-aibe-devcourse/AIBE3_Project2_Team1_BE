@@ -60,4 +60,16 @@ public class ReviewController {
     ) {
         return CommonResponse.success(reviewService.getReviewsWrittenByUser(userId));
     }
+
+    @GetMapping("/project/{projectId}")
+    @Operation(summary = "프로젝트에 달린 리뷰 목록 조회", description = "특정 프로젝트에 작성된 모든 리뷰를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없음")
+    })
+    public CommonResponse<List<ReviewResponseDto>> getReviewsByProject(
+            @PathVariable Long projectId
+    ) {
+        return CommonResponse.success(reviewService.getReviewsByProject(projectId));
+    }
 }
