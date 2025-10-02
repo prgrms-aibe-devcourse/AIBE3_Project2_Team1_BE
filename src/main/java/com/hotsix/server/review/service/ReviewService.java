@@ -127,9 +127,6 @@ public class ReviewService {
             throw new ApplicationException(ReviewErrorCase.INVALID_RATING);
         }
 
-        // 기존 리뷰 정보 수정
-        review.setRating(dto.rating());
-        review.setComment(dto.comment());
 
         // 이미지 갱신 (기존 이미지 삭제 후 새로 저장)
         reviewImageRepository.deleteAll(review.getReviewImageList());
@@ -139,6 +136,8 @@ public class ReviewService {
             List<ReviewImage> images = dto.images().stream()
                     .map(img -> ReviewImage.of(review, img))
                     .toList();
+            review.getReviewImageList().addAll(images);
+            reviewImageRepository.saveAll(images);
         }
 
         review.update(dto.rating(), dto.comment());
