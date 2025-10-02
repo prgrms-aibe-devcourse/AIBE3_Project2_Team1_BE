@@ -1,5 +1,7 @@
 package com.hotsix.server.project.service;
 
+import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.exception.ProjectErrorCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.hotsix.server.global.exception.ApplicationException;
@@ -75,6 +77,33 @@ public class ProjectService {
                 saved.getDeadline(),
                 saved.getCategory(),
                 saved.getStatus().name()
+        );
+    }
+
+    @Transactional
+    public ProjectResponseDto updateProjectStatus(Long userId, Long projectId, ProjectStatusUpdateRequestDto dto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+
+        // 권한 체크: client 또는 freelancer인 경우만 수정 가능
+        if (!project.getClient().getUserId().equals(userId) &&
+                !project.getFreelancer().getUserId().equals(userId)) {
+            throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
+        }
+
+        // 상태 변경
+        project.setStatus(dto.status());
+
+        return new ProjectResponseDto(
+                project.getProjectId(),
+                project.getClient().getNickname(),
+                project.getFreelancer().getNickname(),
+                project.getTitle(),
+                project.getDescription(),
+                project.getBudget(),
+                project.getDeadline(),
+                project.getCategory(),
+                project.getStatus().name()
         );
     }
 }
