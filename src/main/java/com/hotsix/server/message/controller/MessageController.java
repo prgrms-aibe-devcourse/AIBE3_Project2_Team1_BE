@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,6 +31,16 @@ public class MessageController {
         return CommonResponse.success(
                 messages.stream().map(MessageResponseDto::new).toList()
         );
+    }
+
+    @DeleteMapping("/{messageId}")
+    @Operation(summary = "삭제")
+    public CommonResponse<String> deleteMessage(
+            @PathVariable long messageId
+    ){
+        messageService.delete(messageId);
+
+        return CommonResponse.success("%d번 메세지가 삭제되었습니다.".formatted(messageId));
     }
 
     // 메시지 전송, 조회 등 API 구현
