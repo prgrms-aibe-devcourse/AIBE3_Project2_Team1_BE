@@ -34,4 +34,6 @@ public class ProjectController {
     ) {
         return CommonResponse.success(projectService.registerProject(userId, dto));
     }
+
+    // TODO: 프로젝트 상세 조회 API 개발 (GET)
 }
