@@ -84,11 +84,11 @@ public class ReviewService {
     // 프로젝트와 작성자를 기반으로 리뷰 대상 결정
     private User getTargetUser(Project project, User writer) {
         if (project.getClient().equals(writer)) {
-                        return project.getFreelancer();
-                    }
-                if (project.getFreelancer().equals(writer)) {
-                        return project.getClient();
-                    }
-                throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+            return project.getFreelancer();
+        }
+        if (project.getFreelancer().equals(writer)) {
+            return project.getClient();
+        }
+        throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
     }
 }
