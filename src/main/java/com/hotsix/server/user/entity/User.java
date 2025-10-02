@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -18,6 +19,7 @@ public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userId")
     private Long userId;
 
     @Column(nullable = false, unique = true)
@@ -55,27 +57,6 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.role = role;
         this.apiKey = UUID.randomUUID().toString();
-    }
-
-    public User(String email,
-                String password,
-                String nickname,
-                Profile profile,
-                Role role
-    ) {
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.profile = profile;
-        if (profile != null) {
-            profile.assignUser(this);
-        }
-
-        this.apiKey = UUID.randomUUID().toString();
-
-        if(role == null) this.role = Role.CLIENT;
-        else this.role = role;
-
     }
 
     @PrePersist
