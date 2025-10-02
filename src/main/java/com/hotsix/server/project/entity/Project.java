@@ -39,7 +39,10 @@ public class Project extends BaseEntity {
 
     private String category;
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void updateStatus(Status newStatus) {
+        if (this.status == Status.COMPLETED && newStatus != Status.COMPLETED) {
+            throw new IllegalStateException("완료된 프로젝트의 상태는 변경할 수 없습니다.");
+        }
+        this.status = newStatus;
     }
 }

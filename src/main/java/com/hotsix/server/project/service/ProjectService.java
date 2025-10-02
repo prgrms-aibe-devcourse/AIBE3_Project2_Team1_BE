@@ -37,6 +37,9 @@ public class ProjectService {
 
         // 프로젝트 등록은 클라이언트,프리랜서 둘다 가능하도록 (회원가입 한 Role에 따라 clientId,freelancerId로 구분)
         if (currentUser.getRole() == Role.CLIENT) {
+            if (targetUser.getRole() != Role.FREELANCER) {
+                throw new ApplicationException(UserErrorCase.NO_PERMISSION);
+            }
             // 현재 유저가 클라이언트면 → 상대방은 프리랜서
             project = Project.builder()
                     .client(currentUser)
@@ -49,6 +52,9 @@ public class ProjectService {
                     .category(dto.category())
                     .build();
         } else if (currentUser.getRole() == Role.FREELANCER) {
+            if (targetUser.getRole() != Role.CLIENT) {
+                throw new ApplicationException(UserErrorCase.NO_PERMISSION);
+            }
             // 현재 유저가 프리랜서면 → 상대방은 클라이언트
             project = Project.builder()
                     .client(targetUser)
@@ -92,7 +98,7 @@ public class ProjectService {
         }
 
         // 상태 변경
-        project.setStatus(dto.status());
+        project.updateStatus(dto.status());
 
         return new ProjectResponseDto(
                 project.getProjectId(),
