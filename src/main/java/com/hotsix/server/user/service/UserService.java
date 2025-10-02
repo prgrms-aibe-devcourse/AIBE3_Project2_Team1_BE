@@ -30,6 +30,10 @@ public class UserService {
                 .ifPresent(_user -> {
                     throw new ApplicationException(UserErrorCase.EMAIL_ALREADY_EXISTS);
                 });
+        userRepository.findByNickname(nickname)
+                .ifPresent(_user -> {
+                    throw new ApplicationException(UserErrorCase.NICKNAME_ALREADY_EXISTS);
+                });
         Role userRole = Role.CLIENT;
         password = passwordEncoder.encode(password);
         User user = new User(
