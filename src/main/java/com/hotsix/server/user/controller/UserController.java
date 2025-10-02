@@ -66,7 +66,7 @@ public class UserController {
     }
 
     @Transactional
-    @PutMapping("/info/{id}")
+    @PutMapping("/info")
     @Operation(
             summary = "회원정보 수정",
             description = "본인 계정의 이름, 닉네임, 전화번호, 생년월일을 수정합니다.",
@@ -77,10 +77,11 @@ public class UserController {
             }
     )
     public RsData<UserDto> updateUser(
-            @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequestDto reqBody
     ) {
-        User updatedUser = userService.updateUser(id, reqBody, rq.getUser());
+        Long userId = rq.getUser().getUserId();
+
+        User updatedUser = userService.updateUser(userId, reqBody, rq.getUser());
 
         return new RsData<>(
                 "200-3",
@@ -90,7 +91,7 @@ public class UserController {
     }
 
     @Transactional
-    @PatchMapping("/info/{id}/password")
+    @PatchMapping("/info/password")
     @Operation(
             summary = "비밀번호 변경",
             description = "본인 계정의 현재 비밀번호를 확인한 후 새 비밀번호로 변경합니다.",
@@ -102,10 +103,11 @@ public class UserController {
             }
     )
     public RsData<Void> changePassword(
-            @PathVariable Long id,
             @Valid @RequestBody UserPasswordChangeRequestDto reqBody
     ) {
-        userService.changePassword(id, reqBody, rq.getUser());
+        Long userId = rq.getUser().getUserId();
+
+        userService.changePassword(userId, reqBody, rq.getUser());
 
         return new RsData<>(
                 "200-4",
@@ -114,7 +116,7 @@ public class UserController {
     }
 
     @Transactional
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @Operation(
             summary = "회원탈퇴",
             description = "본인 계정의 회원탈퇴를 처리합니다.",
@@ -124,8 +126,10 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
             }
     )
-    public RsData<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id, rq.getUser());
+    public RsData<Void> deleteUser() {
+        Long userId = rq.getUser().getUserId();
+
+        userService.deleteUser(userId, rq.getUser());
 
         // 쿠키 삭제
         rq.deleteCookie("apiKey");
