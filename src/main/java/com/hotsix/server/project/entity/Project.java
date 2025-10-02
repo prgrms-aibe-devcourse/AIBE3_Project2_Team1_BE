@@ -38,4 +38,8 @@ public class Project extends BaseEntity {
     private Status status; // OPEN, IN_PROGRESS, COMPLETED
 
     private String category;
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }
