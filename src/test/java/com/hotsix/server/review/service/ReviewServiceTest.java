@@ -24,6 +24,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -191,6 +192,126 @@ class ReviewServiceTest {
             var result = reviewService.getReviewsWrittenByUser(userId);
 
             assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("리뷰 수정 테스트")
+    class UpdateReview {
+
+        private final Long userId = 1L;
+        private final Long reviewId = 100L;
+        private Review review;
+
+        @BeforeEach
+        void init() {
+            review = Review.builder()
+                    .reviewId(reviewId)
+                    .fromUser(User.builder().userId(userId).nickname("작성자").build())
+                    .toUser(User.builder().userId(2L).nickname("상대방").build())
+                    .comment("이전 코멘트")
+                    .rating(BigDecimal.valueOf(4.0))
+                    .reviewImageList(new ArrayList<>(List.of(
+                            ReviewImage.of(null, "https://old-image.com/1.jpg")
+                    )))
+                    .build();
+        }
+
+        @Test
+        @DisplayName("리뷰 수정 성공")
+        void updateReviewSuccess() {
+            ReviewRequestDto dto = new ReviewRequestDto(
+                    1L,
+                    BigDecimal.valueOf(5.0),
+                    "수정된 코멘트",
+                    List.of("https://new-image.com/1.jpg", "https://new-image.com/2.jpg")
+            );
+
+            given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+            given(reviewRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+
+            reviewService.updateReview(userId, reviewId, dto);
+
+            verify(reviewImageRepository).deleteAll(anyList());
+            verify(reviewRepository).save(any());
+        }
+
+        @Test
+        @DisplayName("리뷰 수정 실패 - 작성자가 아님")
+        void updateReviewUnauthorized() {
+            ReviewRequestDto dto = new ReviewRequestDto(
+                    1L,
+                    BigDecimal.valueOf(5.0),
+                    "수정된 코멘트",
+                    List.of("https://new-image.com/1.jpg")
+            );
+
+            review = Review.builder()
+                    .reviewId(reviewId)
+                    .fromUser(User.builder().userId(999L).nickname("다른사람").build())
+                    .toUser(User.builder().userId(userId).build())
+                    .comment("이전")
+                    .rating(BigDecimal.valueOf(4.0))
+                    .reviewImageList(List.of())
+                    .build();
+
+            given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+
+            assertThatThrownBy(() -> reviewService.updateReview(userId, reviewId, dto))
+                    .isInstanceOf(ApplicationException.class)
+                    .hasMessageContaining(ReviewErrorCase.UNAUTHORIZED_REVIEWER.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("리뷰 삭제 테스트")
+    class DeleteReview {
+
+        private final Long userId = 1L;
+        private final Long reviewId = 200L;
+
+        @Test
+        @DisplayName("리뷰 삭제 성공")
+        void deleteReviewSuccess() {
+            Review review = Review.builder()
+                    .reviewId(reviewId)
+                    .fromUser(User.builder().userId(userId).nickname("작성자").build())
+                    .toUser(User.builder().userId(2L).nickname("상대방").build())
+                    .build();
+
+            given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+
+            reviewService.deleteReview(userId, reviewId);
+
+            verify(reviewRepository).delete(review);
+        }
+
+        @Test
+        @DisplayName("리뷰 삭제 실패 - 작성자가 아님")
+        void deleteReviewUnauthorized() {
+            Review review = Review.builder()
+                    .reviewId(reviewId)
+                    .fromUser(User.builder().userId(999L).nickname("다른사람").build())
+                    .toUser(User.builder().userId(userId).build())
+                    .build();
+
+            given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+
+            assertThatThrownBy(() -> reviewService.deleteReview(userId, reviewId))
+                    .isInstanceOf(ApplicationException.class)
+                    .hasMessageContaining(ReviewErrorCase.UNAUTHORIZED_REVIEWER.getMessage());
+
+            verify(reviewRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("리뷰 삭제 실패 - 존재하지 않는 리뷰")
+        void deleteReviewNotFound() {
+            given(reviewRepository.findById(reviewId)).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> reviewService.deleteReview(userId, reviewId))
+                    .isInstanceOf(ApplicationException.class)
+                    .hasMessageContaining(ReviewErrorCase.REVIEW_NOT_FOUND.getMessage());
         }
     }
 }
