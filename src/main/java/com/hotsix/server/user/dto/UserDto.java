@@ -12,7 +12,7 @@ public record UserDto (
 ){
     public UserDto(User user) {
         this(
-                user.getId(),
+                user.getUserId(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getNickname()

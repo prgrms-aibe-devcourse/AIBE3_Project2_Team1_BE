@@ -11,8 +11,13 @@ import lombok.*;
 @Builder
 @Entity
 public class Profile extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long profileId;
+
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", referencedColumnName = "userId", nullable = false, unique = true)
     private User user;
 
     private String title;

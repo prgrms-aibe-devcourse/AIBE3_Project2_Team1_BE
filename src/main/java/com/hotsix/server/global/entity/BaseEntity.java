@@ -12,10 +12,6 @@ import java.time.LocalDateTime;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // PK 이름 통일
-
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
