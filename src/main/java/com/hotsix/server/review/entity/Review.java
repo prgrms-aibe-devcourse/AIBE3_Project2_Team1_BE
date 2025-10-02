@@ -52,4 +52,7 @@ public class Review extends BaseEntity {
                 .comment(comment)
                 .build();
     }
+
+    public void setRating(BigDecimal rating) { this.rating = rating; }
+    public void setComment(String comment) { this.comment = comment; }
 }
