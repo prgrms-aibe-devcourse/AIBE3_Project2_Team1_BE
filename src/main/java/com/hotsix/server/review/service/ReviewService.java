@@ -84,11 +84,30 @@ public class ReviewService {
     // 프로젝트와 작성자를 기반으로 리뷰 대상 결정
     private User getTargetUser(Project project, User writer) {
         if (project.getClient().equals(writer)) {
-                        return project.getFreelancer();
-                    }
-                if (project.getFreelancer().equals(writer)) {
-                        return project.getClient();
-                    }
-                throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+            return project.getFreelancer();
+        }
+        if (project.getFreelancer().equals(writer)) {
+            return project.getClient();
+        }
+        throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getReviewsByProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ReviewErrorCase.PROJECT_NOT_FOUND));
+
+        return reviewRepository.findAllByProject_ProjectId(projectId).stream()
+                .map(review -> new ReviewResponseDto(
+                        review.getReviewId(),
+                        review.getFromUser().getNickname(),
+                        review.getRating(),
+                        review.getComment(),
+                        review.getCreatedAt().toLocalDate(),
+                        review.getReviewImageList().stream()
+                                .map(ReviewImage::getImageUrl)
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
     }
 }

@@ -26,6 +26,5 @@ public class Contract extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ContractStatus contractStatus; // DRAFT, REVIEW, COMPLETED, TERMINATED, CANCELLED
-
-
 }
+
