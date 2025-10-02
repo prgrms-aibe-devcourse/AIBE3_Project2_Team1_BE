@@ -37,11 +37,8 @@ public class ProposalService {
 
     @Transactional
     public Proposal create(Long projectId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles, ProposalStatus proposalStatus) {
-        //Project 임시 생성
-        Project project =  Project.builder().build();
 
-//        Project project = projectService.findById(projectId)
-//                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROJECT_NOT_FOUND));
+        Project project = projectService.findById(projectId);
 
         User actor = rq.getUser();
 
@@ -84,6 +81,8 @@ public class ProposalService {
         Proposal proposal = findById(id);
 
         User actor = rq.getUser();
+
+        // actor 검증 로직 구현 필요
 
         proposal.modify(proposalStatus);
     }

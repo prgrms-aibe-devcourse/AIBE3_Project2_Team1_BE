@@ -1,19 +1,19 @@
 package com.hotsix.server.project.service;
 
-import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
-import com.hotsix.server.project.exception.ProjectErrorCase;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
+import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
+import com.hotsix.server.project.exception.ProjectErrorCase;
 import com.hotsix.server.project.repository.ProjectRepository;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -111,5 +111,11 @@ public class ProjectService {
                 project.getCategory(),
                 project.getStatus().name()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Project findById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
     }
 }
