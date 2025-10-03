@@ -3,12 +3,14 @@ package com.hotsix.server.admin.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AdminAuthInterceptor implements HandlerInterceptor {
@@ -19,15 +21,17 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 로그인 API는 인증 제외
         if (request.getRequestURI().equals("/api/v1/admin/login")) {
+            log.info("관리자 로그인 시도 - IP: {}", request.getRemoteAddr());
             return true;
         }
 
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Basic ")) {
+            log.warn("관리자 인증 실패(헤더 없음) - IP: {}", request.getRemoteAddr());
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"message\": \"인증 정보가 없습니다. 관리자 계정으로 로그인해주세요.\"}");
+            response.getWriter().write("{\"message\": \"인증에 실패했습니다.\"}");
             return false;
         }
 
@@ -44,16 +48,20 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
             String password = values[1];
 
             if (!username.equals(adminProperties.getUsername()) || !password.equals(adminProperties.getPassword())) {
+                log.warn("관리자 인증 실패 - IP: {}, Username: {}", request.getRemoteAddr(), username);
                 response.setStatus(401);
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"message\": \"아이디 또는 비밀번호가 올바르지 않습니다.\"}");
+                response.getWriter().write("{\"message\": \"인증에 실패했습니다.\"}");
                 return false;
             }
 
+            log.info("관리자 인증 성공 - IP: {}, Username: {}", request.getRemoteAddr(), username);
+
         } catch (IllegalArgumentException e) {
+            log.warn("관리자 인증 예외 - IP: {}, Error: {}", request.getRemoteAddr(), e.getMessage());
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"message\": \"잘못된 인증 정보입니다. 관리자 계정 확인이 필요합니다.\"}");
+            response.getWriter().write("{\"message\": \"인증에 실패했습니다.\"}");
             return false;
         }
 

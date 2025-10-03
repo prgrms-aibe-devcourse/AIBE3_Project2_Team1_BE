@@ -10,10 +10,14 @@ public record AdminRecentProjectDto(
         LocalDateTime createdAt
 ) {
     public static AdminRecentProjectDto from(Project project) {
+        String nickname = (project.getCreatedBy() != null)
+                ? project.getCreatedBy().getNickname()
+                : project.getClient().getNickname();
+
         return new AdminRecentProjectDto(
                 project.getProjectId(),
                 project.getTitle(),
-                project.getCreatedBy().getNickname(),
+                nickname,
                 project.getCreatedAt()
         );
     }
