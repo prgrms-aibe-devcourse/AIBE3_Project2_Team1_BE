@@ -57,6 +57,6 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        return true; 
+        return true;
     }
 }
