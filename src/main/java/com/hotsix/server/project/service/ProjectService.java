@@ -53,6 +53,7 @@ public class ProjectService {
                     .deadline(dto.deadline())
                     .status(Status.OPEN)
                     .category(dto.category())
+                    .createdBy(currentUser)
                     .build();
         } else if (currentUser.getRole() == Role.FREELANCER) {
             if (targetUser.getRole() != Role.CLIENT) {
@@ -68,6 +69,7 @@ public class ProjectService {
                     .deadline(dto.deadline())
                     .status(Status.OPEN)
                     .category(dto.category())
+                    .createdBy(currentUser)
                     .build();
         } else {
             // Role이 둘 다 아니면 예외 처리
