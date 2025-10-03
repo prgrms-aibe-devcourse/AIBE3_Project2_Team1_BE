@@ -7,10 +7,12 @@ import com.hotsix.server.review.repository.ReviewRepository;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -23,7 +25,7 @@ public class AdminDashboardService {
 
     @Transactional(readOnly = true)
     public AdminDashboardResponseDto getDashboard() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
         long totalUserCount = userRepository.countAllUsers();
         long todayUserCount = userRepository.countUsersByCreatedDate(today);
@@ -32,7 +34,8 @@ public class AdminDashboardService {
         long todayProjectCount = projectRepository.countByCreatedDate(today);
         long todayReviewCount = reviewRepository.countByCreatedDate(today);
 
-        List<AdminRecentProjectDto> recentProjects = projectRepository.findTop10ByOrderByCreatedAtDesc()
+        List<AdminRecentProjectDto> recentProjects = projectRepository
+                .findTop10ByOrderByCreatedAtDescWithUser(PageRequest.of(0, 10))
                 .stream()
                 .map(AdminRecentProjectDto::from)
                 .toList();

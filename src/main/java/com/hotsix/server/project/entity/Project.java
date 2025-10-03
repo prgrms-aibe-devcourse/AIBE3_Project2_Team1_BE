@@ -43,7 +43,7 @@ public class Project extends BaseEntity {
     private String category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_user_id", nullable = false)
+    @JoinColumn(name = "created_by_user_id", nullable = true)
     private User createdBy;
 
     public void updateStatus(Status newStatus) {
