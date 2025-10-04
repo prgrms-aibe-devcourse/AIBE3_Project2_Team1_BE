@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 import java.time.LocalDateTime;
 
 public record MessageResponseDto (
-    long messageId,
+    Long messageId,
     @NonNull LocalDateTime createDate,
     @NonNull String senderName,
     @NonNull String content
