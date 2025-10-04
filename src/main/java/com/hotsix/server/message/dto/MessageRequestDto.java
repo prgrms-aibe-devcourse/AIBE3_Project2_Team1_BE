@@ -1,4 +1,9 @@
 package com.hotsix.server.message.dto;
 
-public class MessageRequestDto {
+public record MessageRequestDto (
+        Long projectId,
+        Long senderUserId,
+        String content
+){
+
 }

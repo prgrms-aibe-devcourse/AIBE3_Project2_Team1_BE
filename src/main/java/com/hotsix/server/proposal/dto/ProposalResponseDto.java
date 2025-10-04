@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ProposalResponseDto (
-        long proposalId,
+        Long proposalId,
         @NonNull LocalDateTime createDate,
         @NonNull LocalDateTime updateDate,
         @NonNull Long projectId,

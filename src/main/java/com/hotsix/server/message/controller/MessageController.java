@@ -1,6 +1,7 @@
 package com.hotsix.server.message.controller;
 
 import com.hotsix.server.global.response.CommonResponse;
+import com.hotsix.server.message.dto.MessageRequestDto;
 import com.hotsix.server.message.dto.MessageResponseDto;
 import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.message.service.MessageService;
@@ -41,6 +42,18 @@ public class MessageController {
         messageService.delete(messageId);
 
         return CommonResponse.success("%d번 메세지가 삭제되었습니다.".formatted(messageId));
+    }
+
+    @PostMapping()
+    @Operation(summary = "메세지 작성")
+    public CommonResponse<MessageResponseDto> createMessage(
+            @RequestBody MessageRequestDto messageRequestDto
+    ){
+        Message message = messageService.create(messageRequestDto);
+
+        return CommonResponse.success(
+                new MessageResponseDto(message)
+        );
     }
 
     // 메시지 전송, 조회 등 API 구현
