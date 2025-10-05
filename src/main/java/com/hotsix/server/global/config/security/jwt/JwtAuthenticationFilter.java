@@ -23,6 +23,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse res,
                                     FilterChain chain) throws ServletException, IOException {
 
+        String uri = req.getRequestURI();
+        if (uri.startsWith("/api/v1/admin")) {
+            chain.doFilter(req, res);
+            return;
+        }
+
         String token = null;
 
         String header = req.getHeader("Authorization");
