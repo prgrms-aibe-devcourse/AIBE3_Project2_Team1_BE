@@ -84,11 +84,77 @@ public class ReviewService {
     // 프로젝트와 작성자를 기반으로 리뷰 대상 결정
     private User getTargetUser(Project project, User writer) {
         if (project.getClient().equals(writer)) {
-                        return project.getFreelancer();
-                    }
-                if (project.getFreelancer().equals(writer)) {
-                        return project.getClient();
-                    }
-                throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+            return project.getFreelancer();
+        }
+        if (project.getFreelancer().equals(writer)) {
+            return project.getClient();
+        }
+        throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getReviewsByProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ReviewErrorCase.PROJECT_NOT_FOUND));
+
+        return reviewRepository.findAllByProject_ProjectId(projectId).stream()
+                .map(review -> new ReviewResponseDto(
+                        review.getReviewId(),
+                        review.getFromUser().getNickname(),
+                        review.getRating(),
+                        review.getComment(),
+                        review.getCreatedAt().toLocalDate(),
+                        review.getReviewImageList().stream()
+                                .map(ReviewImage::getImageUrl)
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateReview(Long userId, Long reviewId, ReviewRequestDto dto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ApplicationException(ReviewErrorCase.REVIEW_NOT_FOUND));
+
+        // 작성자 본인만 수정 가능
+        if (!review.getFromUser().getUserId().equals(userId)) {
+            throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+        }
+
+        if (dto.rating() == null ||
+                dto.rating().compareTo(new BigDecimal("1.0")) < 0 ||
+                dto.rating().compareTo(new BigDecimal("5.0")) > 0) {
+            throw new ApplicationException(ReviewErrorCase.INVALID_RATING);
+        }
+
+
+        // 이미지 갱신 (기존 이미지 삭제 후 새로 저장)
+        reviewImageRepository.deleteAll(review.getReviewImageList());
+        review.getReviewImageList().clear();
+
+        if (dto.images() != null && !dto.images().isEmpty()) {
+            List<ReviewImage> images = dto.images().stream()
+                    .map(img -> ReviewImage.of(review, img))
+                    .toList();
+            review.getReviewImageList().addAll(images);
+            reviewImageRepository.saveAll(images);
+        }
+
+        review.update(dto.rating(), dto.comment());
+
+        reviewRepository.save(review);
+    }
+
+    @Transactional
+    public void deleteReview(Long userId, Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ApplicationException(ReviewErrorCase.REVIEW_NOT_FOUND));
+
+        // 작성자 본인만 삭제 가능
+        if (!review.getFromUser().getUserId().equals(userId)) {
+            throw new ApplicationException(ReviewErrorCase.UNAUTHORIZED_REVIEWER);
+        }
+
+        reviewRepository.delete(review);
     }
 }

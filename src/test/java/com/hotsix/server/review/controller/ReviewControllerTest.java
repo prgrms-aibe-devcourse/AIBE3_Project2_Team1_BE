@@ -24,10 +24,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @ActiveProfiles("test")
 class ReviewControllerTest {
@@ -112,5 +111,74 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.data[0].images[0]").value("https://s3.aws.com/img1.jpg"));
 
         verify(reviewService).getReviewsWrittenByUser(userId);
+    }
+
+    @Test
+    @DisplayName("프로젝트에 달린 리뷰 목록 조회")
+    void getReviewsByProject() throws Exception {
+        Long projectId = 10L;
+
+        List<ReviewResponseDto> response = List.of(
+                new ReviewResponseDto(
+                        1L,
+                        "프리랜서10",
+                        new BigDecimal("5.0"),
+                        "프리랜서코멘트",
+                        LocalDate.now(),
+                        List.of("https://test.com/img1.png")
+                )
+        );
+
+        when(reviewService.getReviewsByProject(projectId)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/reviews/project/{projectId}", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].reviewId").value(1))
+                .andExpect(jsonPath("$.data[0].targetNickname").value("프리랜서10"))
+                .andExpect(jsonPath("$.data[0].comment").value("프리랜서코멘트"))
+                .andExpect(jsonPath("$.data[0].images[0]").value("https://test.com/img1.png"));
+
+        verify(reviewService).getReviewsByProject(projectId);
+    }
+
+    @Test
+    @DisplayName("리뷰 수정 성공")
+    void updateReviewSuccess() throws Exception {
+        Long userId = 1L;
+        Long reviewId = 99L;
+
+        ReviewRequestDto request = new ReviewRequestDto(
+                10L,
+                BigDecimal.valueOf(4.3),
+                "리뷰 수정 테스트",
+                List.of("https://new-image.com/img.jpg")
+        );
+
+        when(currentUserArgumentResolver.supportsParameter(any())).thenReturn(true);
+        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
+
+        mockMvc.perform(patch("/api/v1/reviews/{reviewId}", reviewId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value("리뷰가 수정되었습니다."));
+
+        verify(reviewService).updateReview(eq(userId), eq(reviewId), any(ReviewRequestDto.class));
+    }
+
+    @Test
+    @DisplayName("리뷰 삭제 성공")
+    void deleteReviewSuccess() throws Exception {
+        Long userId = 1L;
+        Long reviewId = 77L;
+
+        when(currentUserArgumentResolver.supportsParameter(any())).thenReturn(true);
+        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
+
+        mockMvc.perform(delete("/api/v1/reviews/{reviewId}", reviewId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value("리뷰가 삭제되었습니다."));
+
+        verify(reviewService).deleteReview(userId, reviewId);
     }
 }

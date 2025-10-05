@@ -10,4 +10,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findAllByFromUser_UserId(Long fromUserId);
 
     boolean existsByProject_ProjectIdAndFromUser_UserId(Long projectId, Long fromUserId);
+
+    List<Review> findAllByProject_ProjectId(Long projectId);
 }
