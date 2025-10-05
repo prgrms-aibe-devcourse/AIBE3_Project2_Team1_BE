@@ -6,6 +6,7 @@ import lombok.*;
 import java.io.Serializable;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -20,17 +21,9 @@ public class RefreshToken implements Serializable {
     @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String token;
 
     @Column(nullable = false)
     private Long expiry; // 만료 시간
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setExpiry(Long expiry) {
-        this.expiry = expiry;
-    }
 }

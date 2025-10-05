@@ -1,5 +1,7 @@
 package com.hotsix.server.auth.controller;
 
+import com.hotsix.server.auth.entity.RefreshToken;
+import com.hotsix.server.auth.exception.AuthErrorCase;
 import com.hotsix.server.auth.service.AuthService;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
@@ -8,7 +10,6 @@ import com.hotsix.server.user.dto.UserDto;
 import com.hotsix.server.user.dto.UserLoginRequestDto;
 import com.hotsix.server.user.dto.UserLoginResponseDto;
 import com.hotsix.server.user.entity.User;
-import com.hotsix.server.user.exception.UserErrorCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +28,6 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
     @PostMapping("/login/basic")
     @Operation(
             summary = "로그인",
@@ -40,26 +40,18 @@ public class AuthController {
     public RsData<UserLoginResponseDto> login(
             @Valid @RequestBody UserLoginRequestDto reqBody
     ) {
-        User user = authService.findByEmail(reqBody.email())
-                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
+        UserLoginResponseDto tokenResponse = authService.login(reqBody.email(), reqBody.password());
 
-        authService.checkPassword(user, reqBody.password());
-
-        String accessToken = authService.genAccessToken(user);
-
-        rq.setCookie("apiKey", user.getApiKey());
-        rq.setCookie("accessToken", accessToken);
+        rq.setCookie("apiKey", tokenResponse.apiKey());
+        rq.setCookie("accessToken", tokenResponse.accessToken());
 
         return new RsData<>(
                 "200-1",
-                "%s님 환영합니다.".formatted(user.getNickname()),
-                new UserLoginResponseDto(
-                        new UserDto(user),
-                        user.getApiKey(),
-                        accessToken
-                )
+                "%s님 환영합니다.".formatted(tokenResponse.item().getNickname()),
+                tokenResponse
         );
     }
+
 
     @Transactional
     @DeleteMapping("/logout")
@@ -73,10 +65,49 @@ public class AuthController {
     public RsData<Void> logout() {
         rq.deleteCookie("apiKey");
         rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
 
         return new RsData<>(
                 "200-1",
                 "로그아웃 되었습니다."
         );
     }
+
+    @PostMapping("/token/reissue")
+    @Operation(
+            summary = "토큰 재발급",
+            description = "리프레시 토큰으로 액세스 토큰을 재발급합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "토큰 재발급 성공", content = @Content(schema = @Schema(implementation = UserLoginResponseDto.class))),
+                    @ApiResponse(responseCode = "401", description = "리프레시 토큰 유효하지 않음")
+            }
+    )
+    public RsData<UserLoginResponseDto> reissueAccessToken(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken
+    ) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new ApplicationException(AuthErrorCase.INVALID_REFRESH_TOKEN);
+        }
+
+        String newAccessToken = authService.reissueAccessToken(refreshToken);
+        RefreshToken tokenEntity = authService.getRefreshToken(refreshToken);
+
+        User user = authService.findById(tokenEntity.getUserId())
+                .orElseThrow(() -> new ApplicationException(AuthErrorCase.UNAUTHORIZED));
+
+        UserLoginResponseDto response = new UserLoginResponseDto(
+                new UserDto(user),
+                user.getApiKey(),
+                newAccessToken
+        );
+
+        rq.setCookie("accessToken", newAccessToken);
+
+        return new RsData<>(
+                "200-2",
+                "토큰이 재발급되었습니다.",
+                response
+        );
+    }
+
 }
