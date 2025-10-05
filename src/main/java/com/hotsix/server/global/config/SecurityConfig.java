@@ -47,10 +47,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/v1/users/login",
-                                "/api/v1/users/signup",
-                                "/api/v1/admin/login"
+                                "/api/v1/users/signup"
                         ).permitAll()
-                        .requestMatchers("/api/v1/admin/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

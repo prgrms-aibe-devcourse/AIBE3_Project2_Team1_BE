@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -18,6 +19,7 @@ public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userId")
     private Long userId;
 
     @Column(nullable = false, unique = true)
@@ -28,11 +30,11 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // CLIENT, FREELANCER
 
-
     private String name;
     private String nickname;
     private String phoneNumber;
     private LocalDate birthDate;
+
     @Column(nullable = false, unique = true)
     @Builder.Default
     private String apiKey = UUID.randomUUID().toString();
@@ -40,13 +42,21 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
 
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    private String providerId;
+
+    private String picture;
+
     public User(String email,
                 String password,
                 LocalDate birthDate,
                 String name,
                 String nickname,
                 String phoneNumber,
-                Role role) {
+                Role role,
+                Provider provider) {
         this.email = email;
         this.password = password;
         this.birthDate = birthDate;
@@ -54,28 +64,8 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.nickname = nickname;
         this.role = role;
+        this.provider = provider;
         this.apiKey = UUID.randomUUID().toString();
-    }
-
-    public User(String email,
-                String password,
-                String nickname,
-                Profile profile,
-                Role role
-    ) {
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.profile = profile;
-        if (profile != null) {
-            profile.assignUser(this);
-        }
-
-        this.apiKey = UUID.randomUUID().toString();
-
-        if(role == null) this.role = Role.CLIENT;
-        else this.role = role;
-
     }
 
     @PrePersist
@@ -88,11 +78,11 @@ public class User extends BaseEntity {
 
     public void update(String name, String nickname, String phoneNumber, LocalDate birthDate) {
         if (nickname == null || nickname.isBlank()) {
-                        throw new IllegalArgumentException("닉네임을 입력해주세요");
-                    }
-                if (birthDate != null && birthDate.isAfter(LocalDate.now())) {
-                        throw new IllegalArgumentException("생일을 다시 입력해주세요");
-                    }
+            throw new IllegalArgumentException("닉네임을 입력해주세요");
+        }
+        if (birthDate != null && birthDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("생일을 다시 입력해주세요");
+        }
         this.name = name;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
