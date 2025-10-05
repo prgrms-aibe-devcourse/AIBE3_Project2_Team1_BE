@@ -1,8 +1,10 @@
 package com.hotsix.server.user.service;
 
+import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.user.dto.UserPasswordChangeRequestDto;
 import com.hotsix.server.user.dto.UserUpdateRequestDto;
+import com.hotsix.server.user.entity.Provider;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public User signUp(String email,
                        String password,
@@ -26,16 +29,21 @@ public class UserService {
                        String name,
                        String nickname,
                        String phoneNumber) {
+
         userRepository.findByEmail(email)
                 .ifPresent(_user -> {
                     throw new ApplicationException(UserErrorCase.EMAIL_ALREADY_EXISTS);
                 });
+
         userRepository.findByNickname(nickname)
                 .ifPresent(_user -> {
                     throw new ApplicationException(UserErrorCase.NICKNAME_ALREADY_EXISTS);
                 });
+
         Role userRole = Role.CLIENT;
+        Provider userProvider = Provider.NORMAL;
         password = passwordEncoder.encode(password);
+
         User user = new User(
                 email,
                 password,
@@ -43,7 +51,8 @@ public class UserService {
                 name,
                 nickname,
                 phoneNumber,
-                userRole
+                userRole,
+                userProvider
         );
         return userRepository.save(user);
     }
