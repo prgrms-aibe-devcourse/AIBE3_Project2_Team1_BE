@@ -1,6 +1,5 @@
 package com.hotsix.server.proposal.controller;
 
-import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +22,6 @@ import java.util.List;
 @Tag(name = "ProposalController", description = "API 제안서 컨트롤러")
 public class ProposalController {
     private final ProposalService proposalService;
-    private final Rq rq;
 
     @GetMapping
     @Operation(summary = "제안서 다건 조회")
@@ -48,17 +45,18 @@ public class ProposalController {
         );
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping/*(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)*/
     @Operation(summary = "제안서 작성")
     public CommonResponse<ProposalResponseDto> createProposal(
             @Valid @RequestBody ProposalRequestDto proposalRequestDto
+            //@RequestPart(value = "files", required = false) List<ProposalFile> files
     ){
 
         Proposal proposal = proposalService.create(
                 proposalRequestDto.projectId(),
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
-                proposalRequestDto.portfolioFiles(),
+                //files,
                 ProposalStatus.SUBMITTED
         );
 
@@ -83,7 +81,7 @@ public class ProposalController {
             @PathVariable long id,
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
-        proposalService.update(id, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
+        proposalService.update(id, requestBody.description(), requestBody.proposedAmount()/*, requestBody.portfolioFiles()*/);
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
     }
