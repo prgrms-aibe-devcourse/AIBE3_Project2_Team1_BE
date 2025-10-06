@@ -54,11 +54,6 @@ public class MessageController {
         );
     }
 
-//    // SSE 구독 (클라이언트가 연결)
-//    @GetMapping("/connect")
-//    public SseEmitter connect() {
-//        return messageService.connect();
-//    }
 
 
     // 메시지 전송, 조회 등 API 구현
