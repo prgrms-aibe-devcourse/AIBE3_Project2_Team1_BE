@@ -47,7 +47,8 @@ public class MessageService {
 
     public Message create(MessageRequestDto messageRequestDto) {
 
-        Project project = projectRepository.findById(messageRequestDto.projectId()).get();
+        Project project = projectRepository.findById(messageRequestDto.projectId())
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
         User actor = rq.getUser();
 
