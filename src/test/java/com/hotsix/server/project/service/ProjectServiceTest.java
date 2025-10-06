@@ -1,5 +1,6 @@
 package com.hotsix.server.project.service;
 
+import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
@@ -15,8 +16,8 @@ import org.mockito.Mockito;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 public class ProjectServiceTest {
 
@@ -73,29 +74,29 @@ public class ProjectServiceTest {
         assertThat(result.freelancerNickname()).isEqualTo("프리랜서");
     }
 
-//    @Test
-//    @DisplayName("프로젝트 등록 실패 - 역할 불일치")
-//    void projectRegFail() {
-//        Long currentUserId = 1L;
-//        Long targetUserId = 2L;
-//
-//        User client1 = User.builder().userId(currentUserId).role(Role.CLIENT).build();
-//        User client2 = User.builder().userId(targetUserId).role(Role.CLIENT).build();
-//
-//        when(userRepository.findById(currentUserId)).thenReturn(java.util.Optional.of(client1));
-//        when(userRepository.findById(targetUserId)).thenReturn(java.util.Optional.of(client2));
-//
-//        ProjectRequestDto dto = new ProjectRequestDto(
-//                targetUserId,
-//                "제목",
-//                "설명",
-//                1000,
-//                LocalDate.now(),
-//                "IT"
-//        );
-//
-//        assertThrows(ApplicationException.class, () -> {
-//            projectService.registerProject(currentUserId, dto);
-//        });
-//    }
+    @Test
+    @DisplayName("프로젝트 등록 실패 - 역할 불일치")
+    void projectRegFail() {
+        Long currentUserId = 1L;
+        Long targetUserId = 2L;
+
+        User client1 = User.builder().userId(currentUserId).role(Role.CLIENT).build();
+        User client2 = User.builder().userId(targetUserId).role(Role.CLIENT).build();
+
+        when(userRepository.findById(currentUserId)).thenReturn(java.util.Optional.of(client1));
+        when(userRepository.findById(targetUserId)).thenReturn(java.util.Optional.of(client2));
+
+        ProjectRequestDto dto = new ProjectRequestDto(
+                targetUserId,
+                "제목",
+                "설명",
+                1000,
+                LocalDate.now(),
+                "IT"
+        );
+
+        assertThrows(ApplicationException.class, () -> {
+            projectService.registerProject(currentUserId, dto);
+        });
+    }
 }
