@@ -6,7 +6,6 @@ import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
-import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
@@ -36,7 +35,7 @@ public class ProposalService {
     }
 
     @Transactional
-    public Proposal create(Long projectId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles, ProposalStatus proposalStatus) {
+    public Proposal create(Long projectId, String description, Integer proposedAmount, /*List<ProposalFile> proposalFiles,*/ ProposalStatus proposalStatus) {
 
         Project project = projectService.findById(projectId);
 
@@ -47,7 +46,7 @@ public class ProposalService {
                 .sender(actor)
                 .description(description)
                 .proposedAmount(proposedAmount)
-                .portfolioFiles(proposalFiles)
+                //.portfolioFiles(proposalFiles)
                 .proposalStatus(proposalStatus)
                 .build();
 
@@ -69,11 +68,11 @@ public class ProposalService {
     }
 
     @Transactional
-    public void update(long id, String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
+    public void update(long id, String description, Integer proposedAmount/*, List<ProposalFile> proposalFiles*/) {
         Proposal proposal = findById(id);
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
-        proposal.modify(description, proposedAmount, proposalFiles);
+        proposal.modify(description, proposedAmount/*, proposalFiles*/);
     }
 
     @Transactional
