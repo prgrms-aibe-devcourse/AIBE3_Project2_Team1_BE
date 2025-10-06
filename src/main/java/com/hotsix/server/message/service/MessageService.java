@@ -20,6 +20,7 @@ import java.util.List;
 public class MessageService {
 
     private final MessageRepository messageRepository;
+    //private final EmitterRepository emitterRepository;
     private final ProjectRepository projectRepository;
     private final Rq rq;
 
@@ -60,6 +61,24 @@ public class MessageService {
 
         return messageRepository.save(message);
     }
+//
+//    public SseEmitter connect() {
+//        User user = rq.getUser();
+//        SseEmitter emitter = new SseEmitter(30L * 60 * 1000);
+//        emitterRepository.save(user.getUserId(), emitter);
+//
+//        emitter.onCompletion(() -> emitterRepository.delete(user.getUserId()));
+//        emitter.onTimeout(() -> emitterRepository.delete(user.getUserId()));
+//
+//        try {
+//            emitter.send(SseEmitter.event().name("connect").data("connected"));
+//        } catch (IOException e) {
+//            emitter.completeWithError(e);
+//            throw new ApplicationException(ProjectErrorCase.EMITTER_CANT_CONNECT);
+//        }
+//
+//        return emitter;
+//    }
 
     // 메시지 생성, 조회 등 로직 구현
 }
