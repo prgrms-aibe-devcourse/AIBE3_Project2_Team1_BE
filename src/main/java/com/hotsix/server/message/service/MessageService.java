@@ -1,10 +1,12 @@
 package com.hotsix.server.message.service;
 
 import com.hotsix.server.global.Rq.Rq;
+import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.message.dto.MessageRequestDto;
 import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.message.repository.MessageRepository;
 import com.hotsix.server.project.entity.Project;
+import com.hotsix.server.project.exception.ProjectErrorCase;
 import com.hotsix.server.project.repository.ProjectRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,8 @@ public class MessageService {
 
     public List<Message> findByProjectIdOrderByCreatedAtAsc(Long projectId) {
 
-        Project project = projectRepository.findById(projectId).get();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
         return messageRepository.findByProjectOrderByCreatedAtAsc(project);
     }
 
