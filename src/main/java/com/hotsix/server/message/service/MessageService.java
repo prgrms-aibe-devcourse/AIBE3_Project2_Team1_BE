@@ -3,6 +3,7 @@ package com.hotsix.server.message.service;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.message.dto.MessageRequestDto;
+import com.hotsix.server.message.dto.MessageResponseDto;
 import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.message.exception.MessageErrorCase;
 import com.hotsix.server.message.repository.MessageRepository;
@@ -12,6 +13,7 @@ import com.hotsix.server.project.repository.ProjectRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,13 +25,18 @@ public class MessageService {
     private final ProjectRepository projectRepository;
     private final Rq rq;
 
-    public List<Message> findByProjectIdOrderByCreatedAtAsc(Long projectId) {
+    @Transactional(readOnly = true)
+    public List<MessageResponseDto> findByProjectIdOrderByCreatedAtAsc(Long projectId) {
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
-        return messageRepository.findByProjectOrderByCreatedAtAsc(project);
+
+        return messageRepository.findByProjectOrderByCreatedAtAsc(project).stream()
+                .map(MessageResponseDto::new) // 여기서 Lazy 필드 접근 가능
+                .toList();
     }
 
+    @Transactional
     public void delete(long messageId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ApplicationException(MessageErrorCase.MESSAGE_NOT_FOUND));
@@ -45,6 +52,7 @@ public class MessageService {
         messageRepository.deleteById(messageId);
     }
 
+    @Transactional
     public Message create(MessageRequestDto messageRequestDto) {
 
         Project project = projectRepository.findById(messageRequestDto.projectId())
