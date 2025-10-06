@@ -1,11 +1,14 @@
 package com.hotsix.server.project.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
+import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -49,4 +52,8 @@ public class Project extends BaseEntity {
         }
         this.status = newStatus;
     }
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    private List<Message> messages = new ArrayList<>();
 }

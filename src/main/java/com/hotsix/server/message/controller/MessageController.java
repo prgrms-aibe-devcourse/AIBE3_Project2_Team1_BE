@@ -25,10 +25,8 @@ public class MessageController {
     public CommonResponse<List<MessageResponseDto>> getMessagesByProjectId(
             @PathVariable long projectId
     ) {
-        List<Message> messages = messageService.findByProjectIdOrderByCreatedAtAsc(projectId);
-
         return CommonResponse.success(
-                messages.stream().map(MessageResponseDto::new).toList()
+                messageService.findByProjectIdOrderByCreatedAtAsc(projectId)
         );
     }
 
