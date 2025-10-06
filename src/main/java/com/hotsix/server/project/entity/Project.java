@@ -54,5 +54,6 @@ public class Project extends BaseEntity {
     }
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
     private List<Message> messages = new ArrayList<>();
 }
