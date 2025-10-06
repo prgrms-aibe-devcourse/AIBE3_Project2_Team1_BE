@@ -2,15 +2,11 @@ package com.hotsix.server.proposal.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
 import com.hotsix.server.global.exception.ApplicationException;
-import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
-import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.project.entity.Project;
+import com.hotsix.server.proposal.exception.ProposalErrorCase;
+import com.hotsix.server.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import com.hotsix.server.user.entity.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -37,9 +33,9 @@ public class Proposal extends BaseEntity {
 
     private Integer proposedAmount;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProposalFile> portfolioFiles = new ArrayList<>();
+//    @Builder.Default
+//    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ProposalFile> portfolioFiles = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
@@ -56,10 +52,10 @@ public class Proposal extends BaseEntity {
         }
     }
 
-    public void modify(String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
+    public void modify(String description, Integer proposedAmount/*, List<ProposalFile> proposalFiles*/) {
         this.description = description;
         this.proposedAmount = proposedAmount;
-        this.portfolioFiles = proposalFiles;
+        //this.portfolioFiles = proposalFiles;
     }
 
     public void modify(ProposalStatus proposalStatus) {
