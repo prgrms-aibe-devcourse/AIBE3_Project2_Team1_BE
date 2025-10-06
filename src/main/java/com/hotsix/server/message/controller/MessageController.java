@@ -6,7 +6,6 @@ import com.hotsix.server.message.dto.MessageResponseDto;
 import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.message.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@SecurityRequirement(name = "JWT")
 @RequestMapping("/api/v1/messages")
 @RequiredArgsConstructor
 @Tag(name = "MessageController", description = "API 메세지 컨트롤러")
@@ -55,6 +53,8 @@ public class MessageController {
                 new MessageResponseDto(message)
         );
     }
+
+
 
     // 메시지 전송, 조회 등 API 구현
 }
