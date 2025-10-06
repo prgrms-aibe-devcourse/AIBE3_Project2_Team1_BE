@@ -28,7 +28,9 @@ public class UserService {
                        LocalDate birthdate,
                        String name,
                        String nickname,
-                       String phoneNumber) {
+                       String phoneNumber,
+                       Role userRole
+                       ) {
 
         userRepository.findByEmail(email)
                 .ifPresent(_user -> {
@@ -40,7 +42,6 @@ public class UserService {
                     throw new ApplicationException(UserErrorCase.NICKNAME_ALREADY_EXISTS);
                 });
 
-        Role userRole = Role.CLIENT;
         Provider userProvider = Provider.NORMAL;
         password = passwordEncoder.encode(password);
 

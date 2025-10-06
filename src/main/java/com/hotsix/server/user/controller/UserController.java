@@ -37,7 +37,7 @@ public class UserController {
             }
     )
     public RsData<UserDto> join(@Valid @RequestBody UserRegisterRequestDto reqBody) {
-        User user = userService.signUp(reqBody.email(), reqBody.password(), reqBody.birthDate(), reqBody.name(), reqBody.nickname(), reqBody.phoneNumber());
+        User user = userService.signUp(reqBody.email(), reqBody.password(), reqBody.birthDate(), reqBody.name(), reqBody.nickname(), reqBody.phoneNumber(), reqBody.role());
 
         return new RsData<>(
                 "201-1",
