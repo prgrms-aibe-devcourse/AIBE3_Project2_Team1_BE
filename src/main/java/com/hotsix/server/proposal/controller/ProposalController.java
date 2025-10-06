@@ -5,7 +5,6 @@ import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.dto.ProposalStatusRequestBody;
-import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.service.ProposalService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,10 +25,8 @@ public class ProposalController {
     @GetMapping
     @Operation(summary = "제안서 다건 조회")
     public CommonResponse<List<ProposalResponseDto>> getProposals() {
-        List<Proposal> items = proposalService.getList();
-
         return CommonResponse.success(
-                items.stream().map(ProposalResponseDto::new).toList()
+                proposalService.getList()
         );
     }
 
@@ -38,10 +35,10 @@ public class ProposalController {
     public CommonResponse<ProposalResponseDto> getProposal(
             @PathVariable long id
     ) {
-        Proposal proposal = proposalService.findById(id);
+        ProposalResponseDto proposalResponseDto = proposalService.findById(id);
 
         return CommonResponse.success(
-                new ProposalResponseDto(proposal)
+                proposalResponseDto
         );
     }
 
@@ -52,7 +49,7 @@ public class ProposalController {
             //@RequestPart(value = "files", required = false) List<ProposalFile> files
     ){
 
-        Proposal proposal = proposalService.create(
+        ProposalResponseDto proposalResponseDto = proposalService.create(
                 proposalRequestDto.projectId(),
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
@@ -61,7 +58,7 @@ public class ProposalController {
         );
 
         return CommonResponse.success(
-                new ProposalResponseDto(proposal)
+                proposalResponseDto
         );
     }
 
@@ -70,9 +67,7 @@ public class ProposalController {
     public CommonResponse<ProposalResponseDto> deleteProposal(
             @PathVariable long id
     ){
-        ProposalResponseDto proposalResponseDto = proposalService.delete(id);
-
-        return CommonResponse.success(proposalResponseDto);
+        return CommonResponse.success(proposalService.delete(id));
     }
 
     @PutMapping("/{id}")

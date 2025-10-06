@@ -25,10 +25,8 @@ public class MessageController {
     public CommonResponse<List<MessageResponseDto>> getMessagesByProjectId(
             @PathVariable long projectId
     ) {
-        List<MessageResponseDto> messageResponseDtos = messageService.findByProjectIdOrderByCreatedAtAsc(projectId);
-
         return CommonResponse.success(
-                messageResponseDtos
+                messageService.findByProjectIdOrderByCreatedAtAsc(projectId)
         );
     }
 
