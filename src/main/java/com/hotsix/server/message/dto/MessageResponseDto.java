@@ -15,7 +15,7 @@ public record MessageResponseDto (
         this(
                 message.getMessageId(),
                 message.getCreatedAt(),
-                message.getSender().getName(),
+                message.getSender().getNickname(),
                 message.getContent()
         );
     }
