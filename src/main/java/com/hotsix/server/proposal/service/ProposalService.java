@@ -24,18 +24,23 @@ public class ProposalService {
     private final ProjectService projectService;
 
     @Transactional(readOnly = true)
-    public List<Proposal> getList() {
-        return proposalRepository.findAll();
+    public List<ProposalResponseDto> getList() {
+
+        List<Proposal> proposals = proposalRepository.findAll();
+        return proposals.stream().map(ProposalResponseDto::new).toList();
     }
 
     @Transactional(readOnly = true)
-    public Proposal findById(long id) {
-        return proposalRepository.findById(id)
+    public ProposalResponseDto findById(long id) {
+
+        Proposal proposal = proposalRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
+
+        return new ProposalResponseDto(proposal);
     }
 
     @Transactional
-    public Proposal create(Long projectId, String description, Integer proposedAmount, /*List<ProposalFile> proposalFiles,*/ ProposalStatus proposalStatus) {
+    public ProposalResponseDto create(Long projectId, String description, Integer proposedAmount, /*List<ProposalFile> proposalFiles,*/ ProposalStatus proposalStatus) {
 
         Project project = projectService.findById(projectId);
 
@@ -50,12 +55,13 @@ public class ProposalService {
                 .proposalStatus(proposalStatus)
                 .build();
 
-        return proposalRepository.save(proposal);
+        return new ProposalResponseDto(proposalRepository.save(proposal));
     }
 
     @Transactional
     public ProposalResponseDto delete(long id) {
-        Proposal proposal = findById(id);
+        Proposal proposal = proposalRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
 
         User actor = rq.getUser();
 
@@ -69,7 +75,8 @@ public class ProposalService {
 
     @Transactional
     public void update(long id, String description, Integer proposedAmount/*, List<ProposalFile> proposalFiles*/) {
-        Proposal proposal = findById(id);
+        Proposal proposal = proposalRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
         proposal.modify(description, proposedAmount/*, proposalFiles*/);
@@ -77,7 +84,8 @@ public class ProposalService {
 
     @Transactional
     public void update(long id, ProposalStatus proposalStatus) {
-        Proposal proposal = findById(id);
+        Proposal proposal = proposalRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
 
         User actor = rq.getUser();
 

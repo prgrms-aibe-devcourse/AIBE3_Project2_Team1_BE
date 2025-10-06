@@ -32,7 +32,7 @@ public class MessageService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
         return messageRepository.findByProjectOrderByCreatedAtAsc(project).stream()
-                .map(MessageResponseDto::new) // 여기서 Lazy 필드 접근 가능
+                .map(MessageResponseDto::new)
                 .toList();
     }
 
