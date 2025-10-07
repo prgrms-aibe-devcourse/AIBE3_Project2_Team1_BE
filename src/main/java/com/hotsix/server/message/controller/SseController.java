@@ -24,7 +24,7 @@ public class SseController {
             @RequestParam Long chatRoomId
     ) {
         //1. 새로운 SseEmitter(HTTP 스트림 하나를 관리하는 객체) 객체를 생성
-        //2. emitter를 ProjectEmitterRepository에 저장
+        //2. emitter를 ChatRoomEmitterRepository에 저장
         //3. emitter의 timeout/completion 시 정리 로직 등록
         //4. 최초 연결 확인용 이벤트(connect) 전송 -> “connected : userId=1” 같은 데이터
         return sseService.connect(chatRoomId);
@@ -32,4 +32,4 @@ public class SseController {
 }
 
 //<프런트 SSE 연결 요청 코드>
-//const eventSource = new EventSource(`/api/sse/connect?projectId=1`);
+//const eventSource = new EventSource(`/api/sse/connect?chatRoomtId=1`);
