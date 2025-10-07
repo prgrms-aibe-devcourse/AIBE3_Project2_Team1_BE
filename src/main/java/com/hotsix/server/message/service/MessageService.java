@@ -4,12 +4,13 @@ import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.message.dto.MessageRequestDto;
 import com.hotsix.server.message.dto.MessageResponseDto;
+import com.hotsix.server.message.entity.ChatRoom;
 import com.hotsix.server.message.entity.Message;
+import com.hotsix.server.message.exception.ChatRoomErrorCase;
 import com.hotsix.server.message.exception.MessageErrorCase;
+import com.hotsix.server.message.repository.ChatRoomRepository;
 import com.hotsix.server.message.repository.MessageRepository;
-import com.hotsix.server.project.entity.Project;
-import com.hotsix.server.project.exception.ProjectErrorCase;
-import com.hotsix.server.project.repository.ProjectRepository;
+import com.hotsix.server.message.sse.ChatRoomEmitterRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,17 +25,18 @@ import java.util.List;
 public class MessageService {
 
     private final MessageRepository messageRepository;
-    private final ProjectRepository projectRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final SseService sseService;
     private final Rq rq;
+    private final ChatRoomEmitterRepository chatRoomEmitterRepository;
 
     @Transactional(readOnly = true)
-    public List<MessageResponseDto> findByProjectIdOrderByCreatedAtAsc(Long projectId) {
+    public List<MessageResponseDto> findByChatRoomIdOrderByCreatedAtAsc(Long chatRoomId) {
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
 
-        return messageRepository.findByProjectOrderByCreatedAtAsc(project).stream()
+        return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId).stream()
                 .map(MessageResponseDto::new)
                 .toList();
     }
@@ -47,9 +49,7 @@ public class MessageService {
         User actor = rq.getUser();
 
         // 작성자 본인 또는 프로젝트 관계자만 삭제 가능
-        if (!message.getSender().getUserId().equals(actor.getUserId()) &&
-            !message.getProject().getClient().getUserId().equals(actor.getUserId()) &&
-            !message.getProject().getFreelancer().getUserId().equals(actor.getUserId())) {
+        if (!message.getSender().getUserId().equals(actor.getUserId())) {
             throw new ApplicationException(MessageErrorCase.FORBIDDEN_DELETE);
         }
         messageRepository.deleteById(messageId);
@@ -59,11 +59,11 @@ public class MessageService {
     public MessageResponseDto sendMessage(MessageRequestDto messageRequestDto) {
 
         User actor = rq.getUser();
-        Project project = projectRepository.findById(messageRequestDto.projectId())
-                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepository.findById(messageRequestDto.chatRoomId())
+                .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
 
         Message message = Message.builder()
-                .project(project)
+                .chatRoom(chatRoom)
                 .sender(actor)
                 .content(messageRequestDto.content())
                 .build();
@@ -72,7 +72,7 @@ public class MessageService {
         MessageResponseDto responseDto = new MessageResponseDto(message);
 
         //같은 프로젝트 구독자들에게 푸시
-        List<SseEmitter> emitters = sseService.getEmitters(messageRequestDto.projectId());
+        List<SseEmitter> emitters = chatRoomEmitterRepository.findAllByChatRoomId(messageRequestDto.chatRoomId());
         emitters.forEach(emitter -> {
             try {
                 emitter.send(SseEmitter.event()
@@ -80,7 +80,7 @@ public class MessageService {
                         .data(responseDto));
             } catch (IOException e) {
                 // 실패 시 emitter 정리
-                sseService.removeEmitter(messageRequestDto.projectId(), emitter);
+                sseService.removeEmitter(messageRequestDto.chatRoomId(), emitter);
             }
         });
 

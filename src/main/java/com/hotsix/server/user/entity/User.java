@@ -1,11 +1,14 @@
 package com.hotsix.server.user.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
+import com.hotsix.server.message.entity.ChatRoomUser;
 import com.hotsix.server.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -48,6 +51,10 @@ public class User extends BaseEntity {
     private String providerId;
 
     private String picture;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoomUser> chatRooms = new ArrayList<>();
+
 
     public User(String email,
                 String password,
