@@ -9,6 +9,7 @@ import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.message.exception.ChatRoomErrorCase;
 import com.hotsix.server.message.exception.MessageErrorCase;
 import com.hotsix.server.message.repository.ChatRoomRepository;
+import com.hotsix.server.message.repository.ChatRoomUserRepository;
 import com.hotsix.server.message.repository.MessageRepository;
 import com.hotsix.server.message.sse.ChatRoomEmitterRepository;
 import com.hotsix.server.user.entity.User;
@@ -26,6 +27,7 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomUserRepository chatRoomUserRepository;
     private final SseService sseService;
     private final Rq rq;
     private final ChatRoomEmitterRepository chatRoomEmitterRepository;
@@ -35,6 +37,11 @@ public class MessageService {
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
+
+        User actor = rq.getUser();
+        if (!chatRoomUserRepository.existsByUser_UserIdAndChatRoom_ChatRoomId(actor.getUserId(), chatRoomId)) {
+            throw new ApplicationException(ChatRoomErrorCase.FORBIDDEN_ACCESS);
+        }
 
         return messageRepository.findByChatRoom_ChatRoomIdOrderByCreatedAtAsc(chatRoomId).stream()
                 .map(MessageResponseDto::new)
@@ -61,6 +68,11 @@ public class MessageService {
         User actor = rq.getUser();
         ChatRoom chatRoom = chatRoomRepository.findById(messageRequestDto.chatRoomId())
                 .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
+
+        if (!chatRoomUserRepository.existsByUser_UserIdAndChatRoom_ChatRoomId(actor.getUserId(),
+                messageRequestDto.chatRoomId())) {
+            throw new ApplicationException(ChatRoomErrorCase.FORBIDDEN_ACCESS);
+        }
 
         Message message = Message.builder()
                 .chatRoom(chatRoom)
