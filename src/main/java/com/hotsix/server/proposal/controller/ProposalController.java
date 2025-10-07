@@ -30,12 +30,12 @@ public class ProposalController {
         );
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{proposalId}")
     @Operation(summary = "제안서 단건 조회")
     public CommonResponse<ProposalResponseDto> getProposal(
-            @PathVariable long id
+            @PathVariable long proposalId
     ) {
-        ProposalResponseDto proposalResponseDto = proposalService.findById(id);
+        ProposalResponseDto proposalResponseDto = proposalService.findById(proposalId);
 
         return CommonResponse.success(
                 proposalResponseDto
@@ -62,34 +62,34 @@ public class ProposalController {
         );
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "삭제")
+    @DeleteMapping("/{proposalId}")
+    @Operation(summary = "제안서 삭제")
     public CommonResponse<ProposalResponseDto> deleteProposal(
-            @PathVariable long id
+            @PathVariable long proposalId
     ){
-        return CommonResponse.success(proposalService.delete(id));
+        return CommonResponse.success(proposalService.delete(proposalId));
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "수정")
+    @PatchMapping("/{proposalId}")
+    @Operation(summary = "제안서 수정")
     public CommonResponse<String> updateProposal(
-            @PathVariable long id,
+            @PathVariable long proposalId,
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
-        proposalService.update(id, requestBody.description(), requestBody.proposedAmount()/*, requestBody.portfolioFiles()*/);
+        proposalService.update(proposalId, requestBody.description(), requestBody.proposedAmount()/*, requestBody.portfolioFiles()*/);
 
-        return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(id));
+        return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(proposalId));
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{proposalId}/status")
     @Operation(summary = "제안서 상태 변경")
     public CommonResponse<String> updateStatus(
-            @PathVariable long id,
+            @PathVariable long proposalId,
             @Valid @RequestBody ProposalStatusRequestBody requestBody
     ){
-        proposalService.update(id, requestBody.proposalStatus());
+        proposalService.update(proposalId, requestBody.proposalStatus());
         return CommonResponse.success("%d 번 제안서의 상태가 %s로 변경되었습니다."
-                .formatted(id, requestBody.proposalStatus()));
+                .formatted(proposalId, requestBody.proposalStatus()));
     }
 
 }
