@@ -3,19 +3,18 @@ package com.hotsix.server.message.sse;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Repository
 public class ChatRoomEmitterRepository {
 
-    private final Map<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    private final Map<Long, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter save(Long chatRoomId, SseEmitter emitter) {
-        emitters.computeIfAbsent(chatRoomId, k -> new ArrayList<>()).add(emitter);
+        emitters.computeIfAbsent(chatRoomId, k -> new CopyOnWriteArrayList<>()).add(emitter);
         return emitter;
     }
 
@@ -25,7 +24,7 @@ public class ChatRoomEmitterRepository {
     }
 
     public List<SseEmitter> findAllByChatRoomId(Long chatRoomId) {
-        return emitters.getOrDefault(chatRoomId, Collections.emptyList());
+        return emitters.getOrDefault(chatRoomId, new CopyOnWriteArrayList<>());
     }
 
 }
