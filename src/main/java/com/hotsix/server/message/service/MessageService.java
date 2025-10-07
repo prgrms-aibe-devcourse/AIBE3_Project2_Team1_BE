@@ -14,7 +14,9 @@ import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -23,6 +25,7 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final ProjectRepository projectRepository;
+    private final SseService sseService;
     private final Rq rq;
 
     @Transactional(readOnly = true)
@@ -53,21 +56,37 @@ public class MessageService {
     }
 
     @Transactional
-    public Message create(MessageRequestDto messageRequestDto) {
-
-        Project project = projectRepository.findById(messageRequestDto.projectId())
-                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+    public MessageResponseDto sendMessage(MessageRequestDto messageRequestDto) {
 
         User actor = rq.getUser();
+        Project project = projectRepository.findById(messageRequestDto.projectId())
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
         Message message = Message.builder()
                 .project(project)
                 .sender(actor)
                 .content(messageRequestDto.content())
                 .build();
+        messageRepository.save(message);
 
-        return messageRepository.save(message);
+        MessageResponseDto responseDto = new MessageResponseDto(message);
+
+        //같은 프로젝트 구독자들에게 푸시
+        List<SseEmitter> emitters = sseService.getEmitters(messageRequestDto.projectId());
+        emitters.forEach(emitter -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("message")
+                        .data(responseDto));
+            } catch (IOException e) {
+                // 실패 시 emitter 정리
+                sseService.removeEmitter(messageRequestDto.projectId(), emitter);
+            }
+        });
+
+        return responseDto;
     }
+
 
     // 메시지 생성, 조회 등 로직 구현
 }

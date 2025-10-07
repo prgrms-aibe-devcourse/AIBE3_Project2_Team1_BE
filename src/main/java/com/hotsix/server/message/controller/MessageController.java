@@ -3,7 +3,6 @@ package com.hotsix.server.message.controller;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.message.dto.MessageRequestDto;
 import com.hotsix.server.message.dto.MessageResponseDto;
-import com.hotsix.server.message.entity.Message;
 import com.hotsix.server.message.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,17 +41,12 @@ public class MessageController {
 
     @PostMapping()
     @Operation(summary = "메세지 작성")
-    public CommonResponse<MessageResponseDto> createMessage(
-            @RequestBody MessageRequestDto messageRequestDto
-    ){
-        Message message = messageService.create(messageRequestDto);
-
-        return CommonResponse.success(
-                new MessageResponseDto(message)
-        );
+    public CommonResponse<MessageResponseDto> sendMessage(
+            @RequestBody MessageRequestDto dto
+    ) {
+        MessageResponseDto message = messageService.sendMessage(dto);
+        return CommonResponse.success(message);
     }
-
-
 
     // 메시지 전송, 조회 등 API 구현
 }
