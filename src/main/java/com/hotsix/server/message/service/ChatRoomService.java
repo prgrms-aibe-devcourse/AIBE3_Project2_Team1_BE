@@ -1,9 +1,11 @@
 package com.hotsix.server.message.service;
 
 import com.hotsix.server.global.Rq.Rq;
+import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.message.dto.ChatRoomResponseDto;
 import com.hotsix.server.message.entity.ChatRoom;
 import com.hotsix.server.message.entity.ChatRoomUser;
+import com.hotsix.server.message.exception.ChatRoomErrorCase;
 import com.hotsix.server.message.repository.ChatRoomRepository;
 import com.hotsix.server.message.repository.ChatRoomUserRepository;
 import com.hotsix.server.user.entity.User;
@@ -54,9 +56,9 @@ public class ChatRoomService {
         User user = rq.getUser();
 
         ChatRoom room = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+                .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
         if (chatRoomUserRepository.existsByUser_UserIdAndChatRoom_ChatRoomId(user.getUserId(), chatRoomId)) {
-            throw new IllegalStateException("이미 참가 중인 채팅방입니다.");
+            throw new ApplicationException(ChatRoomErrorCase.ALREADY_JOINED);
         }
         chatRoomUserRepository.save(ChatRoomUser.create(room, user));
     }

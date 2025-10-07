@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ChatRoomErrorCase implements ErrorCase {
 
-    CHAT_ROOM_NOT_FOUND(404, 8101, "메시지를 찾을 수 없습니다.");
+    CHAT_ROOM_NOT_FOUND(404, 8101, "존재하지 않는 채팅방입니다."),
+    ALREADY_JOINED(409, 8102, "이미 참가 중인 채팅방입니다.");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;

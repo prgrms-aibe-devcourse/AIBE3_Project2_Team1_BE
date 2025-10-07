@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "chat room")
+@Table(name = "chat_room")
 public class ChatRoom extends BaseEntity {
 
     @Id
@@ -21,9 +21,11 @@ public class ChatRoom extends BaseEntity {
 
     private String title;
 
+    @Builder.Default
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> participants = new ArrayList<>();
 
