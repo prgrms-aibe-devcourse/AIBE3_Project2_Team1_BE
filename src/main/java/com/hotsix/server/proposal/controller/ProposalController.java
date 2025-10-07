@@ -70,7 +70,7 @@ public class ProposalController {
         return CommonResponse.success(proposalService.delete(proposalId));
     }
 
-    @PutMapping("/{proposalId}")
+    @PatchMapping("/{proposalId}")
     @Operation(summary = "제안서 수정")
     public CommonResponse<String> updateProposal(
             @PathVariable long proposalId,
@@ -81,7 +81,7 @@ public class ProposalController {
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(proposalId));
     }
 
-    @PutMapping("/{proposalId}/status")
+    @PatchMapping("/{proposalId}/status")
     @Operation(summary = "제안서 상태 변경")
     public CommonResponse<String> updateStatus(
             @PathVariable long proposalId,
