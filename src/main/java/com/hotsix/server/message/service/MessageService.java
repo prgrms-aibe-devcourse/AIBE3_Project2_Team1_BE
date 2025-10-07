@@ -36,7 +36,7 @@ public class MessageService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
 
-        return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId).stream()
+        return messageRepository.findByChatRoom_ChatRoomIdOrderByCreatedAtAsc(chatRoomId).stream()
                 .map(MessageResponseDto::new)
                 .toList();
     }

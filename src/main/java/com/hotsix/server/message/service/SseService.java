@@ -36,7 +36,7 @@ public class SseService {
         return emitter;
     }
 
-    public void removeEmitter(Long projectId, SseEmitter emitter) {
-        emitterRepository.remove(projectId, emitter);
+    public void removeEmitter(Long chatRoomId, SseEmitter emitter) {
+        emitterRepository.remove(chatRoomId, emitter);
     }
 }

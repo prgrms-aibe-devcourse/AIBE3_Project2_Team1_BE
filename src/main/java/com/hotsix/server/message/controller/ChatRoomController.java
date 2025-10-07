@@ -30,9 +30,9 @@ public class ChatRoomController {
     @GetMapping()
     @Operation(summary = "내 채팅방 목록 조회")
     public CommonResponse<List<ChatRoomResponseDto>> getChatRooms() {
-        List<ChatRoom> rooms = chatRoomService.getChatRoomsByUser();
+        List<ChatRoomResponseDto> chatRoomResponseDtos = chatRoomService.getChatRoomsByUser();
         return CommonResponse.success(
-                rooms.stream().map(ChatRoomResponseDto::new).toList()
+                chatRoomResponseDtos
         );
     }
     // 채팅방 참가
