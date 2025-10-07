@@ -19,13 +19,13 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    @GetMapping("/{projectId}")
-    @Operation(summary = "프로젝트 관련 메세지 조회")
-    public CommonResponse<List<MessageResponseDto>> getMessagesByProjectId(
-            @PathVariable long projectId
+    @GetMapping("/{chatRoomId}")
+    @Operation(summary = "채팅방 메세지 조회")
+    public CommonResponse<List<MessageResponseDto>> getMessagesByChatRoomId(
+            @PathVariable long chatRoomId
     ) {
         return CommonResponse.success(
-                messageService.findByProjectIdOrderByCreatedAtAsc(projectId)
+                messageService.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId)
         );
     }
 
@@ -47,6 +47,8 @@ public class MessageController {
         MessageResponseDto message = messageService.sendMessage(dto);
         return CommonResponse.success(message);
     }
+
+
 
     // 메시지 전송, 조회 등 API 구현
 }

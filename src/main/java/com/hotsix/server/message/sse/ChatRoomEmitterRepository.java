@@ -10,21 +10,22 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class ProjectEmitterRepository {
+public class ChatRoomEmitterRepository {
 
     private final Map<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
-    public SseEmitter save(Long projectId, SseEmitter emitter) {
-        emitters.computeIfAbsent(projectId, k -> new ArrayList<>()).add(emitter);
+    public SseEmitter save(Long chatRoomId, SseEmitter emitter) {
+        emitters.computeIfAbsent(chatRoomId, k -> new ArrayList<>()).add(emitter);
         return emitter;
     }
 
-    public void remove(Long projectId, SseEmitter emitter) {
-        List<SseEmitter> list = emitters.get(projectId);
+    public void remove(Long chatRoomId, SseEmitter emitter) {
+        List<SseEmitter> list = emitters.get(chatRoomId);
         if (list != null) list.remove(emitter);
     }
 
-    public List<SseEmitter> findAllByProjectId(Long projectId) {
-        return emitters.getOrDefault(projectId, Collections.emptyList());
+    public List<SseEmitter> findAllByChatRoomId(Long chatRoomId) {
+        return emitters.getOrDefault(chatRoomId, Collections.emptyList());
     }
+
 }
