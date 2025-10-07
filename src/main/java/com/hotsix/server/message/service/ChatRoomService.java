@@ -1,6 +1,7 @@
 package com.hotsix.server.message.service;
 
 import com.hotsix.server.global.Rq.Rq;
+import com.hotsix.server.message.dto.ChatRoomResponseDto;
 import com.hotsix.server.message.entity.ChatRoom;
 import com.hotsix.server.message.entity.ChatRoomUser;
 import com.hotsix.server.message.repository.ChatRoomRepository;
@@ -34,11 +35,15 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public List<ChatRoom> getChatRoomsByUser() {
+    public List<ChatRoomResponseDto> getChatRoomsByUser() {
         User user = rq.getUser();
-        List<ChatRoomUser> relations = chatRoomUserRepository.findByUserId(user.getUserId());
-        return relations.stream()
+        List<ChatRoomUser> relations = chatRoomUserRepository.findByUser_UserId(user.getUserId());
+        List<ChatRoom> chatRooms =  relations.stream()
                 .map(ChatRoomUser::getChatRoom)
+                .toList();
+
+        return chatRooms.stream()
+                .map(ChatRoomResponseDto::new)
                 .toList();
     }
 
@@ -50,7 +55,7 @@ public class ChatRoomService {
 
         ChatRoom room = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
-        if (chatRoomUserRepository.existsByUserIdAndChatRoomId(user.getUserId(), chatRoomId)) {
+        if (chatRoomUserRepository.existsByUser_UserIdAndChatRoom_ChatRoomId(user.getUserId(), chatRoomId)) {
             throw new IllegalStateException("이미 참가 중인 채팅방입니다.");
         }
         chatRoomUserRepository.save(ChatRoomUser.create(room, user));
