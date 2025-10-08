@@ -8,6 +8,9 @@ import com.hotsix.server.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -33,9 +36,9 @@ public class Proposal extends BaseEntity {
 
     private Integer proposedAmount;
 
-//    @Builder.Default
-//    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<ProposalFile> portfolioFiles = new ArrayList<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProposalFile> portfolioFiles = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus proposalStatus; // DRAFT, SUBMITTED, ACCEPTED, REJECTED
@@ -52,13 +55,18 @@ public class Proposal extends BaseEntity {
         }
     }
 
-    public void modify(String description, Integer proposedAmount/*, List<ProposalFile> proposalFiles*/) {
+    public void modify(String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
         this.description = description;
         this.proposedAmount = proposedAmount;
-        //this.portfolioFiles = proposalFiles;
+        this.portfolioFiles = proposalFiles;
     }
 
     public void modify(ProposalStatus proposalStatus) {
         this.proposalStatus = proposalStatus;
+    }
+
+    public void addFiles(List<ProposalFile> files) {
+        this.portfolioFiles.addAll(files);
+        files.forEach(file -> file.setProposal(this));
     }
 }

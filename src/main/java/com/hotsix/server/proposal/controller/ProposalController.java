@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -42,18 +44,18 @@ public class ProposalController {
         );
     }
 
-    @PostMapping/*(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)*/
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "제안서 작성")
     public CommonResponse<ProposalResponseDto> createProposal(
-            @Valid @RequestBody ProposalRequestDto proposalRequestDto
-            //@RequestPart(value = "files", required = false) List<ProposalFile> files
+            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
     ){
 
         ProposalResponseDto proposalResponseDto = proposalService.create(
                 proposalRequestDto.projectId(),
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
-                //files,
+                files,
                 ProposalStatus.SUBMITTED
         );
 
@@ -64,10 +66,11 @@ public class ProposalController {
 
     @DeleteMapping("/{proposalId}")
     @Operation(summary = "제안서 삭제")
-    public CommonResponse<ProposalResponseDto> deleteProposal(
+    public CommonResponse<String> deleteProposal(
             @PathVariable long proposalId
     ){
-        return CommonResponse.success(proposalService.delete(proposalId));
+        proposalService.delete(proposalId);
+        return CommonResponse.success("%d번 제안서가 삭제되었습니다.".formatted(proposalId));
     }
 
     @PatchMapping("/{proposalId}")
@@ -76,7 +79,7 @@ public class ProposalController {
             @PathVariable long proposalId,
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
-        proposalService.update(proposalId, requestBody.description(), requestBody.proposedAmount()/*, requestBody.portfolioFiles()*/);
+        proposalService.update(proposalId, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
 
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(proposalId));
     }

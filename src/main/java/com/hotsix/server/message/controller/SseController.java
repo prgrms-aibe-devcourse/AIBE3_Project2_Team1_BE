@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
-@RequestMapping("/api/sse")
+@RequestMapping("/api/v1/sse")
 @RequiredArgsConstructor
 @Tag(name = "SseController", description = "SSE 컨트롤러")
 public class SseController {
