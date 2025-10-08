@@ -41,8 +41,8 @@ jobs:
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       SPRING_DATA_REDIS_PASSWORD: ""
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      CLOUD_AWS_CREDENTIALS_ACCESSKEY: ${{ secrets.AWS_ACCESS_KEY }}
-      CLOUD_AWS_CREDENTIALS_SECRETKEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
       CLOUD_AWS_REGION_STATIC: ap-northeast-2
 
     steps:
