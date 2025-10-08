@@ -4,6 +4,8 @@ import com.hotsix.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -20,9 +22,17 @@ public class Deliverable extends BaseEntity {
     @JoinColumn(name = "milestone_id", referencedColumnName = "milestoneId", nullable = false)
     private Milestone milestone;
 
-    private String linkUrl;
+    private String title; //제목
 
-    private String description;
+    private String taskType; //"CARD", "EVENT", "FILE"
+
+    private String columnStatus; //칸반 : "planned", "doing", "done"
+
+    private LocalDate eventDate; //일정: 날짜
+
+    private String linkUrl; // 제출물:링크?
+
+    private String description; //설명
 
     @Enumerated(EnumType.STRING)
     private DeliverableStatus deliverableStatus;

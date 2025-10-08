@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: hotsix
+
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/hotsix_db
+    username: root
+    password: root123414
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+    open-in-view: false
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
+
+jwt:
+  secret: 3Dg7f$Yt!pQz#B9nT2w@xR4eZ1LmK6sVp8JoMf^C
+  access-exp: 3600000
+  refresh-exp: 604800000
+
+springdoc:
+  swagger-ui:
+    display-request-duration: true
+    doc-expansion: none
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
