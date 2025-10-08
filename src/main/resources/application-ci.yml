@@ -34,3 +34,13 @@ springdoc:
     doc-expansion: none
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+    region:
+      static: ${CLOUD_AWS_REGION_STATIC}
+    s3:
+      bucket: hotsix-upload-bucket
