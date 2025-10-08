@@ -89,7 +89,6 @@ public class ProposalService {
 
         User actor = rq.getUser();
         proposal.checkCanDelete(actor);
-        ProposalResponseDto responseDto = new ProposalResponseDto(proposal);
         proposalRepository.delete(proposal);
     }
 
