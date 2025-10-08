@@ -38,8 +38,8 @@ springdoc:
 cloud:
   aws:
     credentials:
-      access-key: ${CLOUD_AWS_CREDENTIALS_ACCESSKEY}
-      secret-key: ${CLOUD_AWS_CREDENTIALS_SECRETKEY}
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
     region:
       static: ${CLOUD_AWS_REGION_STATIC}
     s3:
