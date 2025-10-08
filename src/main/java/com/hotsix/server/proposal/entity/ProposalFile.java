@@ -1,6 +1,5 @@
-package com.hotsix.server.proposal.entity.proposalPorfolio;
+package com.hotsix.server.proposal.entity;
 
-import com.hotsix.server.proposal.entity.Proposal;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,8 +19,10 @@ public class ProposalFile {
     private String filePath;     // 저장된 경로 or URL
     private String fileType;     // MIME 타입 (pdf, png, etc)
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proposal_id")
     private Proposal proposal;
+
 }
 
