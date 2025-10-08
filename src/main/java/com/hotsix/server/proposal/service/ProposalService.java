@@ -89,6 +89,16 @@ public class ProposalService {
 
         User actor = rq.getUser();
         proposal.checkCanDelete(actor);
+
+        // ✅ 실제 파일 삭제
+        for (ProposalFile file : proposal.getPortfolioFiles()) {
+            try {
+                Files.deleteIfExists(Paths.get(file.getFilePath()));
+            } catch (IOException e) {
+                throw new RuntimeException("파일 삭제 실패: ", e);
+            }
+        }
+
         proposalRepository.delete(proposal);
     }
 
