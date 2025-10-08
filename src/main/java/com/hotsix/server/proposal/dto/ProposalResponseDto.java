@@ -2,9 +2,11 @@ package com.hotsix.server.proposal.dto;
 
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
+import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ProposalResponseDto (
         Long proposalId,
@@ -14,7 +16,7 @@ public record ProposalResponseDto (
         @NonNull Long senderId,
         @NonNull String description,
         @NonNull Integer proposedAmount,
-        //List<ProposalFile> portfolioFiles,
+        List<ProposalFile> portfolioFiles,
         @NonNull ProposalStatus proposalStatus
 ){
     public ProposalResponseDto(Proposal proposal){
@@ -26,7 +28,7 @@ public record ProposalResponseDto (
                 proposal.getSender().getUserId(),
                 proposal.getDescription(),
                 proposal.getProposedAmount(),
-                //proposal.getPortfolioFiles(),
+                proposal.getPortfolioFiles(),
                 proposal.getProposalStatus()
         );
     }
