@@ -1,6 +1,6 @@
 package com.hotsix.server.proposal.dto;
 
-import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
+import com.hotsix.server.proposal.entity.ProposalFile;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
