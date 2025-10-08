@@ -1,7 +1,6 @@
 package com.hotsix.server.message.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
-import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,8 +18,8 @@ public class Message extends BaseEntity {
     private Long messageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    @JoinColumn(name = "chat_room_id", nullable = false)
+    private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_user_id", referencedColumnName = "userId", nullable = false)
@@ -28,4 +27,5 @@ public class Message extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
 }

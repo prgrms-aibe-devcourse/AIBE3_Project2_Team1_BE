@@ -1,4 +1,8 @@
 package com.hotsix.server.message.dto;
 
-public class MessageRequestDto {
+public record MessageRequestDto (
+        Long chatRoomId,
+        String content
+){
+
 }

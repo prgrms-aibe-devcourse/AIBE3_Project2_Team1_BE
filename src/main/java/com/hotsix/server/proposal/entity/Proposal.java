@@ -2,12 +2,11 @@ package com.hotsix.server.proposal.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
 import com.hotsix.server.global.exception.ApplicationException;
-import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
-import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.project.entity.Project;
+import com.hotsix.server.proposal.exception.ProposalErrorCase;
+import com.hotsix.server.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import com.hotsix.server.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +63,10 @@ public class Proposal extends BaseEntity {
 
     public void modify(ProposalStatus proposalStatus) {
         this.proposalStatus = proposalStatus;
+    }
+
+    public void addFiles(List<ProposalFile> files) {
+        this.portfolioFiles.addAll(files);
+        files.forEach(file -> file.setProposal(this));
     }
 }

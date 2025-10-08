@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MessageErrorCase implements ErrorCase {
+public enum ChatRoomErrorCase implements ErrorCase {
 
-    MESSAGE_NOT_FOUND(404, 8001, "메시지를 찾을 수 없습니다."),
-    NOTIFICATION_NOT_FOUND(404, 8002, "알림을 찾을 수 없습니다."),
-    FORBIDDEN_DELETE(403, 8003, "메시지를 삭제할 권한이 없습니다.");
+    CHAT_ROOM_NOT_FOUND(404, 8101, "존재하지 않는 채팅방입니다."),
+    ALREADY_JOINED(409, 8102, "이미 참가 중인 채팅방입니다."),
+    FORBIDDEN_ACCESS(403,8103 , "접근할 수 없는 채팅방입니다.");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;

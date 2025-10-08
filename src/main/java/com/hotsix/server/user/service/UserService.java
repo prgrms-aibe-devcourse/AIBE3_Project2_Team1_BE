@@ -1,9 +1,10 @@
 package com.hotsix.server.user.service;
 
-import com.hotsix.server.auth.service.AuthService;
+import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.user.dto.UserPasswordChangeRequestDto;
 import com.hotsix.server.user.dto.UserUpdateRequestDto;
+import com.hotsix.server.user.entity.Provider;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
@@ -14,27 +15,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final AuthService authService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public User signUp(String email,
                        String password,
                        LocalDate birthdate,
                        String name,
                        String nickname,
-                       String phoneNumber) {
+                       String phoneNumber,
+                       Role userRole
+                       ) {
+
         userRepository.findByEmail(email)
                 .ifPresent(_user -> {
                     throw new ApplicationException(UserErrorCase.EMAIL_ALREADY_EXISTS);
                 });
-        Role userRole = Role.CLIENT;
+
+        userRepository.findByNickname(nickname)
+                .ifPresent(_user -> {
+                    throw new ApplicationException(UserErrorCase.NICKNAME_ALREADY_EXISTS);
+                });
+
+        Provider userProvider = Provider.NORMAL;
         password = passwordEncoder.encode(password);
+
         User user = new User(
                 email,
                 password,
@@ -42,7 +52,8 @@ public class UserService {
                 name,
                 nickname,
                 phoneNumber,
-                userRole
+                userRole,
+                userProvider
         );
         return userRepository.save(user);
     }
@@ -81,16 +92,4 @@ public class UserService {
 
         userRepository.delete(user);
     }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public void checkPassword(User user, String password) {
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ApplicationException(UserErrorCase.INVALID_PASSWORD);
-        }
-    }
-    
-    
 }

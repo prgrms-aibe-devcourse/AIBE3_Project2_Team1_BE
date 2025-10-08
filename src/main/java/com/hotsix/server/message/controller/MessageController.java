@@ -1,16 +1,54 @@
 package com.hotsix.server.message.controller;
 
+import com.hotsix.server.global.response.CommonResponse;
+import com.hotsix.server.message.dto.MessageRequestDto;
+import com.hotsix.server.message.dto.MessageResponseDto;
 import com.hotsix.server.message.service.MessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/messages")
 @RequiredArgsConstructor
+@Tag(name = "MessageController", description = "API 메세지 컨트롤러")
 public class MessageController {
 
     private final MessageService messageService;
+
+    @GetMapping("/{chatRoomId}")
+    @Operation(summary = "채팅방 메세지 조회")
+    public CommonResponse<List<MessageResponseDto>> getMessagesByChatRoomId(
+            @PathVariable long chatRoomId
+    ) {
+        return CommonResponse.success(
+                messageService.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId)
+        );
+    }
+
+    @DeleteMapping("/{messageId}")
+    @Operation(summary = "삭제")
+    public CommonResponse<String> deleteMessage(
+            @PathVariable long messageId
+    ){
+        messageService.delete(messageId);
+
+        return CommonResponse.success("%d번 메세지가 삭제되었습니다.".formatted(messageId));
+    }
+
+    @PostMapping()
+    @Operation(summary = "메세지 작성")
+    public CommonResponse<MessageResponseDto> sendMessage(
+            @RequestBody MessageRequestDto dto
+    ) {
+        MessageResponseDto message = messageService.sendMessage(dto);
+        return CommonResponse.success(message);
+    }
+
+
 
     // 메시지 전송, 조회 등 API 구현
 }
