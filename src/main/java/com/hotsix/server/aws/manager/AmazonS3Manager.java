@@ -56,6 +56,6 @@ public class AmazonS3Manager {
     }
 
     private String getFileUrl(String fileName) {
-        return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
+        return amazonS3.getUrl(bucket, fileName).toString();
     }
 }
