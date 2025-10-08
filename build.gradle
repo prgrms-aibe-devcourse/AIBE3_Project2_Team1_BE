@@ -55,6 +55,9 @@ dependencies {
 
 	// 테스트용 H2 DB
 	runtimeOnly 'com.h2database:h2'
+
+	// S3
+	implementation 'software.amazon.awssdk:s3:2.20.146'
 }
 
 tasks.named('test') {
