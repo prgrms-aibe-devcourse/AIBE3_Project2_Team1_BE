@@ -27,7 +27,7 @@ public class ChatRoomController {
         return CommonResponse.success(new ChatRoomResponseDto(room));
     }
 
-    @GetMapping()
+    @GetMapping("/my-chatrooms")
     @Operation(summary = "내 채팅방 목록 조회")
     public CommonResponse<List<ChatRoomResponseDto>> getChatRooms() {
         List<ChatRoomResponseDto> chatRoomResponseDtos = chatRoomService.getChatRoomsByUser();

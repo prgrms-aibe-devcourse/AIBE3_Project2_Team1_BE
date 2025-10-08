@@ -7,6 +7,7 @@ import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
+import com.hotsix.server.proposal.entity.proposalPorfolio.ProposalFile;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
 import com.hotsix.server.user.entity.User;
@@ -31,16 +32,16 @@ public class ProposalService {
     }
 
     @Transactional(readOnly = true)
-    public ProposalResponseDto findById(long id) {
+    public ProposalResponseDto findById(long proposalId) {
 
-        Proposal proposal = proposalRepository.findById(id)
+        Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
 
         return new ProposalResponseDto(proposal);
     }
 
     @Transactional
-    public ProposalResponseDto create(Long projectId, String description, Integer proposedAmount, /*List<ProposalFile> proposalFiles,*/ ProposalStatus proposalStatus) {
+    public ProposalResponseDto create(Long projectId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles, ProposalStatus proposalStatus) {
 
         Project project = projectService.findById(projectId);
 
@@ -51,7 +52,7 @@ public class ProposalService {
                 .sender(actor)
                 .description(description)
                 .proposedAmount(proposedAmount)
-                //.portfolioFiles(proposalFiles)
+                .portfolioFiles(proposalFiles)
                 .proposalStatus(proposalStatus)
                 .build();
 
@@ -59,8 +60,8 @@ public class ProposalService {
     }
 
     @Transactional
-    public ProposalResponseDto delete(long id) {
-        Proposal proposal = proposalRepository.findById(id)
+    public ProposalResponseDto delete(long proposalId) {
+        Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
 
         User actor = rq.getUser();
@@ -74,22 +75,23 @@ public class ProposalService {
     }
 
     @Transactional
-    public void update(long id, String description, Integer proposedAmount/*, List<ProposalFile> proposalFiles*/) {
-        Proposal proposal = proposalRepository.findById(id)
+    public void update(long proposalId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
+        Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
-        proposal.modify(description, proposedAmount/*, proposalFiles*/);
+        proposal.modify(description, proposedAmount, proposalFiles);
     }
 
     @Transactional
-    public void update(long id, ProposalStatus proposalStatus) {
-        Proposal proposal = proposalRepository.findById(id)
+    public void update(long proposalId, ProposalStatus proposalStatus) {
+        Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
 
         User actor = rq.getUser();
 
         // actor 검증 로직 구현 필요
+
 
         proposal.modify(proposalStatus);
     }
