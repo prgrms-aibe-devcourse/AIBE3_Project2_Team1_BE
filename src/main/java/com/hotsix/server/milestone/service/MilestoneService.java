@@ -1,11 +1,9 @@
 package com.hotsix.server.milestone.service;
 
 import com.hotsix.server.milestone.dto.*;
-import com.hotsix.server.milestone.entity.Deliverable;
-import com.hotsix.server.milestone.entity.Milestone;
-import com.hotsix.server.milestone.entity.MilestoneMember;
-import com.hotsix.server.milestone.entity.MilestoneStatus;
+import com.hotsix.server.milestone.entity.*;
 import com.hotsix.server.milestone.repository.DeliverableRepository;
+import com.hotsix.server.milestone.repository.MilestoneFileRepository;
 import com.hotsix.server.milestone.repository.MilestoneMemberRepository;
 import com.hotsix.server.milestone.repository.MilestoneRepository;
 import com.hotsix.server.project.entity.Project;
@@ -13,6 +11,9 @@ import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,11 +27,10 @@ public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final DeliverableRepository deliverableRepository;
     private final MilestoneMemberRepository milestoneMemberRepository;
+    private final MilestoneFileRepository milestoneFileRepository;
+    private final FileStorageService fileStorageService;
 
     // -- 조회 기능 --
-
-
-
     // 정보 조회
     public MilestoneResponseDto getMilestone(Long milestoneId) {
         Milestone milestone = milestoneRepository.findById(milestoneId)
@@ -80,8 +80,20 @@ public class MilestoneService {
                 .collect(Collectors.toList());
     }
 
+    //파일 목록 조회
+    public List<FileResponseDto> getFiles(Long milestoneId) {
+        Milestone milestone = findMilestoneOrThrow(milestoneId);
+        return milestoneFileRepository.findByMilestone(milestone)
+                .stream()
+                .map(FileResponseDto::from)
+                .collect(Collectors.toList());
+    }
 
-
+    // 파일 정보 조회 (다운로드용)
+    public MilestoneFile getFileById(Long fileId) {
+        return milestoneFileRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("해당 파일을 찾을 수 없습니다. ID: " + fileId));
+    }
 
     // -- 생성 기능 --
 
@@ -129,6 +141,44 @@ public class MilestoneService {
         Deliverable saved = deliverableRepository.save(deliverable);
         return CalendarEventResponse.from(saved);
     }
+
+    // 파일 업로드
+    @Transactional
+    public FileResponseDto uploadFile(Long milestoneId, MultipartFile file) {
+        Milestone milestone = findMilestoneOrThrow(milestoneId);
+
+        // 파일 검증
+        if (file.isEmpty()) {
+            throw new RuntimeException("파일이 비어있습니다.");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.trim().isEmpty()) {
+            throw new RuntimeException("파일명이 없습니다.");
+        }
+
+        // 파일 크기 제한 (10MB)
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new RuntimeException("파일 크기는 10MB를 초과할 수 없습니다.");
+        }
+
+        // 파일 저장
+        FileStorageService.FileInfo fileInfo = fileStorageService.storeFile(file, milestoneId);
+
+        // DB에 메타데이터 저장
+        MilestoneFile milestoneFile = MilestoneFile.builder()
+                .milestone(milestone)
+                .fileName(fileInfo.originalName)
+                .savedFileName(fileInfo.storedName)
+                .filePath(fileInfo.fullPath)
+                .fileSize(fileInfo.size)
+                .fileType(fileInfo.contentType)
+                .build();
+
+        MilestoneFile saved = milestoneFileRepository.save(milestoneFile);
+        return FileResponseDto.from(saved);
+    }
+
     // -- 수정 기능 --
 
     // 정보 수정
@@ -212,6 +262,21 @@ public class MilestoneService {
         Deliverable deliverable = getValidatedDeliverable(milestoneId, eventId, "EVENT");
         deliverableRepository.delete(deliverable);
     }
+
+    // 파일 삭제
+    @Transactional
+    public void deleteFile(Long milestoneId, Long fileId) {
+        MilestoneFile file = milestoneFileRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("해당 파일을 찾을 수 없습니다. ID: " + fileId));
+
+        if (!file.getMilestone().getMilestoneId().equals(milestoneId)) {
+            throw new RuntimeException("이 파일은 해당 마일스톤에 속하지 않습니다.");
+        }
+
+        fileStorageService.deleteFile(file.getFilePath()); // 실제 파일 삭제
+        milestoneFileRepository.delete(file);              // DB 레코드 삭제
+    }
+
     // -- 팀원 소개란 --
     // 팀원 생성
     @Transactional
