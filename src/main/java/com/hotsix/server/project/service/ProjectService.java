@@ -160,4 +160,11 @@ public class ProjectService {
                 project.getStatus().name()
         );
     }
+
+    @Transactional
+    public void deleteProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+        projectRepository.delete(project);
+    }
 }
