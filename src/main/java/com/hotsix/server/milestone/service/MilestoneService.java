@@ -23,6 +23,9 @@ public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final DeliverableRepository deliverableRepository;
 
+    // -- 조회 기능 --
+
+    // 칸반 카드 목록 조회
     public List<KanbanCardResponse> getCards(Long milestoneId) {
         Milestone milestone = milestoneRepository.findById(milestoneId)
 
@@ -35,6 +38,8 @@ public class MilestoneService {
                 .collect(Collectors.toList());
     }
 
+    // 일정 목록 조회
+
     public List<CalendarEventResponse> getEvents(Long milestoneId) {
         Milestone milestone = milestoneRepository.findById(milestoneId)
                 .orElseThrow(() -> new RuntimeException("일정을 찾을 수 없습니다."));
@@ -46,6 +51,9 @@ public class MilestoneService {
                 .collect(Collectors.toList());
     }
 
+    // -- 생성 기능 --
+
+    // 칸반 카드 생성
     @Transactional
     public KanbanCardResponse createCard(Long milestoneId, CardRequestDto request) {
 
@@ -64,7 +72,7 @@ public class MilestoneService {
         return KanbanCardResponse.from(saved);
 
     }
-
+    // 일정 생성
     public CalendarEventResponse createEvent(Long milestoneId, EventRequestDto request) {
 
         Milestone milestone = milestoneRepository.findById(milestoneId)
@@ -81,6 +89,9 @@ public class MilestoneService {
         return CalendarEventResponse.from(saved);
 
     }
+    // -- 수정 기능 --
+
+    // 칸반 카드 수정
     public KanbanCardResponse updateCard(Long milestoneId, Long cardId, CardRequestDto request) {
         Milestone milestone = milestoneRepository.findById(milestoneId)
                 .orElseThrow(() -> new RuntimeException("해당 마일스톤이 존재하지 않습니다. "));
@@ -143,5 +154,44 @@ public class MilestoneService {
 
         return CalendarEventResponse.from(updated);
     }
+    // 칸반 카드 삭제
+    @Transactional
+    public void deleteCard(Long milestoneId, Long cardId) {
+        Milestone milestone = milestoneRepository.findById(milestoneId)
+                .orElseThrow(() -> new RuntimeException("해당 마일스톤이 존재하지 않습니다. ID: " + milestoneId));
+
+        Deliverable deliverable = deliverableRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("해당 카드를 찾을 수 없습니다. ID: " + cardId));
+
+        if (!deliverable.getMilestone().getMilestoneId().equals(milestoneId)) {
+            throw new RuntimeException("이 카드는 해당 마일스톤에 속하지 않습니다.");
+        }
+
+        if (!"CARD".equals(deliverable.getTaskType())) {
+            throw new RuntimeException("이 deliverable은 카드 타입이 아닙니다.");
+        }
+
+        deliverableRepository.delete(deliverable);
+    }
+
+    @Transactional
+    public void deleteEvent(Long milestoneId, Long eventId) {
+        Milestone milestone = milestoneRepository.findById(milestoneId)
+                .orElseThrow(() -> new RuntimeException("해당 마일스톤이 존재하지 않습니다. ID: " + milestoneId));
+
+        Deliverable deliverable = deliverableRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("해당 일정을 찾을 수 없습니다. ID: " + eventId));
+
+        if (!deliverable.getMilestone().getMilestoneId().equals(milestoneId)) {
+            throw new RuntimeException("이 일정은 해당 마일스톤에 속하지 않습니다.");
+        }
+
+        if (!"EVENT".equals(deliverable.getTaskType())) {
+            throw new RuntimeException("이 deliverable은 일정 타입이 아닙니다.");
+        }
+
+        deliverableRepository.delete(deliverable);
+    }
+
 
 }

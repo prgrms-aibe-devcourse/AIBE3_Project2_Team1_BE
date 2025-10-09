@@ -17,17 +17,22 @@ public class MilestoneController {
 
     private final MilestoneService milestoneService;
 
+    //-- 조회 API --
+
+    //칸반 카드 목록 조회
     @GetMapping("/{milestoneId}/cards")
     public List<KanbanCardResponse> getCards(@PathVariable Long milestoneId) {
         return milestoneService.getCards(milestoneId);
     }
 
+    // 일정 목록 조회
     @GetMapping("/{milestoneId}/events")
     public List<CalendarEventResponse> getEvents(@PathVariable Long milestoneId) {
         return milestoneService.getEvents(milestoneId);
     }
 
-    //생성 API
+    //-- 생성 API --
+    //칸반 카드 생성
     @PostMapping("/{milestoneId}/cards")
     public KanbanCardResponse createCard(
             @PathVariable Long milestoneId,
@@ -44,6 +49,7 @@ public class MilestoneController {
     ) {
         return milestoneService.createEvent(milestoneId, request);
     }
+    //-- 수정 API --
 
     // 칸반 카드 수정
     @PatchMapping("/{milestoneId}/cards/{cardId}")
@@ -62,6 +68,25 @@ public class MilestoneController {
             @RequestBody EventRequestDto request
     ) {
         return milestoneService.updateEvent(milestoneId, eventId, request);
+    }
+
+    // -- 삭제 API --
+
+    // 칸반 카드 삭제
+    @DeleteMapping("/{milestoneId}/cards/{cardId}")
+    public void deleteCard(
+            @PathVariable Long milestoneId,
+            @PathVariable Long cardId
+    ) {
+        milestoneService.deleteCard(milestoneId, cardId);
+    }
+    // 일정 삭제
+    @DeleteMapping("/{milestoneId}/events/{eventId}")
+    public void deleteEvent(
+            @PathVariable Long milestoneId,
+            @PathVariable Long eventId
+    ) {
+        milestoneService.deleteEvent(milestoneId, eventId);
     }
 
 
