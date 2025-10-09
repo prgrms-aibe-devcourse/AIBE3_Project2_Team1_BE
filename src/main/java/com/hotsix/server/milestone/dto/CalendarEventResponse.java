@@ -22,7 +22,7 @@ public class CalendarEventResponse {
         return CalendarEventResponse.builder()
                 .id(deliverable.getDeliverableId())
                 .title(deliverable.getTitle())
-                .date(deliverable.getEventDate().toString())
+                .date(deliverable.getEventDate() == null ? null : deliverable.getEventDate().toString())
                 .build();
     }
 }
