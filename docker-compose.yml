@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hotsix-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT}
+      SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY}
+      CLOUD_AWS_REGION_STATIC: ${CLOUD_AWS_REGION_STATIC}
+    restart: always
+
+  redis:
+    image: redis:7.2
+    container_name: hotsix-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "${SPRING_DATA_REDIS_PASSWORD}"]
+    restart: always
