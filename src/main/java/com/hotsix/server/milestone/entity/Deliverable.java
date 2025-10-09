@@ -22,12 +22,14 @@ public class Deliverable extends BaseEntity {
     @JoinColumn(name = "milestone_id", referencedColumnName = "milestoneId", nullable = false)
     private Milestone milestone;
 
+    @Setter
     private String title; //제목
 
     private String taskType; //"CARD", "EVENT", "FILE"
 
+    @Setter
     private String columnStatus; //칸반 : "planned", "doing", "done"
-
+    @Setter
     private LocalDate eventDate; //일정: 날짜
 
     private String linkUrl; // 제출물:링크?

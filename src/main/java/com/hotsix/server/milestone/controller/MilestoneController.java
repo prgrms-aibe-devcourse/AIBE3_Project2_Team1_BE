@@ -45,4 +45,24 @@ public class MilestoneController {
         return milestoneService.createEvent(milestoneId, request);
     }
 
+    // 칸반 카드 수정
+    @PatchMapping("/{milestoneId}/cards/{cardId}")
+    public KanbanCardResponse updateCard(
+            @PathVariable Long milestoneId,
+            @PathVariable Long cardId,
+            @RequestBody CardRequestDto request
+    ) {
+        return milestoneService.updateCard(milestoneId, cardId, request);
+    }
+    // 일정 수정
+    @PatchMapping("/{milestoneId}/events/{eventId}")
+    public CalendarEventResponse updateEvent(
+            @PathVariable Long milestoneId,
+            @PathVariable Long eventId,
+            @RequestBody EventRequestDto request
+    ) {
+        return milestoneService.updateEvent(milestoneId, eventId, request);
+    }
+
+
 }
