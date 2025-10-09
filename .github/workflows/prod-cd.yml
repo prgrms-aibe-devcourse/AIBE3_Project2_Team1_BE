@@ -111,9 +111,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/hotsix:latest"
 
             echo "Pulling latest Docker image..."
-            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/hotsix:latest"
             docker pull "$IMAGE"
 
             echo "Stopping old containers..."
@@ -151,4 +151,4 @@ jobs:
               -e CLOUD_AWS_REGION_STATIC=${{ secrets.CLOUD_AWS_REGION_STATIC }} \
               "$IMAGE"
 
-            echo "Deployment completed successfully"
+            echo "Deployment completed"
