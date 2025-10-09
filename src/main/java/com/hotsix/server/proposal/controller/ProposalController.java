@@ -79,7 +79,6 @@ public class ProposalController {
             @Valid @RequestBody ProposalRequestBody requestBody
     ){
         proposalService.update(proposalId, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
-
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(proposalId));
     }
 

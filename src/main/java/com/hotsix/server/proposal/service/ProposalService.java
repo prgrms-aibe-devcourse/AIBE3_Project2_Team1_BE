@@ -2,6 +2,8 @@ package com.hotsix.server.proposal.service;
 
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.message.repository.MessageRepository;
+import com.hotsix.server.message.service.MessageService;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
@@ -10,6 +12,7 @@ import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
+import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,8 @@ public class ProposalService {
     private final Rq rq;
     private final ProjectService projectService;
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/proposals/";
+    private final MessageRepository messageRepository;
+    private final MessageService messageService;
 
     @Transactional(readOnly = true)
     public List<ProposalResponseDto> getList() {
@@ -78,7 +83,16 @@ public class ProposalService {
         }
         proposalRepository.save(proposal);
 
-
+        if(actor.getRole() == Role.CLIENT){
+            String title = actor.getName() + ", " + project.getFreelancer().getName();
+            String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getFreelancer().getUserId(), title, content);
+        }
+        else if(actor.getRole() == Role.FREELANCER){
+            String title = actor.getName() + ", " + project.getFreelancer().getName();
+            String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getFreelancer().getUserId(), title, content);
+        }
 
         return new ProposalResponseDto(proposal);
     }
@@ -119,6 +133,19 @@ public class ProposalService {
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
         proposal.modify(proposalStatus);
+
+        Project project = proposal.getProject();
+
+        if(actor.getRole() == Role.CLIENT){
+            String title = actor.getName() + ", " + project.getFreelancer().getName();
+            String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getFreelancer().getUserId(), title, content);
+        }
+        else if(actor.getRole() == Role.FREELANCER){
+            String title = actor.getName() + ", " + project.getFreelancer().getName();
+            String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getFreelancer().getUserId(), title, content);
+        }
     }
 
     public ProposalFile toProposalFile(MultipartFile file, Proposal proposal) {
