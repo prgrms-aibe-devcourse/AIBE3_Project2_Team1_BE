@@ -15,6 +15,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
@@ -53,5 +55,35 @@ public class ProjectController {
         return CommonResponse.success(projectService.updateProjectStatus(userId, projectId, dto));
     }
 
+
+    @GetMapping()
+    @Operation(summary = "프로젝트 전체 조회", description = "프로젝트 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "프로젝트 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
+    public CommonResponse<List<ProjectResponseDto>> getAllProjects() {
+        List<ProjectResponseDto> projects = projectService.getAllProjects();
+        return CommonResponse.success(projects);
+    }
+
+
     // TODO: 프로젝트 상세 조회 API 개발 (GET)
+    @GetMapping("/{projectId}")
+    @Operation(summary = "프로젝트 상세 조회", description = "프로젝트를 상세 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "상태 변경 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "403", description = "권한 없음"),
+            @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없음")
+    })
+    public CommonResponse<ProjectResponseDto> getProject(
+            @Parameter(hidden = true) @CurrentUser Long userId,
+            @PathVariable Long projectId
+    ) {
+        ProjectResponseDto project = projectService.getProjectDetail(projectId);
+        return CommonResponse.success(project);
+    }
+
 }

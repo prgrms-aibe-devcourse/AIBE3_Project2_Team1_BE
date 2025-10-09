@@ -16,6 +16,8 @@ import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -111,5 +113,40 @@ public class ProjectService {
                 project.getCategory(),
                 project.getStatus().name()
         );
+    }
+
+    public List<ProjectResponseDto> getAllProjects() {
+        return projectRepository.findAll()
+                .stream()
+                .map(project -> new ProjectResponseDto(
+                        project.getProjectId(),
+                        project.getClient().getNickname(),
+                        project.getFreelancer().getNickname(),
+                        project.getTitle(),
+                        project.getDescription(),
+                        project.getBudget(),
+                        project.getDeadline(),
+                        project.getCategory(),
+                        project.getStatus().name()
+                ))
+                .toList();
+    }
+
+    public ProjectResponseDto getProjectDetail(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+        ProjectResponseDto dto = new ProjectResponseDto(
+                project.getProjectId(),
+                project.getClient().getNickname(),
+                project.getFreelancer().getNickname(),
+                project.getTitle(),
+                project.getDescription(),
+                project.getBudget(),
+                project.getDeadline(),
+                project.getCategory(),
+                project.getStatus().name()
+        );
+
+        return dto;
     }
 }

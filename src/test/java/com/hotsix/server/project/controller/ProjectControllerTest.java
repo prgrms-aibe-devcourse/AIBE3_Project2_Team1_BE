@@ -6,8 +6,10 @@ import com.hotsix.server.auth.resolver.CurrentUserArgumentResolver;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.service.ProjectService;
+import org.apache.coyote.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +20,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.core.MethodParameter;
 
+import javax.print.attribute.standard.Media;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -136,4 +141,58 @@ class ProjectControllerTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("프로젝트 전체 조회 성공")
+    void getProjectListSuccess() throws Exception {
+        ProjectResponseDto responseDto1 = new ProjectResponseDto(
+                1L, "클라이언트1", "프리랜서1", "웹사이트 제작",
+                "프론트/백 개발 프로젝트", 2000, LocalDate.now().plusDays(7),
+                "IT", "OPEN"
+        );
+
+        ProjectResponseDto responseDto2 = new ProjectResponseDto(
+                2L, "클라이언트2", "프리랜서2", "브랜딩 디자인",
+                "로고 및 패키지 디자인", 1500, LocalDate.now().plusDays(10),
+                "디자인", "IN_PROGRESS"
+        );
+
+        List<ProjectResponseDto> responseDtoList = List.of(responseDto1, responseDto2);
+
+        when(projectService.getAllProjects()).thenReturn(responseDtoList);
+        when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].projectId").value(1))
+                .andExpect(jsonPath("$.data[0].title").value("웹사이트 제작"))
+                .andExpect(jsonPath("$.data[1].title").value("브랜딩 디자인"));
+    }
+
+
+    @Test
+    @DisplayName("프로젝트 상세 조회 성공")
+    void getProjectDetailSuccess() throws Exception {
+        Long userId = 1L;
+        Long projectId = 10L;
+
+        ProjectResponseDto responseDto = new ProjectResponseDto(
+                projectId, "클라이언트", "프리랜서", "프로젝트명", "설명",
+                1000, LocalDate.now().plusDays(7), "IT", "OPEN"
+        );
+
+        when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
+        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
+        when(projectService.getProjectDetail(eq(projectId))).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.projectId").value(projectId))
+                .andExpect(jsonPath("$.data.status").value("OPEN"));
+    }
+
+
 }
