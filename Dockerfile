@@ -7,8 +7,8 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY build/libs/hotsix-0.0.1-SNAPSHOT.jar app.jar
+COPY app.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/local/bin/wait-for-it.sh", "redis:6379", "--timeout=30", "--", "java", "-jar", "app.jar"]
+ENTRYPOINT ["/usr/local/bin/wait-for-it.sh", "hotsix-redis:6379", "--timeout=30", "--", "java", "-jar", "app.jar"]
