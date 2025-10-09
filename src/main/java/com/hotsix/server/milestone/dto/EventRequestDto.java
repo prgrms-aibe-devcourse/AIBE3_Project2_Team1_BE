@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardRequestDto {
+public class EventRequestDto {
     private String title;
-    private String columnId;
+    private String date;  // "2025-10-15" 형식
 }

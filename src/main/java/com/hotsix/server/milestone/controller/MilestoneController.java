@@ -1,13 +1,12 @@
 package com.hotsix.server.milestone.controller;
 
-import com.hotsix.server.milestone.dto.CalendarEventResponse;  // ← import 추가!
+import com.hotsix.server.milestone.dto.CalendarEventResponse;
+import com.hotsix.server.milestone.dto.CardRequestDto;
+import com.hotsix.server.milestone.dto.EventRequestDto;
 import com.hotsix.server.milestone.dto.KanbanCardResponse;
 import com.hotsix.server.milestone.service.MilestoneService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,4 +26,23 @@ public class MilestoneController {
     public List<CalendarEventResponse> getEvents(@PathVariable Long milestoneId) {
         return milestoneService.getEvents(milestoneId);
     }
+
+    //생성 API
+    @PostMapping("/{milestoneId}/cards")
+    public KanbanCardResponse createCard(
+            @PathVariable Long milestoneId,
+            @RequestBody CardRequestDto request
+    ) {
+        return milestoneService.createCard(milestoneId, request);
+    }
+
+    //일정 생성
+    @PostMapping("/{milestoneId}/events")
+    public CalendarEventResponse createEvent(
+            @PathVariable Long milestoneId,
+            @RequestBody EventRequestDto request
+    ) {
+        return milestoneService.createEvent(milestoneId, request);
+    }
+
 }

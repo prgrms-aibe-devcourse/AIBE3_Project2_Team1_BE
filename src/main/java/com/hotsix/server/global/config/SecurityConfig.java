@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/v1/auth/login/basic",
                                 "/api/v1/users/signup"
+                                // "/api/v1/milestones/**"  // TODO: 테스트용 예외, 추후 삭제
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -1,6 +1,8 @@
 package com.hotsix.server.milestone.service;
 
 import com.hotsix.server.milestone.dto.CalendarEventResponse;
+import com.hotsix.server.milestone.dto.CardRequestDto;
+import com.hotsix.server.milestone.dto.EventRequestDto;
 import com.hotsix.server.milestone.dto.KanbanCardResponse;
 import com.hotsix.server.milestone.entity.Deliverable;
 import com.hotsix.server.milestone.entity.Milestone;
@@ -40,6 +42,41 @@ public class MilestoneService {
         return deliverables.stream()
                 .map(CalendarEventResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    public KanbanCardResponse createCard(Long milestoneId, CardRequestDto request) {
+
+        Milestone milestone = milestoneRepository.findById(milestoneId)
+                .orElseThrow(() -> new RuntimeException("해당 마일스톤이 존재하지 않습니다." ));
+
+
+        Deliverable deliverable = Deliverable.builder()
+                .milestone(milestone)
+                .title(request.getTitle())
+                .taskType("CARD")
+                .columnStatus(request.getColumnId())
+                .build();
+
+        Deliverable saved = deliverableRepository.save(deliverable);
+        return KanbanCardResponse.from(saved);
+
+    }
+
+    public CalendarEventResponse createEvent(Long milestoneId, EventRequestDto request) {
+
+        Milestone milestone = milestoneRepository.findById(milestoneId)
+                .orElseThrow(() -> new RuntimeException("해당 마일스톤이 존재하지 않습니다."));
+
+        Deliverable deliverable = Deliverable.builder()
+                .milestone(milestone)
+                .title(request.getTitle())
+                .taskType("EVENT")
+                .eventDate(java.time.LocalDate.parse(request.getDate()))
+                .build();
+
+        Deliverable saved = deliverableRepository.save(deliverable);
+        return CalendarEventResponse.from(saved);
+
     }
 
 }
