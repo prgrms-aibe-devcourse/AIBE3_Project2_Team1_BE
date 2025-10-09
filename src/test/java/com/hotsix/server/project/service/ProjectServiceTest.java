@@ -2,6 +2,7 @@ package com.hotsix.server.project.service;
 
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.dto.ProjectRequestDto;
+import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.repository.ProjectRepository;
@@ -99,4 +100,83 @@ public class ProjectServiceTest {
             projectService.registerProject(currentUserId, dto);
         });
     }
+
+    @Test
+    @DisplayName("프로젝트 상태 변경 성공")
+    void updateProjectStatusSuccess() {
+        Long projectId = 1L;
+
+
+        User client = User.builder().userId(1L).nickname("클라이언트").build();
+        User freelancer = User.builder().userId(2L).nickname("프리랜서").build();
+
+        Project project = Project.builder()
+                .projectId(projectId)
+                .status(Status.OPEN)
+                .client(client)
+                .freelancer(freelancer)
+                .build();
+
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+
+        ProjectStatusUpdateRequestDto dto = new ProjectStatusUpdateRequestDto(Status.COMPLETED);
+        projectService.updateProjectStatus(1L, projectId, dto);
+
+        assertThat(project.getStatus()).isEqualTo(Status.COMPLETED);
+    }
+
+
+    @Test
+    @DisplayName("프로젝트 상세 조회 성공")
+    void getProjectDetailSuccess() {
+        Long projectId = 1L;
+
+
+        User client = User.builder().userId(1L).nickname("클라이언트").build();
+        User freelancer = User.builder().userId(2L).nickname("프리랜서").build();
+
+        Project project = Project.builder()
+                .projectId(projectId)
+                .title("테스트 프로젝트")
+                .status(Status.OPEN)
+                .client(client)
+                .freelancer(freelancer)
+                .build();
+
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+
+        var result = projectService.getProjectDetail(projectId);
+
+        assertThat(result.projectId()).isEqualTo(projectId);
+        assertThat(result.title()).isEqualTo("테스트 프로젝트");
+        assertThat(result.clientNickname()).isEqualTo("클라이언트");
+        assertThat(result.freelancerNickname()).isEqualTo("프리랜서");
+    }
+
+    @Test
+    @DisplayName("프로젝트 삭제 성공")
+    void deleteProjectSuccess() {
+        Long projectId = 1L;
+        Project project = Project.builder().projectId(projectId).build();
+
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+
+        projectService.deleteProject(projectId);
+
+        verify(projectRepository, times(1)).delete(project);
+    }
+
+    @Test
+    @DisplayName("프로젝트 삭제 실패 - 프로젝트 없음")
+    void deleteProjectNotFound() {
+        Long projectId = 999L;
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(ApplicationException.class, () -> {
+            projectService.deleteProject(projectId);
+        });
+    }
+
+
+
 }

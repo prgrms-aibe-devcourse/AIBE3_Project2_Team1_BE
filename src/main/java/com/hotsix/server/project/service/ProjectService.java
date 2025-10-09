@@ -115,6 +115,7 @@ public class ProjectService {
         );
     }
 
+    @Transactional
     public List<ProjectResponseDto> getAllProjects() {
         return projectRepository.findAll()
                 .stream()
@@ -132,6 +133,7 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional
     public ProjectResponseDto getProjectDetail(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
@@ -148,5 +150,12 @@ public class ProjectService {
         );
 
         return dto;
+    }
+
+    @Transactional
+    public void deleteProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+        projectRepository.delete(project);
     }
 }
