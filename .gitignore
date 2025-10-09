@@ -38,3 +38,8 @@ out/
 
 ### application.yml ###
 application.yml
+application-test.yml
+
+### .env ###
+.env
+.env.local
