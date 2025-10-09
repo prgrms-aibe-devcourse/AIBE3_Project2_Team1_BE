@@ -22,4 +22,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRoleAndCreatedDate(@Param("role") Role role, @Param("date") LocalDate date);
 
     Optional<Object> findByNickname(String nickname);
+
 }

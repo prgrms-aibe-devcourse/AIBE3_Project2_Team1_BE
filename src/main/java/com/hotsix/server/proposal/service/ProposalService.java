@@ -76,8 +76,9 @@ public class ProposalService {
             }
             proposal.addFiles(proposalFiles);
         }
-
         proposalRepository.save(proposal);
+
+
 
         return new ProposalResponseDto(proposal);
     }
