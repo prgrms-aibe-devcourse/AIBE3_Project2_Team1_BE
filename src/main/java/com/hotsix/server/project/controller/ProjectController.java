@@ -59,7 +59,7 @@ public class ProjectController {
     @GetMapping()
     @Operation(summary = "프로젝트 전체 조회", description = "프로젝트 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "전체 프로젝트 조회 성공"),
+            @ApiResponse(responseCode = "200", description = "프로젝트 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     public CommonResponse<List<ProjectResponseDto>> getAllProjects() {
@@ -72,7 +72,7 @@ public class ProjectController {
     @GetMapping("/{projectId}")
     @Operation(summary = "프로젝트 상세 조회", description = "프로젝트를 상세 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "프로젝트 상세 조회 성공"),
+            @ApiResponse(responseCode = "200", description = "상태 변경 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "403", description = "권한 없음"),
@@ -86,40 +86,4 @@ public class ProjectController {
         return CommonResponse.success(project);
     }
 
-
-    @PutMapping("/{projectId}")
-    @Operation(summary = "프로젝트 수정", description = "프로젝트를 수정합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "수정 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "403", description = "권한 없음"),
-            @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없음")
-    })
-    public CommonResponse<ProjectResponseDto> updateProject(
-            @Parameter(hidden = true) @CurrentUser Long userId,
-            @PathVariable Long projectId,
-            @RequestBody @Valid ProjectRequestDto dto
-    ) {
-
-        ProjectResponseDto project = projectService.updateProject(userId, projectId, dto);
-        return CommonResponse.success(project);
-    }
-
-    @DeleteMapping("/{projectId}")
-    @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "삭제 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "403", description = "권한 없음"),
-            @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없음")
-    })
-    public CommonResponse<ProjectResponseDto> deleteProject(
-            @Parameter(hidden = true) @CurrentUser Long userId,
-            @PathVariable Long projectId
-    ) {
-        projectService.deleteProject(projectId);
-        return CommonResponse.success(null);
-    }
 }

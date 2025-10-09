@@ -3,14 +3,11 @@ package com.hotsix.server.project.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hotsix.server.auth.resolver.CurrentUserArgumentResolver;
-import com.hotsix.server.global.exception.ApplicationException;
-import com.hotsix.server.global.exception.GlobalExceptionHandler;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
-import com.hotsix.server.project.exception.ProjectErrorCase;
 import com.hotsix.server.project.service.ProjectService;
 import org.apache.coyote.Response;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +28,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,7 +52,6 @@ class ProjectControllerTest {
 
         this.mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
-                .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(currentUserArgumentResolver)
                 .build();
     }
@@ -198,80 +194,5 @@ class ProjectControllerTest {
                 .andExpect(jsonPath("$.data.status").value("OPEN"));
     }
 
-
-    @Test
-    @DisplayName("프로젝트 삭제 성공")
-    void getProjectDeleteSuccess() throws Exception {
-        Long userId = 1L;
-        Long projectId = 10L;
-
-        ProjectResponseDto responseDto = new ProjectResponseDto(
-                projectId, "클라이언트", "프리랜서", "프로젝트명", "설명",
-                1000, LocalDate.now().plusDays(7), "IT", "OPEN"
-        );
-
-        when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
-        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
-
-        doNothing().when(projectService).deleteProject(eq(projectId));
-
-        mockMvc.perform(delete("/api/v1/projects/{projectId}", projectId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").doesNotExist());
-
-    }
-
-    @Test
-    @DisplayName("프로젝트 삭제 실패 - 존재하지 않는 프로젝트")
-    void deleteProjectFail_notFound() throws Exception {
-        Long userId = 1L;
-        Long projectId = 999L;
-
-        when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
-        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
-        doThrow(new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND))
-                .when(projectService).deleteProject(eq(projectId));
-
-
-        mockMvc.perform(delete("/api/v1/projects/{projectId}", projectId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                ;
-
-    }
-
-
-    @Test
-    @DisplayName("프로젝트 수정 성공")
-    void updateProjectSuccess() throws Exception {
-        Long userId = 1L;
-        Long projectId = 10L;
-
-
-        ProjectRequestDto requestDto = new ProjectRequestDto(
-                2L, "수정된 프로젝트명", "수정된 설명", 2000, LocalDate.now().plusDays(10), "IT"
-        );
-
-
-        ProjectResponseDto responseDto = new ProjectResponseDto(
-                projectId, "클라이언트", "프리랜서", "수정된 프로젝트명", "수정된 설명",
-                2000, LocalDate.now().plusDays(10), "IT", "OPEN"
-        );
-
-        when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
-        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
-        when(projectService.updateProject(eq(userId), eq(projectId), any(ProjectRequestDto.class)))
-                .thenReturn(responseDto);
-
-        mockMvc.perform(put("/api/v1/projects/{projectId}", projectId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.projectId").value(projectId))
-                .andExpect(jsonPath("$.data.title").value("수정된 프로젝트명"))
-                .andExpect(jsonPath("$.data.description").value("수정된 설명"))
-                .andExpect(jsonPath("$.data.budget").value(2000));
-    }
 
 }
