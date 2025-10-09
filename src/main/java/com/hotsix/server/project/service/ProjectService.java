@@ -1,5 +1,12 @@
 package com.hotsix.server.project.service;
 
+
+import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.exception.ProjectErrorCase;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
@@ -167,4 +174,45 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
         projectRepository.delete(project);
     }
+
+    @Transactional
+    public ProjectResponseDto updateProject(Long userId, Long projectId, ProjectRequestDto dto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+
+
+        User client = project.getClient();
+        User freelancer = project.getFreelancer();
+
+        if (client == null || freelancer == null) {
+            throw new ApplicationException(ProjectErrorCase.INVALID_PROJECT_DATA);
+        }
+
+
+        if (!client.getUserId().equals(userId) && !freelancer.getUserId().equals(userId)) {
+            throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
+        }
+
+
+        project.updateProjectInfo(
+                dto.title(),
+                dto.description(),
+                dto.budget(),
+                dto.deadline(),
+                dto.category()
+        );
+
+        return new ProjectResponseDto(
+                project.getProjectId(),
+                client.getNickname(),
+                freelancer.getNickname(),
+                project.getTitle(),
+                project.getDescription(),
+                project.getBudget(),
+                project.getDeadline(),
+                project.getCategory(),
+                project.getStatus().name()
+        );
+    }
+
 }

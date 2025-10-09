@@ -242,4 +242,36 @@ class ProjectControllerTest {
     }
 
 
+    @Test
+    @DisplayName("프로젝트 수정 성공")
+    void updateProjectSuccess() throws Exception {
+        Long userId = 1L;
+        Long projectId = 10L;
+
+
+        ProjectRequestDto requestDto = new ProjectRequestDto(
+                2L, "수정된 프로젝트명", "수정된 설명", 2000, LocalDate.now().plusDays(10), "IT"
+        );
+
+
+        ProjectResponseDto responseDto = new ProjectResponseDto(
+                projectId, "클라이언트", "프리랜서", "수정된 프로젝트명", "수정된 설명",
+                2000, LocalDate.now().plusDays(10), "IT", "OPEN"
+        );
+
+        when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
+        when(currentUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(userId);
+        when(projectService.updateProject(eq(userId), eq(projectId), any(ProjectRequestDto.class)))
+                .thenReturn(responseDto);
+
+        mockMvc.perform(put("/api/v1/projects/{projectId}", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.projectId").value(projectId))
+                .andExpect(jsonPath("$.data.title").value("수정된 프로젝트명"))
+                .andExpect(jsonPath("$.data.description").value("수정된 설명"))
+                .andExpect(jsonPath("$.data.budget").value(2000));
+    }
+
 }
