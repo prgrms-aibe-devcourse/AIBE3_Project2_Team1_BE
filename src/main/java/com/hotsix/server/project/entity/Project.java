@@ -1,5 +1,6 @@
 package com.hotsix.server.project.entity;
 
+import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.global.entity.BaseEntity;
 import com.hotsix.server.user.entity.User;
 import jakarta.persistence.*;
@@ -42,7 +43,8 @@ public class Project extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status status; // OPEN, IN_PROGRESS, COMPLETED
 
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id", nullable = true)
@@ -55,7 +57,7 @@ public class Project extends BaseEntity {
         this.status = newStatus;
     }
 
-    public void updateProjectInfo(String title, String description, Integer budget, LocalDate deadline, String category) {
+    public void updateProjectInfo(String title, String description, Integer budget, LocalDate deadline, Category category) {
         this.title = title;
         this.description = description;
         this.budget = budget;

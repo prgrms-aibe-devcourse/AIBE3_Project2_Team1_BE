@@ -2,6 +2,7 @@ package com.hotsix.server.project.service;
 
 
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.project.exception.ProjectErrorCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class ProjectService {
                 .budget(dto.budget())
                 .deadline(dto.deadline())
                 .status(Status.OPEN)
-                .category(dto.category())
+                .category(Category.valueOf(dto.category()))
                 .createdBy(currentUser)
                 .build();
 
@@ -60,7 +61,7 @@ public class ProjectService {
                 saved.getDescription(),
                 saved.getBudget(),
                 saved.getDeadline(),
-                saved.getCategory(),
+                saved.getCategory().name(),
                 saved.getStatus().name()
         );
     }
@@ -87,7 +88,7 @@ public class ProjectService {
                 project.getDescription(),
                 project.getBudget(),
                 project.getDeadline(),
-                project.getCategory(),
+                project.getCategory().name(),
                 project.getStatus().name()
         );
     }
@@ -111,7 +112,7 @@ public class ProjectService {
                         project.getDescription(),
                         project.getBudget(),
                         project.getDeadline(),
-                        project.getCategory(),
+                        project.getCategory().name(),
                         project.getStatus().name()
                 ))
                 .toList();
@@ -131,7 +132,7 @@ public class ProjectService {
                 project.getDescription(),
                 project.getBudget(),
                 project.getDeadline(),
-                project.getCategory(),
+                project.getCategory().name(),
                 project.getStatus().name()
         );
     }
@@ -167,7 +168,7 @@ public class ProjectService {
                 dto.description(),
                 dto.budget(),
                 dto.deadline(),
-                dto.category()
+                Category.valueOf(dto.category())
         );
 
         return new ProjectResponseDto(
@@ -178,7 +179,7 @@ public class ProjectService {
                 project.getDescription(),
                 project.getBudget(),
                 project.getDeadline(),
-                project.getCategory(),
+                project.getCategory().name(),
                 project.getStatus().name()
         );
     }
