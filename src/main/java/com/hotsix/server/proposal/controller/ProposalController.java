@@ -23,11 +23,11 @@ import java.util.List;
 public class ProposalController {
     private final ProposalService proposalService;
 
-    @GetMapping
-    @Operation(summary = "제안서 다건 조회")
-    public CommonResponse<List<ProposalResponseDto>> getProposals() {
+    @GetMapping("/sent")
+    @Operation(summary = "내가 보낸 제안서 조회")
+    public CommonResponse<List<ProposalResponseDto>> getSentProposals() {
         return CommonResponse.success(
-                proposalService.getList()
+                proposalService.getSentProposals()
         );
     }
 
@@ -40,6 +40,15 @@ public class ProposalController {
 
         return CommonResponse.success(
                 proposalResponseDto
+        );
+    }
+
+    @GetMapping("/draft")
+    @Operation(summary = "임시저장 제안서 조회")
+    public CommonResponse<List<ProposalResponseDto>> getDraftProposal(
+    ) {
+        return CommonResponse.success(
+                proposalService.getDraftList()
         );
     }
 
@@ -56,6 +65,26 @@ public class ProposalController {
                 proposalRequestDto.proposedAmount(),
                 files,
                 ProposalStatus.SUBMITTED
+        );
+
+        return CommonResponse.success(
+                proposalResponseDto
+        );
+    }
+
+    @PostMapping(path = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "제안서 임시 저장")
+    public CommonResponse<ProposalResponseDto> createDraftProposal(
+            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
+    ){
+
+        ProposalResponseDto proposalResponseDto = proposalService.create(
+                proposalRequestDto.projectId(),
+                proposalRequestDto.description(),
+                proposalRequestDto.proposedAmount(),
+                files,
+                ProposalStatus.DRAFT
         );
 
         return CommonResponse.success(

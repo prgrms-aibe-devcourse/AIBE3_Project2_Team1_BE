@@ -32,4 +32,4 @@ public class SseController {
 }
 
 //<프런트 SSE 연결 요청 코드>
-//const eventSource = new EventSource(`/api/sse/connect?chatRoomtId=1`);
+//const eventSource = new EventSource(`/api/v1/sse/connect?chatRoomtId=1`);

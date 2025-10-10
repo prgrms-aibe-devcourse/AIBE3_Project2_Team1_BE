@@ -12,9 +12,7 @@ import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
-import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
-import com.hotsix.server.user.exception.UserErrorCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,9 +37,18 @@ public class ProposalService {
     private final MessageService messageService;
 
     @Transactional(readOnly = true)
-    public List<ProposalResponseDto> getList() {
+    public List<ProposalResponseDto> getSentProposals() {
 
-        List<Proposal> proposals = proposalRepository.findAll();
+        User actor = rq.getUser();
+        List<Proposal> proposals = proposalRepository.findBySender_UserId(actor.getUserId());
+        return proposals.stream().map(ProposalResponseDto::new).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProposalResponseDto> getDraftList() {
+
+        User actor = rq.getUser();
+        List<Proposal> proposals = proposalRepository.findBySender_UserIdAndProposalStatus(actor.getUserId(), ProposalStatus.DRAFT);
         return proposals.stream().map(ProposalResponseDto::new).toList();
     }
 
@@ -84,9 +91,12 @@ public class ProposalService {
         }
         proposalRepository.save(proposal);
 
-        String title = actor.getName() + ", " + project.getInitiator().getName();
-        String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
-        messageService.sendMessage(project.getInitiator().getUserId(), title, content);
+        //임시저장은 상대방에게 안내문자 안보냄
+        if(!(proposal.getProposalStatus() == ProposalStatus.DRAFT)) {
+            String title = actor.getName() + ", " + project.getInitiator().getName();
+            String content = actor.getName() + "님이 " + project.getTitle() + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getInitiator().getUserId(), title, content);
+        }
 
         return new ProposalResponseDto(proposal);
     }
@@ -169,5 +179,7 @@ public class ProposalService {
             throw new RuntimeException("파일 저장 실패: " + file.getOriginalFilename(), e);
         }
     }
+
+
 
 }
