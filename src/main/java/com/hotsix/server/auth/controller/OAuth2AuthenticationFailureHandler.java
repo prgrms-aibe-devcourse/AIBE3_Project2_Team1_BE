@@ -24,8 +24,9 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         log.error("OAuth2 Login Failed: {}", exception.getMessage());
 
+        String errorMessage = "authentication_failed"; // 또는 사용자 친화적인 메시지 매핑
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("error", exception.getLocalizedMessage())
+                .queryParam("error", errorMessage)
                 .build()
                 .toUriString();
 

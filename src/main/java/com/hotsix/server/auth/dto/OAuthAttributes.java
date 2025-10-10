@@ -47,8 +47,13 @@ public class OAuthAttributes {
     private static OAuthAttributes ofKakao(String userNameAttributeName,
                                            Map<String, Object> attributes) {
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        if (kakaoAccount == null) {
+            throw new IllegalArgumentException("Kakao 계정 정보를 찾을 수 없습니다.");
+        }
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
+        if (profile == null) {
+            throw new IllegalArgumentException("Kakao 프로필 정보를 찾을 수 없습니다.");
+        }
         return OAuthAttributes.builder()
                 .name((String) profile.get("nickname"))
                 .email((String) kakaoAccount.get("email"))
@@ -64,7 +69,9 @@ public class OAuthAttributes {
     private static OAuthAttributes ofNaver(String userNameAttributeName,
                                            Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-
+        if (response == null) {
+            throw new IllegalArgumentException("Naver 응답 정보를 찾을 수 없습니다.");
+        }
         return OAuthAttributes.builder()
                 .name((String) response.get("name"))
                 .email((String) response.get("email"))

@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -25,5 +24,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<Object> findByNickname(String nickname);
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
-    Collection<Object> findByProvider(Provider provider);
 }

@@ -160,8 +160,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private String extractRegistrationId(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
-        // /login/oauth2/code/{registrationId} 형식에서 추출
         String[] parts = requestUri.split("/");
+        if (parts.length < 5
+                || !"login".equals(parts[1])
+                || !"oauth2".equals(parts[2])
+                || !"code".equals(parts[3])) {
+            throw new IllegalArgumentException("올바르지 않은 OAuth2 콜백 URI 형식입니다: " + requestUri);
+        }
         return parts[parts.length - 1];
     }
 
