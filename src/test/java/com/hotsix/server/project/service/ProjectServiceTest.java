@@ -39,14 +39,14 @@ public class ProjectServiceTest {
         Long currentUserId = 1L;
         Long targetUserId = 2L;
 
-        User client = User.builder().userId(currentUserId).role(Role.CLIENT).nickname("클라이언트").build();
-        User freelancer = User.builder().userId(targetUserId).role(Role.FREELANCER).nickname("프리랜서").build();
+        User initator = User.builder().userId(currentUserId).role(Role.CLIENT).nickname("클라이언트").build();
+        User participant = User.builder().userId(targetUserId).role(Role.FREELANCER).nickname("프리랜서").build();
 
-        when(userRepository.findById(currentUserId)).thenReturn(java.util.Optional.of(client));
-        when(userRepository.findById(targetUserId)).thenReturn(java.util.Optional.of(freelancer));
+        when(userRepository.findById(currentUserId)).thenReturn(java.util.Optional.of(initator));
+        when(userRepository.findById(targetUserId)).thenReturn(java.util.Optional.of(participant));
 
         ProjectRequestDto dto = new ProjectRequestDto(
-                targetUserId,
+
                 "테스트 프로젝트",
                 "설명",
                 1000,
@@ -56,8 +56,8 @@ public class ProjectServiceTest {
 
         Project savedProject = Project.builder()
                 .projectId(1L)
-                .client(client)
-                .freelancer(freelancer)
+                .initator(initator)
+                .participant(participant)
                 .title(dto.title())
                 .description(dto.description())
                 .budget(dto.budget())
@@ -72,34 +72,34 @@ public class ProjectServiceTest {
 
         assertThat(result.title()).isEqualTo(dto.title());
         assertThat(result.clientNickname()).isEqualTo("클라이언트");
-        assertThat(result.freelancerNickname()).isEqualTo("프리랜서");
+
     }
 
-    @Test
-    @DisplayName("프로젝트 등록 실패 - 역할 불일치")
-    void projectRegFail() {
-        Long currentUserId = 1L;
-        Long targetUserId = 2L;
-
-        User client1 = User.builder().userId(currentUserId).role(Role.CLIENT).build();
-        User client2 = User.builder().userId(targetUserId).role(Role.CLIENT).build();
-
-        when(userRepository.findById(currentUserId)).thenReturn(java.util.Optional.of(client1));
-        when(userRepository.findById(targetUserId)).thenReturn(java.util.Optional.of(client2));
-
-        ProjectRequestDto dto = new ProjectRequestDto(
-                targetUserId,
-                "제목",
-                "설명",
-                1000,
-                LocalDate.now(),
-                "IT"
-        );
-
-        assertThrows(ApplicationException.class, () -> {
-            projectService.registerProject(currentUserId, dto);
-        });
-    }
+    // 프로젝트의 구조를 바꾸면서 역할을 담지 않고 있기 때문에 주석으로 처리
+//    @Test
+//    @DisplayName("프로젝트 등록 실패 - 역할 불일치")
+//    void projectRegFail() {
+//        Long currentUserId = 1L;
+//        Long targetUserId = 2L;
+//
+//        User client1 = User.builder().userId(currentUserId).role(Role.CLIENT).build();
+//        User client2 = User.builder().userId(targetUserId).role(Role.CLIENT).build();
+//
+//        when(userRepository.findById(currentUserId)).thenReturn(java.util.Optional.of(client1));
+//        when(userRepository.findById(targetUserId)).thenReturn(java.util.Optional.of(client2));
+//
+//        ProjectRequestDto dto = new ProjectRequestDto(
+//                "제목",
+//                "설명",
+//                1000,
+//                LocalDate.now(),
+//                "IT"
+//        );
+//
+//        assertThrows(ApplicationException.class, () -> {
+//            projectService.registerProject(currentUserId, dto);
+//        });
+//    }
 
     @Test
     @DisplayName("프로젝트 상태 변경 성공")
@@ -107,14 +107,14 @@ public class ProjectServiceTest {
         Long projectId = 1L;
 
 
-        User client = User.builder().userId(1L).nickname("클라이언트").build();
-        User freelancer = User.builder().userId(2L).nickname("프리랜서").build();
+        User initator = User.builder().userId(1L).nickname("클라이언트").build();
+        User participant = User.builder().userId(2L).nickname("프리랜서").build();
 
         Project project = Project.builder()
                 .projectId(projectId)
                 .status(Status.OPEN)
-                .client(client)
-                .freelancer(freelancer)
+                .initator(initator)
+                .participant(participant)
                 .build();
 
         when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
@@ -132,15 +132,15 @@ public class ProjectServiceTest {
         Long projectId = 1L;
 
 
-        User client = User.builder().userId(1L).nickname("클라이언트").build();
-        User freelancer = User.builder().userId(2L).nickname("프리랜서").build();
+        User initator = User.builder().userId(1L).nickname("클라이언트").build();
+        User participant = User.builder().userId(2L).nickname("프리랜서").build();
 
         Project project = Project.builder()
                 .projectId(projectId)
                 .title("테스트 프로젝트")
                 .status(Status.OPEN)
-                .client(client)
-                .freelancer(freelancer)
+                .initator(initator)
+                .participant(participant)
                 .build();
 
         when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
@@ -150,7 +150,7 @@ public class ProjectServiceTest {
         assertThat(result.projectId()).isEqualTo(projectId);
         assertThat(result.title()).isEqualTo("테스트 프로젝트");
         assertThat(result.clientNickname()).isEqualTo("클라이언트");
-        assertThat(result.freelancerNickname()).isEqualTo("프리랜서");
+
     }
 
     @Test

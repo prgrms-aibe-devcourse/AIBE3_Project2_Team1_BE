@@ -8,11 +8,9 @@ import com.hotsix.server.global.exception.GlobalExceptionHandler;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
-import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.exception.ProjectErrorCase;
 import com.hotsix.server.project.service.ProjectService;
-import org.apache.coyote.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,10 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.core.MethodParameter;
 
-import javax.print.attribute.standard.Media;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -64,14 +59,15 @@ class ProjectControllerTest {
     @DisplayName("프로젝트 등록 성공")
     void registerProjectSuccess() throws Exception {
         Long userId = 1L;
-        Long targetUserId = 2L;
+
 
         ProjectRequestDto requestDto = new ProjectRequestDto(
-                targetUserId, "프로젝트명", "설명", 1000, LocalDate.now().plusDays(7), "IT"
+                "프로젝트명", "설명", 1000, LocalDate.now().plusDays(7), "IT"
         );
 
         ProjectResponseDto responseDto = new ProjectResponseDto(
-                1L, "클라이언트", "프리랜서", "프로젝트명", "설명", 1000, LocalDate.now().plusDays(7), "IT", "OPEN"
+                1L, "작성자", null, "프로젝트명", "설명",
+                1000, LocalDate.now().plusDays(7), "IT", "OPEN"
         );
 
         when(currentUserArgumentResolver.supportsParameter(any(MethodParameter.class))).thenReturn(true);
@@ -110,29 +106,29 @@ class ProjectControllerTest {
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"));
     }
 
-    @Test
-    @DisplayName("프로젝트 등록 실패 - targetUserId 없음")
-    void registerProjectFail_missingTargetUserId() throws Exception {
-        ProjectRequestDto dto = new ProjectRequestDto(
-                null, // targetUserId 누락
-                "프로젝트명",
-                "설명",
-                1000,
-                LocalDate.now().plusDays(3),
-                "IT"
-        );
-
-        mockMvc.perform(post("/api/v1/projects")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
+    // targetUserId 없이 등록하기 때문에 주석처리
+//    @Test
+//    @DisplayName("프로젝트 등록 실패 - targetUserId 없음")
+//    void registerProjectFail_missingTargetUserId() throws Exception {
+//        ProjectRequestDto dto = new ProjectRequestDto(
+//                null, // targetUserId 누락
+//                "프로젝트명",
+//                "설명",
+//                1000,
+//                LocalDate.now().plusDays(3),
+//                "IT"
+//        );
+//
+//        mockMvc.perform(post("/api/v1/projects")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(dto)))
+//                .andExpect(status().isBadRequest());
+//    }
 
     @Test
     @DisplayName("프로젝트 등록 실패 - 음수 예산")
     void registerProjectFail_negativeBudget() throws Exception {
         ProjectRequestDto dto = new ProjectRequestDto(
-                2L,
                 "프로젝트명",
                 "설명",
                 -100, // 예산 음수로 설정
@@ -250,7 +246,7 @@ class ProjectControllerTest {
 
 
         ProjectRequestDto requestDto = new ProjectRequestDto(
-                2L, "수정된 프로젝트명", "수정된 설명", 2000, LocalDate.now().plusDays(10), "IT"
+                 "수정된 프로젝트명", "수정된 설명", 2000, LocalDate.now().plusDays(10), "IT"
         );
 
 

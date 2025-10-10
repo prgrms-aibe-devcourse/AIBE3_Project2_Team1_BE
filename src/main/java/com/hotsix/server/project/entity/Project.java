@@ -22,12 +22,12 @@ public class Project extends BaseEntity {
     private Long projectId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_user_id", referencedColumnName = "userId", nullable = false)
-    private User client;
+    @JoinColumn(name = "initator_id", referencedColumnName = "userId", nullable = false)
+    private User initator;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "freelancer_user_id", referencedColumnName = "userId", nullable = false)
-    private User freelancer;
+    @JoinColumn(name = "participant_id", referencedColumnName = "userId", nullable = false)
+    private User participant;
 
     private String title;
 

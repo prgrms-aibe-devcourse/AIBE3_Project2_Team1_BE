@@ -38,56 +38,24 @@ public class ProjectService {
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
 
-        // 상대방 유저
-        User targetUser = userRepository.findById(dto.targetUserId())
-                .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
-
-        Project project; // 프로젝트 생성 (현재 유저의 Role에 따라 client / freelancer 구분)
-
-        // 프로젝트 등록은 클라이언트,프리랜서 둘다 가능하도록 (회원가입 한 Role에 따라 clientId,freelancerId로 구분)
-        if (currentUser.getRole() == Role.CLIENT) {
-            if (targetUser.getRole() != Role.FREELANCER) {
-                throw new ApplicationException(UserErrorCase.NO_PERMISSION);
-            }
-            // 현재 유저가 클라이언트면 → 상대방은 프리랜서
-            project = Project.builder()
-                    .client(currentUser)
-                    .freelancer(targetUser)
-                    .title(dto.title())
-                    .description(dto.description())
-                    .budget(dto.budget())
-                    .deadline(dto.deadline())
-                    .status(Status.OPEN)
-                    .category(dto.category())
-                    .createdBy(currentUser)
-                    .build();
-        } else if (currentUser.getRole() == Role.FREELANCER) {
-            if (targetUser.getRole() != Role.CLIENT) {
-                throw new ApplicationException(UserErrorCase.NO_PERMISSION);
-            }
-            // 현재 유저가 프리랜서면 → 상대방은 클라이언트
-            project = Project.builder()
-                    .client(targetUser)
-                    .freelancer(currentUser)
-                    .title(dto.title())
-                    .description(dto.description())
-                    .budget(dto.budget())
-                    .deadline(dto.deadline())
-                    .status(Status.OPEN)
-                    .category(dto.category())
-                    .createdBy(currentUser)
-                    .build();
-        } else {
-            // Role이 둘 다 아니면 예외 처리
-            throw new ApplicationException(UserErrorCase.NO_PERMISSION);
-        }
+        Project project = Project.builder()
+                .initator(currentUser)
+                .participant(null)
+                .title(dto.title())
+                .description(dto.description())
+                .budget(dto.budget())
+                .deadline(dto.deadline())
+                .status(Status.OPEN)
+                .category(dto.category())
+                .createdBy(currentUser)
+                .build();
 
         Project saved = projectRepository.save(project);
 
         return new ProjectResponseDto(
                 saved.getProjectId(),
-                saved.getClient().getNickname(),
-                saved.getFreelancer().getNickname(),
+                saved.getInitator().getNickname(),
+                null,
                 saved.getTitle(),
                 saved.getDescription(),
                 saved.getBudget(),
@@ -103,8 +71,8 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
         // 권한 체크: client 또는 freelancer인 경우만 수정 가능
-        if (!project.getClient().getUserId().equals(userId) &&
-                !project.getFreelancer().getUserId().equals(userId)) {
+        if (!project.getInitator().getUserId().equals(userId) &&
+                !project.getParticipant().getUserId().equals(userId)) {
             throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
         }
 
@@ -113,8 +81,8 @@ public class ProjectService {
 
         return new ProjectResponseDto(
                 project.getProjectId(),
-                project.getClient().getNickname(),
-                project.getFreelancer().getNickname(),
+                project.getInitator().getNickname(),
+                project.getParticipant().getNickname(),
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
@@ -137,8 +105,8 @@ public class ProjectService {
                 .stream()
                 .map(project -> new ProjectResponseDto(
                         project.getProjectId(),
-                        project.getClient().getNickname(),
-                        project.getFreelancer().getNickname(),
+                        project.getInitator().getNickname(),
+                        project.getParticipant().getNickname(),
                         project.getTitle(),
                         project.getDescription(),
                         project.getBudget(),
@@ -157,8 +125,8 @@ public class ProjectService {
 
         return new ProjectResponseDto(
                 project.getProjectId(),
-                project.getClient().getNickname(),
-                project.getFreelancer().getNickname(),
+                project.getInitator().getNickname(),
+                project.getParticipant().getNickname(),
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
@@ -181,8 +149,8 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
 
-        User client = project.getClient();
-        User freelancer = project.getFreelancer();
+        User client = project.getInitator();
+        User freelancer = project.getParticipant();
 
         if (client == null || freelancer == null) {
             throw new ApplicationException(ProjectErrorCase.INVALID_PROJECT_DATA);

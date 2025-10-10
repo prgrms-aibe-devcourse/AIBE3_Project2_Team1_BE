@@ -68,8 +68,8 @@ class ReviewServiceTest {
 
         private final Project project = Project.builder()
                 .projectId(projectId)
-                .client(fromUser) // fromUser가 client
-                .freelancer(toUser) // toUser가 freelancer
+                .initator(fromUser) // fromUser가 client
+                .participant(toUser) // toUser가 freelancer
                 .title("테스트 프로젝트")
                 .description("테스트")
                 .budget(1000)
