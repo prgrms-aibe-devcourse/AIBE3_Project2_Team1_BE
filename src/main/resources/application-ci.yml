@@ -43,4 +43,4 @@ cloud:
     region:
       static: ${CLOUD_AWS_REGION_STATIC}
     s3:
-      bucket: hotsix-upload-bucket
+      bucket: hotsix-upload-bucke

@@ -67,4 +67,19 @@ public class JwtTokenProvider {
         return Jwts.parserBuilder().setSigningKey(signingKey).build()
                 .parseClaimsJws(token).getBody().getExpiration().getTime();
     }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(signingKey) // 이미 생성된 signingKey 사용
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            Date expiration = claims.getExpiration();
+            return expiration.before(new Date());
+        } catch (Exception e) {
+            return true; // 토큰 파싱 실패 또는 만료 시 true 반환
+        }
+    }
 }
