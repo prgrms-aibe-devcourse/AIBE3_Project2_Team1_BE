@@ -39,7 +39,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
 
         Project project = Project.builder()
-                .initator(currentUser)
+                .initiator(currentUser)
                 .participant(null)
                 .title(dto.title())
                 .description(dto.description())
@@ -54,7 +54,7 @@ public class ProjectService {
 
         return new ProjectResponseDto(
                 saved.getProjectId(),
-                saved.getInitator().getNickname(),
+                saved.getInitiator().getNickname(),
                 null,
                 saved.getTitle(),
                 saved.getDescription(),
@@ -71,7 +71,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
         // 권한 체크: client 또는 freelancer인 경우만 수정 가능
-        if (!project.getInitator().getUserId().equals(userId) &&
+        if (!project.getInitiator().getUserId().equals(userId) &&
                 !project.getParticipant().getUserId().equals(userId)) {
             throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
         }
@@ -81,7 +81,7 @@ public class ProjectService {
 
         return new ProjectResponseDto(
                 project.getProjectId(),
-                project.getInitator().getNickname(),
+                project.getInitiator().getNickname(),
                 project.getParticipant().getNickname(),
                 project.getTitle(),
                 project.getDescription(),
@@ -105,7 +105,7 @@ public class ProjectService {
                 .stream()
                 .map(project -> new ProjectResponseDto(
                         project.getProjectId(),
-                        project.getInitator().getNickname(),
+                        project.getInitiator().getNickname(),
                         project.getParticipant().getNickname(),
                         project.getTitle(),
                         project.getDescription(),
@@ -125,7 +125,7 @@ public class ProjectService {
 
         return new ProjectResponseDto(
                 project.getProjectId(),
-                project.getInitator().getNickname(),
+                project.getInitiator().getNickname(),
                 project.getParticipant().getNickname(),
                 project.getTitle(),
                 project.getDescription(),
@@ -149,7 +149,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
 
-        User client = project.getInitator();
+        User client = project.getInitiator();
         User freelancer = project.getParticipant();
 
         if (client == null || freelancer == null) {

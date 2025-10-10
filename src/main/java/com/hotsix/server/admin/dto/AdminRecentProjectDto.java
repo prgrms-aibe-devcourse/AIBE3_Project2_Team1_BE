@@ -12,7 +12,7 @@ public record AdminRecentProjectDto(
     public static AdminRecentProjectDto from(Project project) {
         String nickname = (project.getCreatedBy() != null)
                 ? project.getCreatedBy().getNickname()
-                : project.getInitator().getNickname();
+                : project.getInitiator().getNickname();
 
         return new AdminRecentProjectDto(
                 project.getProjectId(),

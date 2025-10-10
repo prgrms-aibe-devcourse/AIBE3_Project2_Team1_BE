@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,11 +24,11 @@ public class Project extends BaseEntity {
     private Long projectId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initator_id", referencedColumnName = "userId", nullable = false)
-    private User initator;
+    @JoinColumn(name = "initiator_id", referencedColumnName = "userId", nullable = false)
+    private User initiator;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", referencedColumnName = "userId", nullable = false)
+    @JoinColumn(name = "participant_id", referencedColumnName = "userId", nullable = true)
     private User participant;
 
     private String title;
@@ -59,5 +61,10 @@ public class Project extends BaseEntity {
         this.budget = budget;
         this.deadline = deadline;
         this.category = category;
+    }
+
+
+    public void setParticipant(User participant) {
+        this.participant = participant;
     }
 }
