@@ -14,6 +14,7 @@ import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.repository.ProposalRepository;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
+import com.hotsix.server.user.exception.UserErrorCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -136,16 +137,25 @@ public class ProposalService {
 
         Project project = proposal.getProject();
 
-        if(actor.getRole() == Role.CLIENT){
-            String title = actor.getName() + ", " + project.getFreelancer().getName();
-            String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
-            messageService.sendMessage(project.getFreelancer().getUserId(), title, content);
-        }
-        else if(actor.getRole() == Role.FREELANCER){
-            String title = actor.getName() + ", " + project.getFreelancer().getName();
-            String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
-            messageService.sendMessage(project.getFreelancer().getUserId(), title, content);
-        }
+        // 상태 메시지
+        String status = switch (proposalStatus) {
+            case REJECTED -> "거절하였습니다.";
+            case ACCEPTED -> "수락하였습니다.";
+            default -> throw new ApplicationException(ProposalErrorCase.PROPOSAL_WRONG_STATUS);
+        };
+
+        // 수신자 결정 (역할 분기도 안전하게)
+        Long receiverId = switch (actor.getRole()) {
+            case CLIENT     -> project.getFreelancer().getUserId();
+            case FREELANCER -> project.getClient().getUserId();
+            default -> throw new ApplicationException(UserErrorCase.USER_WRONG_ROLE);
+        };
+
+        String title = "%s, %s".formatted(actor.getName(), project.getFreelancer().getName()); // 필요하면 상대 이름으로 변경
+        String content = "%s님이 [%s] 프로젝트의 제안서를 %s 확인해주세요."
+                .formatted(actor.getName(), project.getTitle(), status);
+
+        messageService.sendMessage(receiverId, title, content);
     }
 
     public ProposalFile toProposalFile(MultipartFile file, Proposal proposal) {
