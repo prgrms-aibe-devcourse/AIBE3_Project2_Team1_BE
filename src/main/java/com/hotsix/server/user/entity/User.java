@@ -52,6 +52,7 @@ public class User extends BaseEntity {
 
     private String picture;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> chatRooms = new ArrayList<>();
 
