@@ -55,6 +55,7 @@ public class UserService {
                 userRole,
                 userProvider
         );
+
         return userRepository.save(user);
     }
     @Transactional
