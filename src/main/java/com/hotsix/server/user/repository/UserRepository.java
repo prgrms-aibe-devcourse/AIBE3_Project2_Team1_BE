@@ -1,5 +1,6 @@
 package com.hotsix.server.user.repository;
 
+import com.hotsix.server.user.entity.Provider;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,5 +23,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRoleAndCreatedDate(@Param("role") Role role, @Param("date") LocalDate date);
 
     Optional<Object> findByNickname(String nickname);
-
+    Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 }
