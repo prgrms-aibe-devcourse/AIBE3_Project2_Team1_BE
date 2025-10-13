@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -124,10 +125,14 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
+        String participantNickname = Optional.ofNullable(project.getParticipant())
+                .map(User::getNickname)
+                .orElse(null);
+
         return new ProjectResponseDto(
                 project.getProjectId(),
                 project.getInitiator().getNickname(),
-                project.getParticipant().getNickname(),
+                participantNickname,
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
