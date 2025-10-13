@@ -13,6 +13,7 @@ import com.hotsix.server.message.repository.ChatRoomUserRepository;
 import com.hotsix.server.message.repository.MessageRepository;
 import com.hotsix.server.message.sse.ChatRoomEmitterRepository;
 import com.hotsix.server.user.entity.User;
+import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -108,7 +109,7 @@ public class MessageService {
         User sender = rq.getUser();
 
         User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new IllegalArgumentException("Receiver not found"));
+                .orElseThrow(() -> new ApplicationException(UserErrorCase.USER_NOT_FOUND));
 
         // 두 사람의 채팅방이 이미 있는지 조회 없으면 채팅방 생성
         ChatRoom chatRoom = chatRoomRepository.findByUsers(sender.getUserId(), receiverId)

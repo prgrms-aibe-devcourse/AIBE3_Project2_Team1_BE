@@ -14,7 +14,7 @@ public enum UserErrorCase implements ErrorCase {
     UNAUTHORIZED(401, 1005, "로그인 후 이용해주세요."),
     NO_PERMISSION(403, 1006, "권한이 없습니다."),
     USER_NOT_FOUND(404, 1007, "사용자를 찾을 수 없습니다."),
-    USER_WRONG_ROLE(400, 1008, "옳바르지 않은 Role입니다.");
+    USER_WRONG_ROLE(400, 1008, "올바르지 않은 Role입니다.");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;

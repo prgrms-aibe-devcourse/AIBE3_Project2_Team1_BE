@@ -127,6 +127,8 @@ public class ProposalService {
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
+        //파일 처리
+        List<ProposalFile> oldFiles = new ArrayList<>(proposal.getPortfolioFiles());
         // 파일 처리
         List<ProposalFile> proposalFiles = new ArrayList<>();
         if (files != null) {
@@ -136,6 +138,9 @@ public class ProposalService {
             }
         }
         proposal.modify(description, proposedAmount, proposalStatus, proposalFiles);
+        for (ProposalFile old : oldFiles) {
+            amazonS3Manager.deleteFile(old.getFileUrl());
+        }
     }
 
     @Transactional
@@ -165,13 +170,10 @@ public class ProposalService {
 
         String filePath = amazonS3Manager.uploadFile(file);
 
-        ProposalFile pf = ProposalFile.builder()
+        return ProposalFile.builder()
                 .fileUrl(filePath)
                 .proposal(proposal)
                 .build();
-
-        proposalFileRepository.save(pf);
-        return pf;
     }
 
 

@@ -83,14 +83,14 @@ public class ChatRoomService {
 
     // 특정 채팅방에 다른 유저 추가
     @Transactional
-    public void joinRoom(Long chatRoomId, Long UserId) {
+    public void joinRoom(Long chatRoomId, Long userId) {
 
-        User user = userRepository.findById(UserId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApplicationException(UserErrorCase.USER_NOT_FOUND));
 
         ChatRoom room = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ApplicationException(ChatRoomErrorCase.CHAT_ROOM_NOT_FOUND));
-        if (chatRoomUserRepository.existsByUser_UserIdAndChatRoom_ChatRoomId(UserId, chatRoomId)) {
+        if (chatRoomUserRepository.existsByUser_UserIdAndChatRoom_ChatRoomId(userId, chatRoomId)) {
             throw new ApplicationException(ChatRoomErrorCase.ALREADY_JOINED);
         }
 
