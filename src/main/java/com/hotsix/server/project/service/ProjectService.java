@@ -150,15 +150,15 @@ public class ProjectService {
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
 
-        User client = project.getInitiator();
-        User freelancer = project.getParticipant();
+        User initiator = project.getInitiator();
+        User participant = project.getParticipant();
 
-        if (client == null || freelancer == null) {
+        if (initiator == null || participant == null) {
             throw new ApplicationException(ProjectErrorCase.INVALID_PROJECT_DATA);
         }
 
 
-        if (!client.getUserId().equals(userId) && !freelancer.getUserId().equals(userId)) {
+        if (!initiator.getUserId().equals(userId) && !participant.getUserId().equals(userId)) {
             throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
         }
 
@@ -173,8 +173,8 @@ public class ProjectService {
 
         return new ProjectResponseDto(
                 project.getProjectId(),
-                client.getNickname(),
-                freelancer.getNickname(),
+                initiator.getNickname(),
+                participant.getNickname(),
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
@@ -183,6 +183,4 @@ public class ProjectService {
                 project.getStatus().name()
         );
     }
-
-
 }

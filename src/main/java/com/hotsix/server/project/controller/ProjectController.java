@@ -129,8 +129,8 @@ public class ProjectController {
     public CommonResponse<String> getProjectCreatorName(
             @PathVariable Long projectId
     ) {
-        Project project = projectService.findById(projectId);
-        String creatorName = project.getCreatedBy().getName();
+        ProjectResponseDto projectResponseDto = projectService.getProjectDetail(projectId);
+        String creatorName = projectResponseDto.initiatorNickname();
         return CommonResponse.success(creatorName);
     }
 }
