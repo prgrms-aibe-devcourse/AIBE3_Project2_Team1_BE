@@ -1,0 +1,161 @@
+name: Prod CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: hotsix_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SPRING_PROFILES_ACTIVE: ci
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      SPRING_DATA_REDIS_HOST: localhost
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: dummy-pass
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      CLOUD_AWS_REGION_STATIC: ${{ secrets.CLOUD_AWS_REGION_STATIC }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build project (skip test temporarily)
+        run: ./gradlew clean build -x test
+
+      - name: Copy JAR to root
+        run: cp build/libs/hotsix-0.0.1-SNAPSHOT.jar app.jar
+
+      - name: Upload JAR as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: app.jar
+
+  deploy-to-ec2:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Download built JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: .
+
+      - name: Confirm JAR exists
+        run: ls -alh
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/hotsix:latest"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/hotsix:latest"
+
+            echo "Pulling latest Docker image..."
+            docker pull "$IMAGE"
+
+            echo "Stopping old containers..."
+            docker stop hotsix-app || true
+            docker rm hotsix-app || true
+            docker stop hotsix-redis || true
+            docker rm hotsix-redis || true
+
+            echo "Creating Docker network..."
+            docker network create hotsix-net || true
+
+            echo "Starting Redis container..."
+            docker run -d \
+              --name hotsix-redis \
+              --network hotsix-net \
+              -p 6379:6379 \
+              --restart=always \
+              redis:7.2 \
+              redis-server --requirepass "${{ secrets.SPRING_DATA_REDIS_PASSWORD }}"
+
+            echo "Starting Spring Boot container..."
+            docker run -d \
+              --name hotsix-app \
+              --network hotsix-net \
+              -p 8080:8080 \
+              --restart=always \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              -e SPRING_DATA_REDIS_HOST=hotsix-redis \
+              -e SPRING_DATA_REDIS_PORT=6379 \
+              -e SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_KEY }} \
+              -e CLOUD_AWS_REGION_STATIC=${{ secrets.CLOUD_AWS_REGION_STATIC }} \
+              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+              -e KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }} \
+              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+              -e NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }} \
+              -e NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }} \
+              -e OAUTH2_REDIRECT_URI=${{ secrets.OAUTH2_REDIRECT_URI }} \
+              "$IMAGE"
+
+            echo "Deployment completed"

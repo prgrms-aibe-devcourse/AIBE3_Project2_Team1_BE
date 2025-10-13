@@ -52,6 +52,7 @@ public class User extends BaseEntity {
 
     private String picture;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> chatRooms = new ArrayList<>();
 
@@ -71,6 +72,27 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.nickname = nickname;
         this.role = role;
+        this.provider = provider;
+        this.apiKey = UUID.randomUUID().toString();
+    }
+
+    public User(String email,
+                String password,
+                LocalDate birthDate,
+                String name,
+                String nickname,
+                String phoneNumber,
+                Role role,
+                String picture,
+                Provider provider) {
+        this.email = email;
+        this.password = password;
+        this.birthDate = birthDate;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.nickname = nickname;
+        this.role = role;
+        this.picture = picture;
         this.provider = provider;
         this.apiKey = UUID.randomUUID().toString();
     }

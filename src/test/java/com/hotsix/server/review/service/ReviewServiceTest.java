@@ -1,5 +1,6 @@
 package com.hotsix.server.review.service;
 
+import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.project.repository.ProjectRepository;
 import com.hotsix.server.review.repository.ReviewImageRepository;
 import com.hotsix.server.review.repository.ReviewRepository;
@@ -68,14 +69,14 @@ class ReviewServiceTest {
 
         private final Project project = Project.builder()
                 .projectId(projectId)
-                .client(fromUser) // fromUser가 client
-                .freelancer(toUser) // toUser가 freelancer
+                .initiator(fromUser) // fromUser가 client
+                .participant(toUser) // toUser가 freelancer
                 .title("테스트 프로젝트")
                 .description("테스트")
                 .budget(1000)
                 .deadline(LocalDate.now())
                 .status(Status.COMPLETED) // 완료 상태
-                .category("디자인")
+                .category(Category.IT)
                 .build();
 
         @Test

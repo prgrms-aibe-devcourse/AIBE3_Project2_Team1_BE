@@ -18,7 +18,7 @@ public class Bookmark extends BaseEntity {
     private Long bookmarkId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

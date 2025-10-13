@@ -32,6 +32,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
 	// AOP
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
@@ -53,8 +54,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-    // OAuth2를 사용하기 위한 스타터 추가
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	// 테스트용 H2 DB
+	runtimeOnly 'com.h2database:h2'
+
+	// S3
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.681'
+
+  // OAuth2
+  implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 tasks.named('test') {

@@ -12,7 +12,9 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "chat_room")
+@Table(
+        name = "chat_room"
+)
 public class ChatRoom extends BaseEntity {
 
     @Id
