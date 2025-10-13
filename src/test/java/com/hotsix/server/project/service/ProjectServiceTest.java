@@ -72,7 +72,7 @@ public class ProjectServiceTest {
         var result = projectService.registerProject(currentUserId, dto);
 
         assertThat(result.title()).isEqualTo(dto.title());
-        assertThat(result.clientNickname()).isEqualTo("클라이언트");
+        assertThat(result.initiatorNickname()).isEqualTo("클라이언트");
 
     }
 
