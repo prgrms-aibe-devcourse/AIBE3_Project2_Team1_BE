@@ -13,10 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(
-        name = "chat_room",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user1_id", "user2_id"})
-        }
+        name = "chat_room"
 )
 public class ChatRoom extends BaseEntity {
 
