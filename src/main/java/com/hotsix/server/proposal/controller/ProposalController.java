@@ -53,7 +53,7 @@ public class ProposalController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "제안서 작성")
+    @Operation(summary = "제안서 생성")
     public CommonResponse<ProposalResponseDto> createProposal(
             @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
@@ -64,7 +64,7 @@ public class ProposalController {
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
                 files,
-                ProposalStatus.SUBMITTED
+                proposalRequestDto.status()
         );
 
         return CommonResponse.success(
@@ -72,25 +72,25 @@ public class ProposalController {
         );
     }
 
-    @PostMapping(path = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "제안서 임시 저장")
-    public CommonResponse<ProposalResponseDto> createDraftProposal(
-            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
-    ){
-
-        ProposalResponseDto proposalResponseDto = proposalService.create(
-                proposalRequestDto.projectId(),
-                proposalRequestDto.description(),
-                proposalRequestDto.proposedAmount(),
-                files,
-                ProposalStatus.DRAFT
-        );
-
-        return CommonResponse.success(
-                proposalResponseDto
-        );
-    }
+//    @PostMapping(path = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @Operation(summary = "제안서 임시 저장")
+//    public CommonResponse<ProposalResponseDto> createDraftProposal(
+//            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
+//            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
+//    ){
+//
+//        ProposalResponseDto proposalResponseDto = proposalService.create(
+//                proposalRequestDto.projectId(),
+//                proposalRequestDto.description(),
+//                proposalRequestDto.proposedAmount(),
+//                files,
+//                ProposalStatus.DRAFT
+//        );
+//
+//        return CommonResponse.success(
+//                proposalResponseDto
+//        );
+//    }
 
     @DeleteMapping("/{proposalId}")
     @Operation(summary = "제안서 삭제")
@@ -101,13 +101,23 @@ public class ProposalController {
         return CommonResponse.success("%d번 제안서가 삭제되었습니다.".formatted(proposalId));
     }
 
-    @PatchMapping("/{proposalId}")
+    @PatchMapping(
+            value = "/{proposalId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     @Operation(summary = "제안서 수정")
     public CommonResponse<String> updateProposal(
             @PathVariable long proposalId,
-            @Valid @RequestBody ProposalRequestBody requestBody
+            @RequestPart("proposal") ProposalRequestBody requestBody,
+            @RequestPart(value = "portfolioFiles", required = false) List<MultipartFile> portfolioFiles
     ){
-        proposalService.update(proposalId, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
+        proposalService.update(
+                proposalId,
+                requestBody.description(),
+                requestBody.proposedAmount(),
+                portfolioFiles,
+                requestBody.status()
+        );
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(proposalId));
     }
 

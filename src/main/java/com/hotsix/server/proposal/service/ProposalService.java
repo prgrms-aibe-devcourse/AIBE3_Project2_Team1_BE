@@ -122,12 +122,20 @@ public class ProposalService {
     }
 
     @Transactional
-    public void update(long proposalId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
+    public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> files, ProposalStatus proposalStatus) {
         Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
-        proposal.modify(description, proposedAmount, proposalFiles);
+        // 파일 처리
+        List<ProposalFile> proposalFiles = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                ProposalFile pf = toProposalFile(file, proposal);
+                proposalFiles.add(pf);
+            }
+        }
+        proposal.modify(description, proposedAmount, proposalStatus, proposalFiles);
     }
 
     @Transactional
