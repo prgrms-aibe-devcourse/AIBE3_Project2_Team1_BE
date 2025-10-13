@@ -17,8 +17,8 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
-        show_sql: true
+        format_sql: false  # 프로덕션에서는 false 권장
+        show_sql: false    # 프로덕션에서는 false 권장
     open-in-view: false
 
 jwt:
@@ -42,3 +42,13 @@ springdoc:
     doc-expansion: none
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
+
+app:
+  oauth2:
+    redirect-uri: ${OAUTH2_REDIRECT_URI}
+    cookie:
+      access-token:
+        name: accessToken
+        max-age: 3600
+      secure: true
+      path: /
