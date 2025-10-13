@@ -12,7 +12,12 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "chat_room")
+@Table(
+        name = "chat_room",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user1_id", "user2_id"})
+        }
+)
 public class ChatRoom extends BaseEntity {
 
     @Id

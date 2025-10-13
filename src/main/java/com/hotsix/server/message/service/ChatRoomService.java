@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +42,11 @@ public class ChatRoomService {
 
     @Transactional
     public ChatRoom createRoom(User user1, User user2, String title) {
+        Optional<ChatRoom> existing = chatRoomRepository.findByUsers(user1.getUserId(), user2.getUserId());
+        if (existing.isPresent()) {
+            return existing.get(); // ✅ 이미 있으면 새로 만들지 않음
+        }
+
         ChatRoom chatRoom = ChatRoom.create(title);
         chatRoomRepository.save(chatRoom);
 
