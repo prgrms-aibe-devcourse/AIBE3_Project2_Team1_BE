@@ -364,7 +364,7 @@ public class MilestoneService {
     private boolean isFreelancerOf(Milestone milestone, User currentUser) {
         try {
             Project project = milestone.getContract().getProposal().getProject();
-            User freelancer = project.getFreelancer();
+            User freelancer = project.getInitiator();
             return freelancer != null &&
                     currentUser != null &&
                     freelancer.getUserId().equals(currentUser.getUserId());

@@ -35,7 +35,7 @@ public class MilestoneResponseDto {
                     .getProject();
 
             // 클라이언트
-            User client = project.getClient();
+            User client = project.getInitiator();
             if (client != null) {
                 members.add(MemberInfo.builder()
                         .userId(client.getUserId())
@@ -46,7 +46,7 @@ public class MilestoneResponseDto {
             }
 
             // 프리랜서
-            User freelancer = project.getFreelancer();
+            User freelancer = project.getParticipant();
             if (freelancer != null) {
                 members.add(MemberInfo.builder()
                         .userId(freelancer.getUserId())
