@@ -55,10 +55,13 @@ public class Proposal extends BaseEntity {
         }
     }
 
-    public void modify(String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
+    public void modify(String description, Integer proposedAmount, List<ProposalFile> newProposalFiles) {
         this.description = description;
         this.proposedAmount = proposedAmount;
-        this.portfolioFiles = proposalFiles;
+        this.portfolioFiles.clear();
+        if (newProposalFiles != null) {
+            this.portfolioFiles.addAll(newProposalFiles);
+        }
     }
 
     public void modify(ProposalStatus proposalStatus) {
