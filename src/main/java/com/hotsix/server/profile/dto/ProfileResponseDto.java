@@ -12,7 +12,8 @@ public record ProfileResponseDto(
         Visibility visibility,
         Long userId,
         String userName,
-        String userEmail
+        String userEmail,
+        String userProfileImgUrl
 ) {
     public static ProfileResponseDto from(Profile profile) {
         return new ProfileResponseDto(
@@ -24,7 +25,8 @@ public record ProfileResponseDto(
                 profile.getVisibility() != null ? profile.getVisibility() : Visibility.PRIVATE,
                 profile.getUser().getUserId(),
                 profile.getUser().getName(),
-                profile.getUser().getEmail()
+                profile.getUser().getEmail(),
+                profile.getUser().getPicture()
         );
     }
 }
