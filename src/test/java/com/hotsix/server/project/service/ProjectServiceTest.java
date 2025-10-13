@@ -3,6 +3,7 @@ package com.hotsix.server.project.service;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.repository.ProjectRepository;
@@ -56,14 +57,14 @@ public class ProjectServiceTest {
 
         Project savedProject = Project.builder()
                 .projectId(1L)
-                .initator(initator)
+                .initiator(initator)
                 .participant(participant)
                 .title(dto.title())
                 .description(dto.description())
                 .budget(dto.budget())
                 .deadline(dto.deadline())
                 .status(Status.OPEN)
-                .category(dto.category())
+                .category(Category.valueOf(dto.category()))
                 .build();
 
         when(projectRepository.save(Mockito.any(Project.class))).thenReturn(savedProject);
@@ -113,7 +114,7 @@ public class ProjectServiceTest {
         Project project = Project.builder()
                 .projectId(projectId)
                 .status(Status.OPEN)
-                .initator(initator)
+                .initiator(initator)
                 .participant(participant)
                 .build();
 
@@ -139,7 +140,7 @@ public class ProjectServiceTest {
                 .projectId(projectId)
                 .title("테스트 프로젝트")
                 .status(Status.OPEN)
-                .initator(initator)
+                .initiator(initator)
                 .participant(participant)
                 .build();
 
