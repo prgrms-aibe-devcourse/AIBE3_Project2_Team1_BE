@@ -42,7 +42,7 @@ public class User extends BaseEntity {
     @Builder.Default
     private String apiKey = UUID.randomUUID().toString();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
     @Enumerated(EnumType.STRING)
@@ -97,11 +97,10 @@ public class User extends BaseEntity {
         this.apiKey = UUID.randomUUID().toString();
     }
 
-    @PrePersist
-    @PreUpdate
-    private void syncProfileRelation() {
-        if (profile != null && profile.getUser() != this) {
-            profile.assignUser(this);
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+        if (profile != null) {
+            profile.setUser(this);  // ✅ 양방향 연관관계 설정
         }
     }
 
