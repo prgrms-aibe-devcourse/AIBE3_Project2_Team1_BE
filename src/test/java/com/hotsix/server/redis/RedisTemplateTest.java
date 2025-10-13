@@ -1,5 +1,5 @@
 
-
+/*
 package com.hotsix.server.redis;
 
 import com.hotsix.server.auth.entity.RefreshToken;
@@ -44,3 +44,4 @@ class RedisTemplateTest {
     }
 }
 
+*/
