@@ -58,15 +58,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Provider provider = Provider.valueOf(registrationId.toUpperCase());
         String providerId = extractProviderId(oAuth2User, provider);
 
-        log.info("OAuth2 Login Success - Provider: {}, ProviderId: {}", provider, providerId);
-        log.debug("OAuth2 User Attributes: {}", oAuth2User.getAttributes());
-
         // 사용자 조회 또는 생성
         User user = userRepository.findByProviderAndProviderId(provider, providerId)
                 .orElseGet(() -> {
-                    log.warn("User not found, but this shouldn't happen. Check if CustomOAuth2UserService is working properly.");
-                    log.info("Creating user from SuccessHandler - Provider: {}, ProviderId: {}", provider, providerId);
-
                     User newUser = createUserFromOAuth2User(oAuth2User, provider, providerId);
                     return userRepository.save(newUser);
                 });
@@ -78,8 +72,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // RefreshToken DB에 저장 (기존 토큰 있으면 업데이트)
         saveRefreshToken(user.getUserId(), refreshTokenValue, refreshTokenExpiry);
-
-        log.info("JWT Token Generated and RefreshToken saved for User ID: {}", user.getUserId());
 
         // AccessToken을 HttpOnly 쿠키로 설정
         addTokenCookie(response, accessTokenCookieName, accessToken, accessTokenMaxAge);
@@ -172,14 +164,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .picture(picture)
                 .provider(provider)
                 .providerId(providerId)
+                .picture(picture)
                 .role(Role.CLIENT)
                 .build();
     }
 
-    /**
-     * OAuth2AuthenticationToken에서 registrationId를 추출합니다.
-     * URI 파싱 대신 Authentication 객체에서 직접 가져오는 안전한 방법입니다.
-     */
     private String extractRegistrationId(Authentication authentication) {
         if (authentication instanceof OAuth2AuthenticationToken) {
             return ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
