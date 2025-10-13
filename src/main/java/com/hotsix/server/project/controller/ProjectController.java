@@ -6,6 +6,7 @@ import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -121,5 +122,15 @@ public class ProjectController {
     ) {
         projectService.deleteProject(projectId);
         return CommonResponse.success(null);
+    }
+
+    @GetMapping("/{projectId}/creator-name")
+    @Operation(summary = "프로젝트 생성자 이름 조회")
+    public CommonResponse<String> getProjectCreatorName(
+            @PathVariable Long projectId
+    ) {
+        Project project = projectService.findById(projectId);
+        String creatorName = project.getCreatedBy().getName();
+        return CommonResponse.success(creatorName);
     }
 }
