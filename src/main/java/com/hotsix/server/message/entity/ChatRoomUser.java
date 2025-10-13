@@ -13,7 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "chat_room_user")
+@Table(
+        name = "chat_room_user",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"chat_room_id", "user_id"})
+        }
+)
 public class ChatRoomUser extends BaseEntity {
 
     @Id

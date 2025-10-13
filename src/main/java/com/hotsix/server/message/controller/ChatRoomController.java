@@ -35,6 +35,7 @@ public class ChatRoomController {
                 chatRoomResponseDtos
         );
     }
+
     // 채팅방 참가
     @PostMapping("/{chatRoomId}/join")
     @Operation(summary = "채팅방 참가")

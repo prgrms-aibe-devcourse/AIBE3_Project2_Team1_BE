@@ -4,16 +4,12 @@ import com.hotsix.server.proposal.entity.ProposalFile;
 
 public record ProposalFileResponseDto(
         Long id,
-        String fileName,
-        String filePath,
-        String fileType
+        String fileUrl
 ) {
     public ProposalFileResponseDto(ProposalFile file) {
         this(
                 file.getProposalFileId(),
-                file.getFileName(),
-                file.getFilePath(),
-                file.getFileType()
+                file.getFileUrl()
         );
     }
 }
