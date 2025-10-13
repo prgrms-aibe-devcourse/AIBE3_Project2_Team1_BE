@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -30,15 +29,6 @@ public class AuthService {
 
     public String genAccessToken(User user) {
         return jwtTokenProvider.generateToken(user.getUserId(), user.getRole().name());
-    }
-
-    public Map<String, Object> payload(String accessToken) {
-        if (!jwtTokenProvider.validateToken(accessToken)) {
-            return null;
-        }
-
-        Long userId = jwtTokenProvider.getUserId(accessToken);
-        return Map.of("id", userId);
     }
 
     public Optional<User> findByEmail(String email) {
