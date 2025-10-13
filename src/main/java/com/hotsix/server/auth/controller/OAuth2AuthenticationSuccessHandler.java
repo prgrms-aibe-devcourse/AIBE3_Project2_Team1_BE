@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -30,8 +31,20 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth2/redirect}")
+    @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
+
+    @Value("${app.oauth2.cookie.access-token.name:accessToken}")
+    private String accessTokenCookieName;
+
+    @Value("${app.oauth2.cookie.access-token.max-age:3600}")
+    private int accessTokenMaxAge;
+
+    @Value("${app.oauth2.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${app.oauth2.cookie.path:/}")
+    private String cookiePath;
 
     @Override
     @Transactional
@@ -40,13 +53,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // Provider와 ProviderId 추출
-        String registrationId = extractRegistrationId(request);
+        // OAuth2AuthenticationToken에서 registrationId 추출 (더 안전한 방법)
+        String registrationId = extractRegistrationId(authentication);
         Provider provider = Provider.valueOf(registrationId.toUpperCase());
         String providerId = extractProviderId(oAuth2User, provider);
 
         log.info("OAuth2 Login Success - Provider: {}, ProviderId: {}", provider, providerId);
-        log.info("OAuth2 User Attributes: {}", oAuth2User.getAttributes());
+        log.debug("OAuth2 User Attributes: {}", oAuth2User.getAttributes());
 
         // 사용자 조회 또는 생성
         User user = userRepository.findByProviderAndProviderId(provider, providerId)
@@ -69,7 +82,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         log.info("JWT Token Generated and RefreshToken saved for User ID: {}", user.getUserId());
 
         // AccessToken을 HttpOnly 쿠키로 설정
-        addTokenCookie(response, "accessToken", accessToken, 3600); // 1시간
+        addTokenCookie(response, accessTokenCookieName, accessToken, accessTokenMaxAge);
 
         // 프론트엔드로 리다이렉트 (쿠키에 토큰 포함)
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
@@ -103,16 +116,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         log.info("새 RefreshToken 저장: {}", token);
     }
 
-
-
     private void addTokenCookie(HttpServletResponse response, String name, String value, int maxAge) {
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // 로컬 개발 환경에서는 false, 프로덕션에서는 true로 변경
-        cookie.setPath("/");
+        cookie.setSecure(cookieSecure);
+        cookie.setPath(cookiePath);
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
-        log.info("Token cookie added: name={}, maxAge={}", name, maxAge);
+        log.info("Token cookie added: name={}, maxAge={}, secure={}, path={}",
+                name, maxAge, cookieSecure, cookiePath);
     }
 
     private User createUserFromOAuth2User(OAuth2User oAuth2User, Provider provider, String providerId) {
@@ -132,18 +144,24 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 break;
             case KAKAO:
                 Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-                Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-                email = (String) kakaoAccount.get("email");
-                name = (String) profile.get("nickname");
-                nickname = (String) profile.get("nickname");
-                picture = (String) profile.get("profile_image_url");
+                if (kakaoAccount != null) {
+                    Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+                    email = (String) kakaoAccount.get("email");
+                    if (profile != null) {
+                        name = (String) profile.get("nickname");
+                        nickname = (String) profile.get("nickname");
+                        picture = (String) profile.get("profile_image_url");
+                    }
+                }
                 break;
             case NAVER:
                 Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-                email = (String) response.get("email");
-                name = (String) response.get("name");
-                nickname = (String) response.get("nickname");
-                picture = (String) response.get("profile_image");
+                if (response != null) {
+                    email = (String) response.get("email");
+                    name = (String) response.get("name");
+                    nickname = (String) response.get("nickname");
+                    picture = (String) response.get("profile_image");
+                }
                 break;
         }
 
@@ -158,16 +176,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .build();
     }
 
-    private String extractRegistrationId(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
-        String[] parts = requestUri.split("/");
-        if (parts.length < 5
-                || !"login".equals(parts[1])
-                || !"oauth2".equals(parts[2])
-                || !"code".equals(parts[3])) {
-            throw new IllegalArgumentException("올바르지 않은 OAuth2 콜백 URI 형식입니다: " + requestUri);
+    /**
+     * OAuth2AuthenticationToken에서 registrationId를 추출합니다.
+     * URI 파싱 대신 Authentication 객체에서 직접 가져오는 안전한 방법입니다.
+     */
+    private String extractRegistrationId(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            return ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
         }
-        return parts[parts.length - 1];
+        throw new IllegalArgumentException("지원하지 않는 인증 타입입니다: " + authentication.getClass().getName());
     }
 
     private String extractProviderId(OAuth2User oAuth2User, Provider provider) {
@@ -178,6 +195,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             case KAKAO -> String.valueOf(attributes.get("id"));
             case NAVER -> {
                 Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+                if (response == null) {
+                    throw new IllegalStateException("Naver response is null");
+                }
                 yield (String) response.get("id");
             }
             default -> throw new IllegalArgumentException("지원하지 않는 Provider입니다: " + provider);
