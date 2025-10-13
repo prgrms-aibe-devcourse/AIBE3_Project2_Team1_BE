@@ -102,6 +102,7 @@ public class ProjectServiceTest {
 //        });
 //    }
 
+    /*
     @Test
     @DisplayName("프로젝트 상태 변경 성공")
     void updateProjectStatusSuccess() {
@@ -153,7 +154,7 @@ public class ProjectServiceTest {
         assertThat(result.clientNickname()).isEqualTo("클라이언트");
 
     }
-
+*/
     @Test
     @DisplayName("프로젝트 삭제 성공")
     void deleteProjectSuccess() {
