@@ -1,3 +1,4 @@
+
 /*
 package com.hotsix.server.redis;
 
@@ -42,4 +43,5 @@ class RedisTemplateTest {
         redisTemplate.delete(key);
     }
 }
- */
+
+*/
