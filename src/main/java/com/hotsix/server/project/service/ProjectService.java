@@ -4,7 +4,7 @@ package com.hotsix.server.project.service;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.project.exception.ProjectErrorCase;
-import jakarta.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,9 +71,11 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
-        // 권한 체크: client 또는 freelancer인 경우만 수정 가능
-        if (!project.getInitiator().getUserId().equals(userId) &&
-                !project.getParticipant().getUserId().equals(userId)) {
+
+        boolean isInitiator = project.getInitiator().getUserId().equals(userId);
+        boolean isParticipant = project.getParticipant() != null && project.getParticipant().getUserId().equals(userId);
+
+        if (!isInitiator && !isParticipant) {
             throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
         }
 
@@ -84,7 +85,7 @@ public class ProjectService {
         return new ProjectResponseDto(
                 project.getProjectId(),
                 project.getInitiator().getNickname(),
-                project.getParticipant().getNickname(),
+                project.getParticipant() != null ? project.getParticipant().getNickname() : null,
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
@@ -105,17 +106,29 @@ public class ProjectService {
     public List<ProjectResponseDto> getAllProjects() {
         return projectRepository.findAll()
                 .stream()
-                .map(project -> new ProjectResponseDto(
-                        project.getProjectId(),
-                        project.getInitiator().getNickname(),
-                        project.getParticipant().getNickname(),
-                        project.getTitle(),
-                        project.getDescription(),
-                        project.getBudget(),
-                        project.getDeadline(),
-                        project.getCategory().name(),
-                        project.getStatus().name()
-                ))
+                .map(project -> {
+                    String participantNickname = null;
+                    try {
+                        User participant = project.getParticipant();
+                        if (participant != null && participant.getUserId() != 0) {
+                            participantNickname = participant.getNickname();
+                        }
+                    } catch (EntityNotFoundException e) {
+                        participantNickname = null;
+                    }
+
+                    return new ProjectResponseDto(
+                            project.getProjectId(),
+                            project.getInitiator().getNickname(),
+                            participantNickname,
+                            project.getTitle(),
+                            project.getDescription(),
+                            project.getBudget(),
+                            project.getDeadline(),
+                            project.getCategory().name(),
+                            project.getStatus().name()
+                    );
+                })
                 .toList();
     }
 
@@ -125,14 +138,10 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
-        String participantNickname = Optional.ofNullable(project.getParticipant())
-                .map(User::getNickname)
-                .orElse(null);
-
         return new ProjectResponseDto(
                 project.getProjectId(),
                 project.getInitiator().getNickname(),
-                participantNickname,
+                project.getParticipant() != null ? project.getParticipant().getNickname() : null,
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
