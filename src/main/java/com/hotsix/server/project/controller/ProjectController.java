@@ -6,7 +6,6 @@ import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
-import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
