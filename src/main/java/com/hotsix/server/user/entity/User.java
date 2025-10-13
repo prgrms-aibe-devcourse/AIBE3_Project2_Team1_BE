@@ -42,7 +42,7 @@ public class User extends BaseEntity {
     @Builder.Default
     private String apiKey = UUID.randomUUID().toString();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Profile profile;
 
     @Enumerated(EnumType.STRING)
