@@ -1,5 +1,6 @@
 package com.hotsix.server.proposal.service;
 
+import com.hotsix.server.aws.manager.AmazonS3Manager;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.message.repository.MessageRepository;
@@ -11,12 +12,14 @@ import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
+import com.hotsix.server.proposal.repository.ProposalFileRepository;
 import com.hotsix.server.proposal.repository.ProposalRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.View;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,9 +35,10 @@ public class ProposalService {
     private final ProposalRepository proposalRepository;
     private final Rq rq;
     private final ProjectService projectService;
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/proposals/";
-    private final MessageRepository messageRepository;
     private final MessageService messageService;
+    private final AmazonS3Manager  amazonS3Manager;
+    private final ProposalFileRepository proposalFileRepository;
+    private final View error;
 
     @Transactional(readOnly = true)
     public List<ProposalResponseDto> getSentProposals() {
@@ -111,11 +115,7 @@ public class ProposalService {
 
         // ✅ 실제 파일 삭제
         for (ProposalFile file : proposal.getPortfolioFiles()) {
-            try {
-                Files.deleteIfExists(Paths.get(file.getFilePath()));
-            } catch (IOException e) {
-                throw new RuntimeException("파일 삭제 실패: ", e);
-            }
+            amazonS3Manager.deleteFile(file.getFileUrl());
         }
 
         proposalRepository.delete(proposal);
@@ -160,32 +160,18 @@ public class ProposalService {
         messageService.sendMessage(project.getInitiator().getUserId(), title, content);
     }
 
+    @Transactional
     public ProposalFile toProposalFile(MultipartFile file, Proposal proposal) {
-        try {
-            // 저장 디렉토리 없으면 생성
-            Path dirPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(dirPath)) {
-                Files.createDirectories(dirPath);
-            }
 
-            // 고유 이름 생성
-            String originalFilename = file.getOriginalFilename();
-            String storedFileName = UUID.randomUUID() + "_" + originalFilename;
-            Path filePath = dirPath.resolve(storedFileName);
+        String filePath = amazonS3Manager.uploadFile(file);
 
-            // 실제 파일 저장
-            file.transferTo(filePath.toFile());
+        ProposalFile pf = ProposalFile.builder()
+                .fileUrl(filePath)
+                .proposal(proposal)
+                .build();
 
-            // ProposalFile 엔티티 변환
-            return ProposalFile.builder()
-                    .fileName(originalFilename)
-                    .filePath(filePath.toString())
-                    .fileType(file.getContentType())
-                    .proposal(proposal)
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 실패: " + file.getOriginalFilename(), e);
-        }
+        proposalFileRepository.save(pf);
+        return pf;
     }
 
 
