@@ -156,7 +156,7 @@ public class ProposalService {
         };
 
         String title = actor.getName() + ", " + project.getInitiator().getName();
-        String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+        String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 " +  status +  " 확인해주세요.";
         messageService.sendMessage(project.getInitiator().getUserId(), title, content);
     }
 
