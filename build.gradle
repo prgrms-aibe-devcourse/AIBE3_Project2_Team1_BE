@@ -33,7 +33,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'io.github.cdimascio:java-dotenv:6.4.1'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
 	// AOP
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
