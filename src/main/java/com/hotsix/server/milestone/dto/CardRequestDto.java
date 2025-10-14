@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MilestoneRequestDto {
+public class CardRequestDto {
     private String title;
-    private String description;
-    private String dueDate;      // "YYYY-MM-DD"
-    private String status;       // "PENDING", "IN_PROGRESS", "COMPLETED"
+    private String columnId;
 }
