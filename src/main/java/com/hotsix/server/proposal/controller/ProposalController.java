@@ -4,7 +4,6 @@ import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
-import com.hotsix.server.proposal.dto.ProposalStatusRequestBody;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.service.ProposalService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,11 +23,11 @@ import java.util.List;
 public class ProposalController {
     private final ProposalService proposalService;
 
-    @GetMapping
-    @Operation(summary = "제안서 다건 조회")
-    public CommonResponse<List<ProposalResponseDto>> getProposals() {
+    @GetMapping("/sent")
+    @Operation(summary = "내가 보낸 제안서 조회")
+    public CommonResponse<List<ProposalResponseDto>> getSentProposals() {
         return CommonResponse.success(
-                proposalService.getList()
+                proposalService.getSentProposals()
         );
     }
 
@@ -44,25 +43,51 @@ public class ProposalController {
         );
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "제안서 작성")
-    public CommonResponse<ProposalResponseDto> createProposal(
-            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
-    ){
+    @GetMapping("/draft")
+    @Operation(summary = "임시저장 제안서 조회")
+    public CommonResponse<List<ProposalResponseDto>> getDraftProposal(
+    ) {
+        return CommonResponse.success(
+                proposalService.getDraftList()
+        );
+    }
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "제안서 생성")
+    public CommonResponse<ProposalResponseDto> createProposal(
+            @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
+            @RequestPart(value = "portfolioFiles", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
+    ){
         ProposalResponseDto proposalResponseDto = proposalService.create(
                 proposalRequestDto.projectId(),
                 proposalRequestDto.description(),
                 proposalRequestDto.proposedAmount(),
                 files,
-                ProposalStatus.SUBMITTED
+                proposalRequestDto.status()
         );
-
         return CommonResponse.success(
                 proposalResponseDto
         );
     }
+//    @PostMapping(path = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @Operation(summary = "제안서 임시 저장")
+//    public CommonResponse<ProposalResponseDto> createDraftProposal(
+//            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
+//            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
+//    ){
+//
+//        ProposalResponseDto proposalResponseDto = proposalService.create(
+//                proposalRequestDto.projectId(),
+//                proposalRequestDto.description(),
+//                proposalRequestDto.proposedAmount(),
+//                files,
+//                ProposalStatus.DRAFT
+//        );
+//
+//        return CommonResponse.success(
+//                proposalResponseDto
+//        );
+//    }
 
     @DeleteMapping("/{proposalId}")
     @Operation(summary = "제안서 삭제")
@@ -73,26 +98,41 @@ public class ProposalController {
         return CommonResponse.success("%d번 제안서가 삭제되었습니다.".formatted(proposalId));
     }
 
-    @PatchMapping("/{proposalId}")
+    @PatchMapping(
+            value = "/{proposalId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     @Operation(summary = "제안서 수정")
     public CommonResponse<String> updateProposal(
             @PathVariable long proposalId,
-            @Valid @RequestBody ProposalRequestBody requestBody
+            @RequestPart("proposal") ProposalRequestBody requestBody,
+            @RequestPart(value = "portfolioFiles", required = false) List<MultipartFile> portfolioFiles
     ){
-        proposalService.update(proposalId, requestBody.description(), requestBody.proposedAmount(), requestBody.portfolioFiles());
-
+        proposalService.update(
+                proposalId,
+                requestBody.description(),
+                requestBody.proposedAmount(),
+                portfolioFiles,
+                requestBody.status()
+        );
         return CommonResponse.success("%d번 제안서가 수정되었습니다.".formatted(proposalId));
     }
 
-    @PatchMapping("/{proposalId}/status")
-    @Operation(summary = "제안서 상태 변경")
-    public CommonResponse<String> updateStatus(
-            @PathVariable long proposalId,
-            @Valid @RequestBody ProposalStatusRequestBody requestBody
+    @PatchMapping("/{proposalId}/accept")
+    @Operation(summary = "제안서 수락")
+    public CommonResponse<String> acceptProposal(
+            @PathVariable long proposalId
     ){
-        proposalService.update(proposalId, requestBody.proposalStatus());
-        return CommonResponse.success("%d 번 제안서의 상태가 %s로 변경되었습니다."
-                .formatted(proposalId, requestBody.proposalStatus()));
+        proposalService.update(proposalId, ProposalStatus.ACCEPTED);
+        return CommonResponse.success("%d번 제안서를 수락하였습니다.".formatted(proposalId));
     }
 
+    @PatchMapping("/{proposalId}/reject")
+    @Operation(summary = "제안서 거절")
+    public CommonResponse<String> rejectProposal(
+            @PathVariable long proposalId
+    ){
+        proposalService.update(proposalId, ProposalStatus.REJECTED);
+        return CommonResponse.success("%d번 제안서를 거절하였습니다.".formatted(proposalId));
+    }
 }

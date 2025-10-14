@@ -3,6 +3,7 @@ package com.hotsix.server.message.controller;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.message.dto.ChatRoomCreateRequestDto;
 import com.hotsix.server.message.dto.ChatRoomResponseDto;
+import com.hotsix.server.message.dto.DirectChatRequestDto;
 import com.hotsix.server.message.entity.ChatRoom;
 import com.hotsix.server.message.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,11 +36,27 @@ public class ChatRoomController {
                 chatRoomResponseDtos
         );
     }
+
     // 채팅방 참가
     @PostMapping("/{chatRoomId}/join")
     @Operation(summary = "채팅방 참가")
     public CommonResponse<String> joinRoom(@PathVariable Long chatRoomId) {
         chatRoomService.joinRoom(chatRoomId);
         return CommonResponse.success("채팅방에 참가했습니다.");
+    }
+
+    // 채팅방 나가기
+    @PostMapping("/{chatRoomId}/leave")
+    @Operation(summary = "채팅방 나가기")
+    public CommonResponse<String> leaveRoom(@PathVariable Long chatRoomId) {
+        chatRoomService.leaveRoom(chatRoomId);
+        return CommonResponse.success("채팅방을 나갔습니다.");
+    }
+    //1:1 채팅방 가져오기
+    @PostMapping("/direct")
+    @Operation(summary = "1:1 채팅방 가져오거나 생성")
+    public CommonResponse<ChatRoomResponseDto> getOrCreateDirect(@RequestBody DirectChatRequestDto dto) {
+        var result = chatRoomService.getOrCreateDirect(dto);
+        return CommonResponse.success(result);
     }
 }

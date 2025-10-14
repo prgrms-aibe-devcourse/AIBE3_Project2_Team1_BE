@@ -1,7 +1,10 @@
 package com.hotsix.server.proposal.service;
 
+import com.hotsix.server.aws.manager.AmazonS3Manager;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.message.repository.MessageRepository;
+import com.hotsix.server.message.service.MessageService;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
@@ -9,12 +12,14 @@ import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import com.hotsix.server.proposal.exception.ProposalErrorCase;
+import com.hotsix.server.proposal.repository.ProposalFileRepository;
 import com.hotsix.server.proposal.repository.ProposalRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.View;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,12 +35,24 @@ public class ProposalService {
     private final ProposalRepository proposalRepository;
     private final Rq rq;
     private final ProjectService projectService;
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/proposals/";
+    private final MessageService messageService;
+    private final AmazonS3Manager  amazonS3Manager;
+    private final ProposalFileRepository proposalFileRepository;
+    private final View error;
 
     @Transactional(readOnly = true)
-    public List<ProposalResponseDto> getList() {
+    public List<ProposalResponseDto> getSentProposals() {
 
-        List<Proposal> proposals = proposalRepository.findAll();
+        User actor = rq.getUser();
+        List<Proposal> proposals = proposalRepository.findBySender_UserId(actor.getUserId());
+        return proposals.stream().map(ProposalResponseDto::new).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProposalResponseDto> getDraftList() {
+
+        User actor = rq.getUser();
+        List<Proposal> proposals = proposalRepository.findBySender_UserIdAndProposalStatus(actor.getUserId(), ProposalStatus.DRAFT);
         return proposals.stream().map(ProposalResponseDto::new).toList();
     }
 
@@ -76,8 +93,14 @@ public class ProposalService {
             }
             proposal.addFiles(proposalFiles);
         }
-
         proposalRepository.save(proposal);
+
+        //임시저장은 상대방에게 안내문자 안보냄
+        if(!(proposal.getProposalStatus() == ProposalStatus.DRAFT)) {
+            String title = actor.getName() + ", " + project.getInitiator().getName();
+            String content = actor.getName() + "님이 " + project.getTitle() + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getInitiator().getUserId(), title, content);
+        }
 
         return new ProposalResponseDto(proposal);
     }
@@ -92,23 +115,32 @@ public class ProposalService {
 
         // ✅ 실제 파일 삭제
         for (ProposalFile file : proposal.getPortfolioFiles()) {
-            try {
-                Files.deleteIfExists(Paths.get(file.getFilePath()));
-            } catch (IOException e) {
-                throw new RuntimeException("파일 삭제 실패: ", e);
-            }
+            amazonS3Manager.deleteFile(file.getFileUrl());
         }
 
         proposalRepository.delete(proposal);
     }
 
     @Transactional
-    public void update(long proposalId, String description, Integer proposedAmount, List<ProposalFile> proposalFiles) {
+    public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> files, ProposalStatus proposalStatus) {
         Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
-        proposal.modify(description, proposedAmount, proposalFiles);
+        //파일 처리
+        List<ProposalFile> oldFiles = new ArrayList<>(proposal.getPortfolioFiles());
+        // 파일 처리
+        List<ProposalFile> proposalFiles = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                ProposalFile pf = toProposalFile(file, proposal);
+                proposalFiles.add(pf);
+            }
+        }
+        proposal.modify(description, proposedAmount, proposalStatus, proposalFiles);
+        for (ProposalFile old : oldFiles) {
+            amazonS3Manager.deleteFile(old.getFileUrl());
+        }
     }
 
     @Transactional
@@ -118,34 +150,32 @@ public class ProposalService {
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
         proposal.modify(proposalStatus);
+
+        Project project = proposal.getProject();
+
+        // 상태 메시지
+        String status = switch (proposalStatus) {
+            case REJECTED -> "거절하였습니다.";
+            case ACCEPTED -> "수락하였습니다.";
+            default -> throw new ApplicationException(ProposalErrorCase.PROPOSAL_WRONG_STATUS);
+        };
+
+        String title = actor.getName() + ", " + project.getInitiator().getName();
+        String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 " +  status +  " 확인해주세요.";
+        messageService.sendMessage(project.getInitiator().getUserId(), title, content);
     }
 
+    @Transactional
     public ProposalFile toProposalFile(MultipartFile file, Proposal proposal) {
-        try {
-            // 저장 디렉토리 없으면 생성
-            Path dirPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(dirPath)) {
-                Files.createDirectories(dirPath);
-            }
 
-            // 고유 이름 생성
-            String originalFilename = file.getOriginalFilename();
-            String storedFileName = UUID.randomUUID() + "_" + originalFilename;
-            Path filePath = dirPath.resolve(storedFileName);
+        String filePath = amazonS3Manager.uploadFile(file);
 
-            // 실제 파일 저장
-            file.transferTo(filePath.toFile());
-
-            // ProposalFile 엔티티 변환
-            return ProposalFile.builder()
-                    .fileName(originalFilename)
-                    .filePath(filePath.toString())
-                    .fileType(file.getContentType())
-                    .proposal(proposal)
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 실패: " + file.getOriginalFilename(), e);
-        }
+        return ProposalFile.builder()
+                .fileUrl(filePath)
+                .proposal(proposal)
+                .build();
     }
+
+
 
 }

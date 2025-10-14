@@ -122,4 +122,14 @@ public class ProjectController {
         projectService.deleteProject(projectId);
         return CommonResponse.success(null);
     }
+
+    @GetMapping("/{projectId}/creator-name")
+    @Operation(summary = "프로젝트 생성자 이름 조회")
+    public CommonResponse<String> getProjectCreatorName(
+            @PathVariable Long projectId
+    ) {
+        ProjectResponseDto projectResponseDto = projectService.getProjectDetail(projectId);
+        String creatorName = projectResponseDto.initiatorNickname();
+        return CommonResponse.success(creatorName);
+    }
 }

@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 public record ProjectResponseDto(
         Long projectId,
-        String clientNickname,
-        String freelancerNickname,
+        String initiatorNickname,
+        String participantNickname,
         String title,
         String description,
         Integer budget,

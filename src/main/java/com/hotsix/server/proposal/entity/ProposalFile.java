@@ -15,9 +15,7 @@ public class ProposalFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long proposalFileId;
 
-    private String fileName;     // 원본 파일명
-    private String filePath;     // 저장된 경로 or URL
-    private String fileType;     // MIME 타입 (pdf, png, etc)
+    private String fileUrl;     // 저장된 경로 or URL
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
