@@ -9,11 +9,7 @@ public record ProfileResponseDto(
         String description,
         String skills,
         Integer hourlyRate,
-        Visibility visibility,
-        Long userId,
-        String userName,
-        String userEmail,
-        String userProfileImgUrl
+        Visibility visibility
 ) {
     public static ProfileResponseDto from(Profile profile) {
         return new ProfileResponseDto(
@@ -22,11 +18,7 @@ public record ProfileResponseDto(
                 profile.getDescription(),
                 profile.getSkills(),
                 profile.getHourlyRate(),
-                profile.getVisibility() != null ? profile.getVisibility() : Visibility.PRIVATE,
-                profile.getUser().getUserId(),
-                profile.getUser().getName(),
-                profile.getUser().getEmail(),
-                profile.getUser().getPicture()
+                profile.getVisibility() != null ? profile.getVisibility() : Visibility.PRIVATE
         );
     }
 }

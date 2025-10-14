@@ -9,6 +9,7 @@ public record UserInquiryDto(
         String nickname,
         String phoneNumber,
         LocalDate birth,
+        String email,
         String ProfileImgUrl
 ) {
     public UserInquiryDto(User user){
@@ -17,6 +18,7 @@ public record UserInquiryDto(
                 user.getNickname(),
                 user.getPhoneNumber(),
                 user.getBirthDate(),
+                user.getEmail(),
                 user.getPicture()
         );
     }
