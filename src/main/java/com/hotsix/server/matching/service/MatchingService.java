@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotsix.server.matching.dto.MatchingRequest;
 import com.hotsix.server.matching.dto.MatchingResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,7 +18,6 @@ import java.util.Map;
 public class MatchingService {
 
     private final RestTemplate restTemplate;
-    private final HttpHeaders httpHeaders;
 
     public List<MatchingResponse> getAiRecommendations(MatchingRequest request) {
         String prompt = String.format(
@@ -36,7 +37,7 @@ public class MatchingService {
                 "temperature", 0.7
         );
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, httpHeaders);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body);
 
         ResponseEntity<Map> responseEntity = restTemplate.exchange(
                 "https://api.openai.com/v1/chat/completions",
@@ -61,7 +62,7 @@ public class MatchingService {
             MatchingResponse[] responses = mapper.readValue(content, MatchingResponse[].class);
             return List.of(responses);
         } catch (Exception e) {
-            throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage());
+            throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage(), e);
         }
     }
 }

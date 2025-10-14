@@ -3,7 +3,6 @@ package com.hotsix.server.matching;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,19 +10,17 @@ import org.springframework.web.client.RestTemplate;
 public class OpenAiConfig {
 
     @Value("${openai.api-key}")
-    private String secretKey;
+    private String apiKey;
 
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        return restTemplate;
-    }
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().set("Authorization", "Bearer " + apiKey);
+            request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            return execution.execute(request, body);
+        });
 
-    @Bean
-    public HttpHeaders httpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + secretKey);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
+        return restTemplate;
     }
 }
