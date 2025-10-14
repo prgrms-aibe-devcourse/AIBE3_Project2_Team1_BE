@@ -56,7 +56,7 @@ public class ChatRoomController {
     @PostMapping("/direct")
     @Operation(summary = "1:1 채팅방 가져오거나 생성")
     public CommonResponse<ChatRoomResponseDto> getOrCreateDirect(@RequestBody DirectChatRequestDto dto) {
-        var result = chatRoomService.getOrCreateDirect(dto);
+        ChatRoomResponseDto result = chatRoomService.getOrCreateDirect(dto);
         return CommonResponse.success(result);
     }
 }

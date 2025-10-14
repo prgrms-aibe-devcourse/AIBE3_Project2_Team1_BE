@@ -76,6 +76,10 @@ public class ProposalService {
         Project project = projectService.findById(projectId);
         User actor = rq.getUser();
 
+        if(actor.getUserId().equals(project.getInitiator().getUserId())) {
+            throw new ApplicationException(ProposalErrorCase.SELF_PROPOSAL_NOT_ALLOWED);
+        }
+
         Proposal proposal = Proposal.builder()
                 .project(project)
                 .sender(actor)

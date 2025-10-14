@@ -48,6 +48,10 @@ public class ChatRoomService {
 
     @Transactional
     public ChatRoom createRoom(User user1, User user2, String title) {
+        if(user1.getUserId().equals(user2.getUserId())) {
+            throw new ApplicationException(ChatRoomErrorCase.SELF_CHATROOM_NOT_ALLOWED);
+        }
+
         Optional<ChatRoom> existing = chatRoomRepository.findByUsers(user1.getUserId(), user2.getUserId());
         if (existing.isPresent()) {
             return existing.get();

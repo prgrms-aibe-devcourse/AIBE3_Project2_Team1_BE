@@ -132,4 +132,13 @@ public class ProjectController {
         String creatorName = projectResponseDto.initiatorNickname();
         return CommonResponse.success(creatorName);
     }
+
+    @GetMapping("{projectId}/creator-id")
+    @Operation(summary = "프로젝트 생성자 아이디 조회")
+    public CommonResponse<Long> getProjectCreatorId(
+            @PathVariable Long projectId
+    ) {
+        Long creatorId = projectService.getProjectCreatorId(projectId);
+        return CommonResponse.success(creatorId);
+    }
 }
