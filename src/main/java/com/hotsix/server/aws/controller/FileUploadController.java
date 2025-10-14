@@ -75,5 +75,4 @@ public class FileUploadController {
         String presignedUrl = s3Manager.getPresignedUrl(fileName);
         return ResponseEntity.ok(presignedUrl);
     }
-
 }

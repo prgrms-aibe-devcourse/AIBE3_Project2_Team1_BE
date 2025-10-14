@@ -70,6 +70,8 @@ public class AmazonS3Manager {
                 .withMethod(HttpMethod.GET)
                 .withExpiration(expiration);
 
+        request.addRequestParameter("response-content-disposition", "attachment");
+
         URL presignedUrl = amazonS3.generatePresignedUrl(request);
         return presignedUrl.toString();
     }
