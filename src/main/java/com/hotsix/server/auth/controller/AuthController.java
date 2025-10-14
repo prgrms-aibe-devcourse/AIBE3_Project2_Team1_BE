@@ -66,6 +66,7 @@ public class AuthController {
         rq.deleteCookie("apiKey");
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
+        rq.deleteCookie("JSESSIONID");
 
         return new RsData<>(
                 "200-1",
