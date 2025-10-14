@@ -1,16 +1,21 @@
 package com.hotsix.server.proposal.controller;
 
+import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
+import com.hotsix.server.proposal.entity.Proposal;
+import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
+import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.service.ProposalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

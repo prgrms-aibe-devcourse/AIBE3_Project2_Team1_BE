@@ -37,8 +37,6 @@ public class ProposalService {
     private final ProjectService projectService;
     private final MessageService messageService;
     private final AmazonS3Manager  amazonS3Manager;
-    private final ProposalFileRepository proposalFileRepository;
-    private final View error;
 
     @Transactional(readOnly = true)
     public List<ProposalResponseDto> getSentProposals() {

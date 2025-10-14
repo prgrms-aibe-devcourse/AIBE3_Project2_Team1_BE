@@ -1,5 +1,6 @@
 package com.hotsix.server.aws.controller;
 
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.hotsix.server.aws.manager.AmazonS3Manager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -64,4 +67,13 @@ public class FileUploadController {
         s3Manager.deleteFile(imageUrl);
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/presigned")
+    @Operation(summary = "파일 ")
+    public ResponseEntity<String> getPresignedUrl(@RequestParam String fileName) {
+        String presignedUrl = s3Manager.getPresignedUrl(fileName);
+        return ResponseEntity.ok(presignedUrl);
+    }
+
 }
