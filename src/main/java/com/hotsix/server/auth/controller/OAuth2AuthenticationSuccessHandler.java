@@ -53,7 +53,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // OAuth2AuthenticationToken에서 registrationId 추출 (더 안전한 방법)
         String registrationId = extractRegistrationId(authentication);
         Provider provider = Provider.valueOf(registrationId.toUpperCase());
         String providerId = extractProviderId(oAuth2User, provider);
@@ -70,25 +69,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String refreshTokenValue = jwtTokenProvider.generateRefreshToken(user.getUserId());
         Long refreshTokenExpiry = jwtTokenProvider.getTokenExpiry(refreshTokenValue);
 
-        // RefreshToken DB에 저장 (기존 토큰 있으면 업데이트)
         saveRefreshToken(user.getUserId(), refreshTokenValue, refreshTokenExpiry);
 
-        // AccessToken을 HttpOnly 쿠키로 설정
         addTokenCookie(response, accessTokenCookieName, accessToken, accessTokenMaxAge);
-
-        // 프론트엔드로 리다이렉트 (쿠키에 토큰 포함)
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 
     private void saveRefreshToken(Long userId, String token, Long expiry) {
         refreshTokenRepository.findByUserId(userId).ifPresentOrElse(existingToken -> {
-            // 기존 토큰이 만료되지 않았으면 그대로 사용
             if (!jwtTokenProvider.isTokenExpired(existingToken.getToken())) {
                 log.info("기존 RefreshToken 사용: {}", existingToken.getToken());
                 return;
             }
-
-            // 만료되었으면 갱신
             refreshTokenRepository.delete(existingToken);
             createNewRefreshToken(userId, token, expiry);
 
@@ -164,7 +156,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .picture(picture)
                 .provider(provider)
                 .providerId(providerId)
-                .picture(picture)
                 .role(Role.CLIENT)
                 .build();
     }

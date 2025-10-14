@@ -1,19 +1,24 @@
 package com.hotsix.server.profile.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.hotsix.server.profile.entity.Profile;
+import com.hotsix.server.profile.entity.Visibility;
 
-public class ProfileResponseDto {
-
-    @Getter
-    @Builder
-    public static class ProfileInfo {
-        private Long profileId;
-        private Long userId;
-        private String title;
-        private String description;
-        private String skills;
-        private Integer hourlyRate;
-        private String visibility;
+public record ProfileResponseDto(
+        Long profileId,
+        String title,
+        String description,
+        String skills,
+        Integer hourlyRate,
+        Visibility visibility
+) {
+    public static ProfileResponseDto from(Profile profile) {
+        return new ProfileResponseDto(
+                profile.getProfileId(),
+                profile.getTitle(),
+                profile.getDescription(),
+                profile.getSkills(),
+                profile.getHourlyRate(),
+                profile.getVisibility() != null ? profile.getVisibility() : Visibility.PRIVATE
+        );
     }
 }
