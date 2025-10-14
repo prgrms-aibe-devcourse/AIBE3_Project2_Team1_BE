@@ -2,6 +2,7 @@ package com.hotsix.server.auth.controller;
 
 import com.hotsix.server.auth.exception.AuthErrorCase;
 import com.hotsix.server.auth.service.AuthService;
+import com.hotsix.server.auth.service.RedisRefreshTokenService;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
 import com.hotsix.server.global.exception.ApplicationException;
@@ -16,10 +17,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisRefreshTokenService redisRefreshTokenService;
 
     @PostMapping("/login/basic")
     @Operation(
@@ -58,15 +62,26 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "로그아웃 성공")
             }
     )
-    public RsData<Void> logout() {
+    public RsData<Void> logout(
+            @CookieValue(name = "accessToken", required = false) String accessToken,
+            @CookieValue(name = "refreshToken", required = false) String refreshToken
+    ) {
         rq.deleteCookie("apiKey");
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
 
-        return new RsData<>(
-                "200-1",
-                "로그아웃 되었습니다."
-        );
+        // Redis Refresh Token 삭제
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            try {
+                Long userId = jwtTokenProvider.getUserId(refreshToken);
+                redisRefreshTokenService.deleteRefreshToken(userId);
+                log.info("Redis에서 Refresh Token 삭제 완료: userId={}", userId);
+            } catch (Exception e) {
+                log.warn("로그아웃 중 RefreshToken 삭제 실패: {}", e.getMessage());
+            }
+        }
+
+        return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
 
     @PostMapping("/token/reissue")
