@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.Getter;
+import java.net.URL;
 
 
 
@@ -324,6 +326,35 @@ public class MilestoneService {
         }
         milestoneMemberRepository.delete(mm);
     }
+    @Getter
+    public static class FileDownload {
+        private final String originalName;   // 사용자에게 보일 파일명
+        private final String downloadUrl;    // 최종 이동할 S3 전체 URL
+        public FileDownload(String originalName, String downloadUrl) {
+            this.originalName = originalName;
+            this.downloadUrl = downloadUrl;
+        }
+    }
+
+    /**
+     * 파일 다운로드 정보를 반환한다.
+     * - AmazonS3Manager 가 filePath 에 S3 전체 URL을 저장하므로,
+     *   그대로 사용하여 리다이렉트(302)하면 된다.
+     */
+    @Transactional(readOnly = true)
+    public FileDownload getFileDownloadInfo(Long fileId) {
+        MilestoneFile file = milestoneFileRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("해당 파일을 찾을 수 없습니다. ID: " + fileId));
+
+        String originalName = file.getFileName();
+        String s3Url = file.getFilePath();
+
+        if (s3Url == null || s3Url.isBlank()) {
+            throw new RuntimeException("파일 경로가 비어 있습니다. ID: " + fileId);
+        }
+
+        return new FileDownload(originalName, s3Url);
+    }
 
     // -- 내부 헬퍼 --
 
@@ -377,6 +408,5 @@ public class MilestoneService {
             throw new RuntimeException(errorMsg);
         }
     }
-
 
 }

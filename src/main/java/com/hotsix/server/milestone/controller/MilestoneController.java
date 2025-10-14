@@ -9,8 +9,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.net.URI;
+import org.springframework.http.HttpHeaders;
 
 import java.util.List;
 @Tag(name = "MilestoneController", description = "마일스톤 관련 API 컨트롤러")
@@ -172,6 +176,18 @@ public class MilestoneController {
             @PathVariable Long fileId
     ) {
         milestoneService.deleteFile(milestoneId, fileId);
+    }
+    // -- 파일 다운로드 추가 --
+    @Operation(summary = "파일 다운로드(302 리다이렉트)")
+    @GetMapping("/files/download/{fileId}")
+    public ResponseEntity<Void> downloadFile(@PathVariable Long fileId) {
+        // 서비스에서 S3 전체 URL을 받아오기
+        MilestoneService.FileDownload dto = milestoneService.getFileDownloadInfo(fileId);
+
+        // 302 Found 로 S3로 이동
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(dto.getDownloadUrl()));
+        return ResponseEntity.status(302).headers(headers).build();
     }
 
 }
