@@ -1,4 +1,4 @@
-package com.hotsix.server.matching;
+package com.hotsix.server.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
