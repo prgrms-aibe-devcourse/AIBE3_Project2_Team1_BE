@@ -69,25 +69,6 @@ public class ProposalController {
                 proposalResponseDto
         );
     }
-//    @PostMapping(path = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @Operation(summary = "제안서 임시 저장")
-//    public CommonResponse<ProposalResponseDto> createDraftProposal(
-//            @Valid @RequestPart("proposal") ProposalRequestDto proposalRequestDto,
-//            @RequestPart(value = "files", required = false) List<MultipartFile> files //ProposalFile DTO로 변경해야함
-//    ){
-//
-//        ProposalResponseDto proposalResponseDto = proposalService.create(
-//                proposalRequestDto.projectId(),
-//                proposalRequestDto.description(),
-//                proposalRequestDto.proposedAmount(),
-//                files,
-//                ProposalStatus.DRAFT
-//        );
-//
-//        return CommonResponse.success(
-//                proposalResponseDto
-//        );
-//    }
 
     @DeleteMapping("/{proposalId}")
     @Operation(summary = "제안서 삭제")
