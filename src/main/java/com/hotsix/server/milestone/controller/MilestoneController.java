@@ -2,25 +2,16 @@ package com.hotsix.server.milestone.controller;
 
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.milestone.dto.*;
-import com.hotsix.server.milestone.entity.MilestoneFile;
-import com.hotsix.server.milestone.service.FileStorageService;
 import com.hotsix.server.milestone.service.MilestoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.List;
 @Tag(name = "MilestoneController", description = "마일스톤 관련 API 컨트롤러")
 @RestController
@@ -29,7 +20,6 @@ import java.util.List;
 public class MilestoneController {
 
     private final MilestoneService milestoneService;
-    private final FileStorageService fileStorageService;
     private final Rq rq;  // 현재 로그인 유저 가져오기
 
     //-- 조회 API --
@@ -57,12 +47,14 @@ public class MilestoneController {
     @Operation(summary = "일정 목록 조회")
     @GetMapping("/{milestoneId}/events")
     public List<CalendarEventResponse> getEvents(@PathVariable Long milestoneId) {
+
         return milestoneService.getEvents(milestoneId);
     }
 
     @Operation(summary = "파일 목록 조회")
     @GetMapping("/{milestoneId}/files")
     public List<FileResponseDto> getFiles(@PathVariable Long milestoneId) {
+
         return milestoneService.getFiles(milestoneId);
     }
 
@@ -70,6 +62,7 @@ public class MilestoneController {
     @Operation(summary = "팀원 1명 추가")
     @PostMapping("/{milestoneId}/team-members/one")
     public TeamMemberDto createOne(@PathVariable Long milestoneId, @RequestBody TeamMemberDto dto) {
+
         var user = rq.getUser();
         return milestoneService.createOneMember(milestoneId, dto, user);
     }
@@ -89,6 +82,7 @@ public class MilestoneController {
             @PathVariable Long milestoneId,
             @Valid @RequestBody EventRequestDto request
     ) {
+
         return milestoneService.createEvent(milestoneId, request);
     }
 
@@ -121,8 +115,6 @@ public class MilestoneController {
         var user = rq.getUser();
         return milestoneService.updateOneMember(milestoneId, memberId, dto, user);
     }
-
-
 
     @Operation(summary = "칸반 카드 수정")
     @PatchMapping("/{milestoneId}/cards/{cardId}")
@@ -181,36 +173,5 @@ public class MilestoneController {
     ) {
         milestoneService.deleteFile(milestoneId, fileId);
     }
-
-    @Operation(summary = "파일 다운")
-    @GetMapping("/files/download/{fileId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
-        try {
-            // 파일 정보 조회
-            MilestoneFile file = milestoneService.getFileById(fileId);
-
-            // 파일 로드
-            Path filePath = fileStorageService.loadFile(file.getFilePath());
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (!resource.exists()) {
-                throw new RuntimeException("파일을 찾을 수 없습니다: " + file.getFileName());
-            }
-
-            // Content-Disposition 헤더 설정 (한글 파일명 인코딩)
-            String encodedFileName = URLEncoder.encode(file.getFileName(), StandardCharsets.UTF_8)
-                    .replaceAll("\\+", "%20");
-            String contentDisposition = "attachment; filename=\"" + encodedFileName + "\"";
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(file.getFileType()))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .body(resource);
-
-        } catch (Exception e) {
-            throw new RuntimeException("파일 다운로드 중 오류가 발생했습니다: " + e.getMessage());
-        }
-    }
-
 
 }

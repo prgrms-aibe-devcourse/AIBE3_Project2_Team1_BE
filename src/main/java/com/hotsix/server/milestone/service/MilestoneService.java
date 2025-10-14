@@ -1,5 +1,6 @@
 package com.hotsix.server.milestone.service;
 
+import com.hotsix.server.aws.manager.AmazonS3Manager;
 import com.hotsix.server.milestone.dto.*;
 import com.hotsix.server.milestone.entity.*;
 import com.hotsix.server.milestone.repository.DeliverableRepository;
@@ -28,7 +29,8 @@ public class MilestoneService {
     private final DeliverableRepository deliverableRepository;
     private final MilestoneMemberRepository milestoneMemberRepository;
     private final MilestoneFileRepository milestoneFileRepository;
-    private final FileStorageService fileStorageService;
+
+    private final AmazonS3Manager amazonS3Manager;
 
     // -- 조회 기능 --
     // 정보 조회
@@ -87,12 +89,6 @@ public class MilestoneService {
                 .stream()
                 .map(FileResponseDto::from)
                 .collect(Collectors.toList());
-    }
-
-    // 파일 정보 조회 (다운로드용)
-    public MilestoneFile getFileById(Long fileId) {
-        return milestoneFileRepository.findById(fileId)
-                .orElseThrow(() -> new RuntimeException("해당 파일을 찾을 수 없습니다. ID: " + fileId));
     }
 
     // -- 생성 기능 --
@@ -157,22 +153,18 @@ public class MilestoneService {
             throw new RuntimeException("파일명이 없습니다.");
         }
 
-        // 파일 크기 제한 (10MB)
-        if (file.getSize() > 10 * 1024 * 1024) {
-            throw new RuntimeException("파일 크기는 10MB를 초과할 수 없습니다.");
-        }
 
-        // 파일 저장
-        FileStorageService.FileInfo fileInfo = fileStorageService.storeFile(file, milestoneId);
+        // S3에 업로드 (모든 파일 타입 허용!)
+        String s3Url = amazonS3Manager.uploadFile(file);
 
         // DB에 메타데이터 저장
         MilestoneFile milestoneFile = MilestoneFile.builder()
                 .milestone(milestone)
-                .fileName(fileInfo.originalName)
-                .savedFileName(fileInfo.storedName)
-                .filePath(fileInfo.fullPath)
-                .fileSize(fileInfo.size)
-                .fileType(fileInfo.contentType)
+                .fileName(originalFilename)
+                .savedFileName(originalFilename)
+                .filePath(s3Url)
+                .fileSize(file.getSize())
+                .fileType(file.getContentType())
                 .build();
 
         MilestoneFile saved = milestoneFileRepository.save(milestoneFile);
@@ -213,12 +205,8 @@ public class MilestoneService {
         );
 
         Milestone updated = milestoneRepository.save(milestone);
-
         return MilestoneResponseDto.from(updated);
     }
-
-
-
 
     // 칸반 카드 수정
     @Transactional
@@ -273,7 +261,7 @@ public class MilestoneService {
             throw new RuntimeException("이 파일은 해당 마일스톤에 속하지 않습니다.");
         }
 
-        fileStorageService.deleteFile(file.getFilePath()); // 실제 파일 삭제
+        amazonS3Manager.deleteFile(file.getFilePath()); // 실제 파일 삭제
         milestoneFileRepository.delete(file);              // DB 레코드 삭제
     }
 
