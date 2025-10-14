@@ -197,4 +197,12 @@ public class ProjectService {
                 project.getStatus().name()
         );
     }
+
+    @Transactional(readOnly = true)
+    public Long getProjectCreatorId(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+
+        return project.getInitiator().getUserId();
+    }
 }
