@@ -21,10 +21,26 @@ public class MatchingService {
 
     public List<MatchingResponse> getAiRecommendations(MatchingRequest request) {
         String prompt = String.format(
-                "당신은 프리랜서 프로젝트 추천 도우미입니다. " +
-                        "예산은 '%s', 기간은 '%s'입니다. " +
-                        "이 조건에 맞는 프로젝트 아이디어 3개를 JSON 배열로 만들어주세요. " +
-                        "각 항목은 {\"title\": \"프로젝트명\", \"description\": \"간단한 설명\", \"imageUrl\": \"샘플 이미지 경로\"} 형태로 주세요.",
+                """
+                당신은 프리랜서 프로젝트 추천 도우미입니다.
+                사용자가 원하는 조건은 다음과 같습니다:
+                
+                - 예산: '%s'
+                - 예상 소요 기간: '%s'
+            
+                이 조건을 고려하여 적절한 프로젝트 아이디어 3개를 JSON 배열로 생성해주세요.
+                각 항목은 다음 필드를 포함해야 하며, JSON 형식만 출력해주세요:
+            
+                {
+                  "title": "프로젝트명",
+                  "description": "간단한 설명",
+                  "budget": 예산 (숫자),
+                  "deadline": "yyyy-MM-dd 형식 마감일",
+                  "category": "VIDEO | WRITE | IT | MARKETING | HOBBY | TAX | STARTUP | TRANSLATE 중 하나"
+                }
+            
+                JSON 외 다른 문자는 포함하지 마세요.
+                """,
                 request.getBudget(), request.getDuration()
         );
 
@@ -59,8 +75,7 @@ public class MatchingService {
     private List<MatchingResponse> parseJsonToList(String content) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            MatchingResponse[] responses = mapper.readValue(content, MatchingResponse[].class);
-            return List.of(responses);
+            return List.of(mapper.readValue(content, MatchingResponse[].class));
         } catch (Exception e) {
             throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage(), e);
         }

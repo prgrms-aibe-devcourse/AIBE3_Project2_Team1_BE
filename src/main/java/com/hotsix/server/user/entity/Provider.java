@@ -1,7 +1,7 @@
 package com.hotsix.server.user.entity;
 
 public enum Provider {
-    GOOGLE, KAKAO, NAVER, LOCAL;
+    GOOGLE, KAKAO, NAVER, NORMAL;
 
     @Override
     public String toString() {

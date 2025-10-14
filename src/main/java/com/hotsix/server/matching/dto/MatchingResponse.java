@@ -12,5 +12,7 @@ import lombok.Setter;
 public class MatchingResponse {
     private String title;
     private String description;
-    private String imageUrl;
+    private Integer budget;
+    private String deadline;
+    private String category;
 }

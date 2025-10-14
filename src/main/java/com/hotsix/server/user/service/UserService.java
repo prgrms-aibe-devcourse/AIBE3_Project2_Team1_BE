@@ -49,7 +49,7 @@ public class UserService {
                     throw new ApplicationException(UserErrorCase.NICKNAME_ALREADY_EXISTS);
                 });
 
-        Provider userProvider = Provider.LOCAL;
+        Provider userProvider = Provider.NORMAL;
         password = passwordEncoder.encode(password);
 
         User user = new User(
