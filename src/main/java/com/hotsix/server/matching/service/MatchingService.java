@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,12 @@ public class MatchingService {
                 JSON 외에는 어떤 텍스트도 포함하지 말고, 코드블럭(```) 없이 순수 JSON만 응답해주세요.
     
                 각 항목은 다음 필드를 포함해야 합니다:
+                
+                title과 description은 다른 사용자의 관심을 끌 수 있게 만들어주세요.
+                
+                title과 description은 한글로 적어주세요.
+                
+                마감기간은 오늘 날짜('%s')에서 입력받은 마감기간을 더한 날짜로 적어주세요.
     
                 {
                   "title": "프로젝트명",
@@ -47,14 +55,9 @@ public class MatchingService {
                   "deadline": "yyyy-MM-dd 형식 마감일",
                   "category": "VIDEO | WRITE | IT | MARKETING | HOBBY | TAX | STARTUP | TRANSLATE 중 하나"
                 }
-                
-                title과 description은 다른 사용자의 관심을 끌 수 있게 만들어주세요.
-                
-                title과 description은 한글로 적어주세요.
-                
-                
+
                 """,
-                request.getSubject(), request.getBudget(), request.getDuration()
+                request.getSubject(), request.getBudget(), request.getDuration(), LocalDate.now()
         );
 
         Map<String, Object> body = Map.of(
