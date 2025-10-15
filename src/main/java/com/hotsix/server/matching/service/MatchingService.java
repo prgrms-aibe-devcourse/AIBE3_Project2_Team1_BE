@@ -27,11 +27,12 @@ public class MatchingService {
     public List<MatchingResponse> getAiRecommendations(MatchingRequest request) {
         String prompt = String.format(
                 """
-                당신은 프리랜서 프로젝트 추천 도우미입니다.
+                당신은 프로젝트 제작 도우미입니다.
                 사용자가 원하는 조건은 다음과 같습니다:
                 
+                - 주제: '%s'
                 - 예산: '%s'
-                - 예상 소요 기간: '%s'
+                - 마감기간: '%s'
     
                 이 조건을 고려하여 적절한 프로젝트 아이디어 3개를 JSON 배열로 생성해주세요.
     
@@ -41,13 +42,19 @@ public class MatchingService {
     
                 {
                   "title": "프로젝트명",
-                  "description": "간단한 설명",
+                  "description": "프로젝트 설명",
                   "budget": 예산 (숫자),
                   "deadline": "yyyy-MM-dd 형식 마감일",
                   "category": "VIDEO | WRITE | IT | MARKETING | HOBBY | TAX | STARTUP | TRANSLATE 중 하나"
                 }
+                
+                title과 description은 다른 사용자의 관심을 끌 수 있게 만들어주세요.
+                
+                title과 description은 한글로 적어주세요.
+                
+                
                 """,
-                request.getBudget(), request.getDuration()
+                request.getSubject(), request.getBudget(), request.getDuration()
         );
 
         Map<String, Object> body = Map.of(
