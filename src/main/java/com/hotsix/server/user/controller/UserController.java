@@ -3,6 +3,7 @@ package com.hotsix.server.user.controller;
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.rsData.RsData;
 import com.hotsix.server.user.dto.*;
+import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,6 +85,19 @@ public class UserController {
                 "200-3",
                 "회원정보가 수정되었습니다.",
                 new UserDto(updatedUser)
+        );
+    }
+
+    @PutMapping("/mode")
+    public RsData<UserDto> updateUserMode(@RequestParam("mode") Role role) {
+        User user = rq.getUser();
+        user.setRole(role);
+        userService.save(user);
+
+        return new RsData<>(
+                "200-1",
+                "모드가 변경되었습니다.",
+                new UserDto(user)
         );
     }
 

@@ -124,7 +124,7 @@ public class ProposalService {
         User actor = rq.getUser();
         proposal.checkCanDelete(actor);
 
-        // ✅ 실제 파일 삭제
+        // 실제 파일 삭제
         for (ProposalFile file : proposal.getPortfolioFiles()) {
             amazonS3Manager.deleteFile(file.getFileUrl());
         }

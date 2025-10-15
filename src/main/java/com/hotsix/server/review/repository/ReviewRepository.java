@@ -1,6 +1,7 @@
 package com.hotsix.server.review.repository;
 
 import com.hotsix.server.review.entity.Review;
+import com.hotsix.server.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT COUNT(r) FROM Review r WHERE DATE(r.createdAt) = :date")
     long countByCreatedDate(@Param("date") LocalDate date);
+
+    /** 내가 쓴 리뷰 전체 리스트 */
+    // User가 작성한 리뷰를 FromUser 정보와 함께 한 번에 조회
+    @Query("SELECT r FROM Review r JOIN FETCH r.fromUser WHERE r.fromUser = :user")
+    List<Review> findByFromUserWithUser(@Param("user") User user);
+
+    /** 내가 쓴 리뷰 개수 */
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.fromUser = :user")
+    int countByFromUser(@Param("user") User user);
 }
