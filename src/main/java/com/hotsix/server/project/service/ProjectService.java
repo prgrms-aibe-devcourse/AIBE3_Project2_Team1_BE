@@ -210,9 +210,8 @@ public class ProjectService {
 
 
         boolean isInitiator = initiator.getUserId().equals(userId);
-        boolean isParticipant = participant != null && participant.getUserId().equals(userId);
 
-        if (!isInitiator && !isParticipant) {
+        if (!isInitiator) {
             throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
         }
 
@@ -226,6 +225,14 @@ public class ProjectService {
             }
         }
 
+        for (MultipartFile file : images) {
+            String imageUrl = amazonS3Manager.uploadFile(file);
+            ProjectImage projectImage = ProjectImage.builder()
+                    .project(project)
+                    .imageUrl(imageUrl)
+                    .build();
+            projectImages.add(projectImage);
+        }
 
         project.updateProjectInfo(
                 dto.title(),
@@ -239,7 +246,7 @@ public class ProjectService {
         return new ProjectResponseDto(
                 project.getProjectId(),
                 initiator.getNickname(),
-                participant.getNickname(),
+                null,
                 project.getTitle(),
                 project.getDescription(),
                 project.getBudget(),
