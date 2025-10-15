@@ -80,4 +80,12 @@ public class BookmarkService {
 
         return result;
     }
+
+    @Transactional
+    public void deleteAllByProjectId(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApplicationException(BookmarkErrorCase.PROJECT_NOT_FOUND));
+
+        bookmarkRepository.deleteAllByProject(project);
+    }
 }

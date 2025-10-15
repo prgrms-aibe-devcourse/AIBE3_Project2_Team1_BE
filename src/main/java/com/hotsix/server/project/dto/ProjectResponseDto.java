@@ -1,6 +1,7 @@
 package com.hotsix.server.project.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record ProjectResponseDto(
         Long projectId,
@@ -11,5 +12,7 @@ public record ProjectResponseDto(
         Integer budget,
         LocalDate deadline,
         String category,
-        String status
+        String groupType,
+        String status,
+        List<ProjectFileResponseDto> imageUrls
 ) {}

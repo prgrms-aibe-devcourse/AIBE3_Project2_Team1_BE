@@ -1,6 +1,8 @@
 package com.hotsix.server.aws.manager;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.UUID;
 
 @Component
@@ -57,5 +61,22 @@ public class AmazonS3Manager {
 
     private String getFileUrl(String fileName) {
         return amazonS3.getUrl(bucket, fileName).toString();
+    }
+
+    public String getPresignedUrl(String fileName, long expireMillis) {
+        Date expiration = new Date(System.currentTimeMillis() + expireMillis);
+
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, fileName)
+                .withMethod(HttpMethod.GET)
+                .withExpiration(expiration);
+
+        request.addRequestParameter("response-content-disposition", "attachment");
+
+        URL presignedUrl = amazonS3.generatePresignedUrl(request);
+        return presignedUrl.toString();
+    }
+
+    public String getPresignedUrl(String fileName) {
+        return getPresignedUrl(fileName, 1000 * 60 * 5);
     }
 }

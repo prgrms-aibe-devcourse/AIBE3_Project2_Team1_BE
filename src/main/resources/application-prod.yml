@@ -14,7 +14,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: false  # 프로덕션에서는 false 권장
@@ -102,3 +102,6 @@ app:
         max-age: 3600
       secure: true
       path: /
+
+openai:
+  api-key: ${OPENAI_API_KEY}

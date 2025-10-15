@@ -1,10 +1,13 @@
 package com.hotsix.server.project.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 import java.util.List;
 
-public record ProjectRequestDto(
+public record ProjectUpdateRequestDto(
         @NotBlank(message = "프로젝트 제목은 필수입니다.")
         String title,
 
@@ -19,5 +22,7 @@ public record ProjectRequestDto(
         LocalDate deadline,
 
         @NotBlank(message = "카테고리는 필수입니다.")
-        String category
+        String category,
+
+        List<String> images
 ) {}
