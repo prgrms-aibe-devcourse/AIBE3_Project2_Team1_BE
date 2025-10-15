@@ -30,6 +30,7 @@ public class ProjectServiceTest {
     private UserRepository userRepository;
     private AmazonS3Manager s3Manager;
     private FileUploadController fileUploadController;
+    private BookmarkService bookmarkService;
 
     @BeforeEach
     void setUp() {
@@ -37,7 +38,8 @@ public class ProjectServiceTest {
         userRepository = mock(UserRepository.class);
         s3Manager = mock(AmazonS3Manager.class);
         fileUploadController = mock(FileUploadController.class);
-        projectService = new ProjectService(projectRepository, userRepository, s3Manager);
+        bookmarkService = mock(BookmarkService.class);
+        projectService = new ProjectService(projectRepository, userRepository, s3Manager, bookmarkService);
     }
 /*
     @Test
