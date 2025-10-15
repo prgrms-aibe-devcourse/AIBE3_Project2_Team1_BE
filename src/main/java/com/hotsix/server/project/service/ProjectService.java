@@ -1,12 +1,16 @@
 package com.hotsix.server.project.service;
 
 
+import com.hotsix.server.aws.manager.AmazonS3Manager;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.entity.Category;
+import com.hotsix.server.project.entity.ProjectImage;
 import com.hotsix.server.project.exception.ProjectErrorCase;
+import com.hotsix.server.proposal.dto.ProposalFileResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.hotsix.server.project.dto.ProjectFileResponseDto;
 
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.project.dto.ProjectRequestDto;
@@ -23,7 +27,9 @@ import com.hotsix.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,9 +38,10 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final AmazonS3Manager amazonS3Manager;
 
     @Transactional
-    public ProjectResponseDto registerProject(Long currentUserId, ProjectRequestDto dto) {
+    public ProjectResponseDto registerProject(Long currentUserId, ProjectRequestDto dto, List<MultipartFile> images) {
         // 현재 로그인한 유저
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ApplicationException(UserErrorCase.EMAIL_NOT_FOUND));
@@ -51,6 +58,15 @@ public class ProjectService {
                 .createdBy(currentUser)
                 .build();
 
+        if(images != null) {
+            List<ProjectImage> projectImages = new ArrayList<>();
+            for(MultipartFile image: images) {
+                ProjectImage projectImage = toProjectImage(image, project);
+                projectImages.add(projectImage);
+            }
+            project.addImages(projectImages);
+        }
+
         Project saved = projectRepository.save(project);
 
         return new ProjectResponseDto(
@@ -62,7 +78,10 @@ public class ProjectService {
                 saved.getBudget(),
                 saved.getDeadline(),
                 saved.getCategory().name(),
-                saved.getStatus().name()
+                saved.getStatus().name(),
+                saved.getProjectImageList().stream()
+                        .map(ProjectFileResponseDto::new)
+                        .toList()
         );
     }
 
@@ -91,7 +110,10 @@ public class ProjectService {
                 project.getBudget(),
                 project.getDeadline(),
                 project.getCategory().name(),
-                project.getStatus().name()
+                project.getStatus().name(),
+                project.getProjectImageList().stream()
+                        .map(ProjectFileResponseDto::new)
+                        .toList()
         );
     }
 
@@ -126,7 +148,10 @@ public class ProjectService {
                             project.getBudget(),
                             project.getDeadline(),
                             project.getCategory().name(),
-                            project.getStatus().name()
+                            project.getStatus().name(),
+                            project.getProjectImageList().stream()
+                                    .map(ProjectFileResponseDto::new)
+                                    .toList()
                     );
                 })
                 .toList();
@@ -147,7 +172,10 @@ public class ProjectService {
                 project.getBudget(),
                 project.getDeadline(),
                 project.getCategory().name(),
-                project.getStatus().name()
+                project.getStatus().name(),
+                project.getProjectImageList().stream()
+                        .map(ProjectFileResponseDto::new)
+                        .toList()
         );
     }
 
@@ -155,11 +183,16 @@ public class ProjectService {
     public void deleteProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
+
+        for(ProjectImage image: project.getProjectImageList()) {
+            amazonS3Manager.deleteFile(image.getImageUrl());
+        }
+
         projectRepository.delete(project);
     }
 
     @Transactional
-    public ProjectResponseDto updateProject(Long userId, Long projectId, ProjectRequestDto dto) {
+    public ProjectResponseDto updateProject(Long userId, Long projectId, ProjectRequestDto dto, List<MultipartFile> images) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApplicationException(ProjectErrorCase.PROJECT_NOT_FOUND));
 
@@ -167,13 +200,26 @@ public class ProjectService {
         User initiator = project.getInitiator();
         User participant = project.getParticipant();
 
-        if (initiator == null || participant == null) {
+        if (initiator == null) {
             throw new ApplicationException(ProjectErrorCase.INVALID_PROJECT_DATA);
         }
 
 
-        if (!initiator.getUserId().equals(userId) && !participant.getUserId().equals(userId)) {
+        boolean isInitiator = initiator.getUserId().equals(userId);
+        boolean isParticipant = participant != null && participant.getUserId().equals(userId);
+
+        if (!isInitiator && !isParticipant) {
             throw new ApplicationException(ProjectErrorCase.NO_PERMISSION);
+        }
+
+        // 파일 처리
+        List<ProjectImage> oldImages = new ArrayList<>(project.getProjectImageList());
+
+        List<ProjectImage> projectImages = new ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            for (ProjectImage oldImage : oldImages) {
+                amazonS3Manager.deleteFile(oldImage.getImageUrl());
+            }
         }
 
 
@@ -182,7 +228,8 @@ public class ProjectService {
                 dto.description(),
                 dto.budget(),
                 dto.deadline(),
-                Category.valueOf(dto.category())
+                Category.valueOf(dto.category()),
+                projectImages
         );
 
         return new ProjectResponseDto(
@@ -194,9 +241,28 @@ public class ProjectService {
                 project.getBudget(),
                 project.getDeadline(),
                 project.getCategory().name(),
-                project.getStatus().name()
+                project.getStatus().name(),
+                project.getProjectImageList().stream()
+                        .map(ProjectFileResponseDto::new)
+                        .toList()
         );
     }
+
+    @Transactional
+    public ProjectImage toProjectImage(MultipartFile image, Project project) {
+        String filePath = amazonS3Manager.uploadFile(image);
+
+        try {
+            return ProjectImage.builder()
+                    .imageUrl(filePath)
+                    .project(project)
+                    .build();
+        }
+        catch (Exception e) {
+            throw new ApplicationException(ProjectErrorCase.FILE_UPLOAD_FAILED);
+        }
+    }
+
 
     @Transactional(readOnly = true)
     public Long getProjectCreatorId(Long projectId) {
@@ -205,4 +271,5 @@ public class ProjectService {
 
         return project.getInitiator().getUserId();
     }
+
 }
