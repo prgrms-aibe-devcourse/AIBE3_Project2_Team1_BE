@@ -6,6 +6,7 @@ import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.message.repository.MessageRepository;
 import com.hotsix.server.message.service.MessageService;
 import com.hotsix.server.project.entity.Project;
+import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
 import com.hotsix.server.proposal.entity.Proposal;
@@ -178,6 +179,7 @@ public class ProposalService {
 
         if(proposalStatus == ProposalStatus.ACCEPTED) {
             project.setParticipant(proposal.getSender());
+            project.updateStatus(Status.IN_PROGRESS);
         }
     }
 
