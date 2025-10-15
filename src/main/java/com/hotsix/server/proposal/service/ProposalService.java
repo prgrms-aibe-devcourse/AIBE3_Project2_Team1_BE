@@ -134,25 +134,23 @@ public class ProposalService {
 
     // 제안서 송신자의 제안서 내용 변경
     @Transactional
-    public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> files, ProposalStatus proposalStatus) {
+    public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> newFiles, ProposalStatus proposalStatus) {
         Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
-        //파일 처리
-        List<ProposalFile> oldFiles = new ArrayList<>(proposal.getPortfolioFiles());
-        // 파일 처리
+
+        // ✅ 새 파일 리스트 생성
         List<ProposalFile> proposalFiles = new ArrayList<>();
-        if (files != null) {
-            for (MultipartFile file : files) {
+        if (newFiles != null && !newFiles.isEmpty()) {
+            for (MultipartFile file : newFiles) {
                 ProposalFile pf = toProposalFile(file, proposal);
                 proposalFiles.add(pf);
             }
         }
+
+        // ✅ 기존 modify()는 clear() 하지 않으므로, 기존 파일 유지 + 새 파일만 추가
         proposal.modify(description, proposedAmount, proposalStatus, proposalFiles);
-        for (ProposalFile old : oldFiles) {
-            amazonS3Manager.deleteFile(old.getFileUrl());
-        }
     }
 
     //제안서 수신자의 제안서 status 변경
