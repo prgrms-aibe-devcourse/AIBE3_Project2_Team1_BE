@@ -12,6 +12,7 @@ public record ProjectResponseDto(
         Integer budget,
         LocalDate deadline,
         String category,
+        String groupType,
         String status,
         List<ProjectFileResponseDto> imageUrls
 ) {}
