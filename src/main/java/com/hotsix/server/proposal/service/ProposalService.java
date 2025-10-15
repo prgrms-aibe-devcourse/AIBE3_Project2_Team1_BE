@@ -34,6 +34,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProposalService {
     private final ProposalRepository proposalRepository;
+    private final ProposalFileRepository proposalFileRepository;
     private final Rq rq;
     private final ProjectService projectService;
     private final MessageService messageService;
@@ -201,4 +202,14 @@ public class ProposalService {
     }
 
 
+    @Transactional
+    public void deleteFile(String fileUrl) {
+        ProposalFile file = proposalFileRepository.findByFileUrl(fileUrl)
+                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.FILE_NOT_FOUND));
+
+        // DB에서 제거
+        proposalFileRepository.delete(file);
+
+        amazonS3Manager.deleteFile(fileUrl);
+    }
 }

@@ -122,4 +122,13 @@ public class ProposalController {
         proposalService.update(proposalId, ProposalStatus.REJECTED);
         return CommonResponse.success("%d번 제안서를 거절하였습니다.".formatted(proposalId));
     }
+
+    @DeleteMapping
+    @Operation(summary = "제안서 파일 삭제")
+    public CommonResponse<String> deleteFile(
+            @RequestParam("fileUrl") String fileUrl
+    ) {
+        proposalService.deleteFile(fileUrl);
+        return CommonResponse.success("파일이 삭제되었습니다.");
+    }
 }
