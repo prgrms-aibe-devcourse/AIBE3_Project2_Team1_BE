@@ -2,10 +2,7 @@ package com.hotsix.server.user.controller;
 
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.rsData.RsData;
-import com.hotsix.server.user.dto.UserDto;
-import com.hotsix.server.user.dto.UserPasswordChangeRequestDto;
-import com.hotsix.server.user.dto.UserRegisterRequestDto;
-import com.hotsix.server.user.dto.UserUpdateRequestDto;
+import com.hotsix.server.user.dto.*;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,13 +52,13 @@ public class UserController {
                     @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
             }
     )
-    public RsData<UserDto> getMyInfo() {
+    public RsData<UserInquiryDto> getMyInfo() {
         User currentUser = rq.getUser();
 
         return new RsData<>(
                 "200-5",
                 "내 정보 조회 성공",
-                new UserDto(currentUser)
+                new UserInquiryDto(currentUser)
         );
     }
 

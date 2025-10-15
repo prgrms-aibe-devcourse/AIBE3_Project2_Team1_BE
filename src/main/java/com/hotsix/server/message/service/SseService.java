@@ -2,6 +2,7 @@ package com.hotsix.server.message.service;
 
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.message.sse.ChatRoomEmitterRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -15,6 +16,7 @@ public class SseService {
     private final ChatRoomEmitterRepository emitterRepository;
     private final Rq rq;
 
+    @Transactional
     public SseEmitter connect(Long chatRoomId) {
 
         //이 emitter가 '이 클라이언트의 실시간 통신 라인' 이 된다.
@@ -36,6 +38,7 @@ public class SseService {
         return emitter;
     }
 
+    @Transactional
     public void removeEmitter(Long chatRoomId, SseEmitter emitter) {
         emitterRepository.remove(chatRoomId, emitter);
     }

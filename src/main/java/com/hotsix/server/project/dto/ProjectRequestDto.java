@@ -2,11 +2,9 @@ package com.hotsix.server.project.dto;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 
 public record ProjectRequestDto(
-        @NotNull(message = "상대방 유저 ID는 필수입니다.")
-        Long targetUserId,   // 상대방 유저 ID (클라이언트면 프리랜서 ID, 프리랜서면 클라이언트 ID)
-
         @NotBlank(message = "프로젝트 제목은 필수입니다.")
         String title,
 

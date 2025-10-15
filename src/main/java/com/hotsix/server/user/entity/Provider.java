@@ -5,6 +5,6 @@ public enum Provider {
 
     @Override
     public String toString() {
-        return name(); // "GOOGLE, KAKAO, NAVER, NORMAL
+        return name(); // "GOOGLE, KAKAO, NAVER, LOCAL
     }
 }
