@@ -9,10 +9,13 @@ import java.util.Optional;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("""
         SELECT cr FROM ChatRoom cr
-        JOIN cr.participants cru1
-        JOIN cr.participants cru2
-        WHERE cru1.user.userId = :user1Id
-          AND cru2.user.userId = :user2Id
+        WHERE cr.chatRoomId IN (
+            SELECT cru.chatRoom.chatRoomId
+            FROM ChatRoomUser cru
+            WHERE cru.user.userId IN (:user1Id, :user2Id)
+            GROUP BY cru.chatRoom.chatRoomId
+            HAVING COUNT(DISTINCT cru.user.userId) = 2
+        )
     """)
     Optional<ChatRoom> findByUsers(Long user1Id, Long user2Id);
 

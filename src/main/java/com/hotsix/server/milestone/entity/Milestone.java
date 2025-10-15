@@ -23,6 +23,9 @@ public class Milestone extends BaseEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
@@ -34,5 +37,19 @@ public class Milestone extends BaseEntity {
         this.title = title;
         this.dueDate = dueDate;
         this.milestoneStatus = milestoneStatus;
+    }
+    public void updateInfo(String title, String description, LocalDate dueDate, MilestoneStatus status) {
+        if (title != null && !title.trim().isEmpty()) {
+            this.title = title.trim();
+        }
+        if (description != null) {
+            this.description = description.trim();
+        }
+        if (dueDate != null) {
+            this.dueDate = dueDate;
+        }
+        if (status != null) {
+            this.milestoneStatus = status;
+        }
     }
 }
