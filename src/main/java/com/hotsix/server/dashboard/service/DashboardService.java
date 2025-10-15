@@ -6,10 +6,12 @@ import com.hotsix.server.dashboard.dto.DashboardSummaryDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.repository.ProjectRepository;
+import com.hotsix.server.review.entity.Review;
 import com.hotsix.server.review.repository.ReviewRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,8 +43,12 @@ public class DashboardService {
     }
 
     /** 내가 쓴 리뷰 */
+    @Transactional(readOnly = true)
     public List<DashboardReviewDto> getWrittenReviews(User user) {
-        return reviewRepository.findByFromUser(user).stream()
+        // Fetch Join으로 Lazy 문제 해결
+        List<Review> reviews = reviewRepository.findByFromUserWithUser(user);
+
+        return reviews.stream()
                 .map(DashboardReviewDto::from)
                 .toList();
     }
