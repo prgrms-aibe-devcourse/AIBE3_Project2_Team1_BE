@@ -78,6 +78,7 @@ public class ProjectService {
                 saved.getBudget(),
                 saved.getDeadline(),
                 saved.getCategory().name(),
+                saved.getInitiator().getRole().name(),
                 saved.getStatus().name(),
                 saved.getProjectImageList().stream()
                         .map(ProjectFileResponseDto::new)
@@ -110,6 +111,7 @@ public class ProjectService {
                 project.getBudget(),
                 project.getDeadline(),
                 project.getCategory().name(),
+                project.getInitiator().getRole().name(),
                 project.getStatus().name(),
                 project.getProjectImageList().stream()
                         .map(ProjectFileResponseDto::new)
@@ -148,6 +150,7 @@ public class ProjectService {
                             project.getBudget(),
                             project.getDeadline(),
                             project.getCategory().name(),
+                            project.getInitiator().getRole().name(),
                             project.getStatus().name(),
                             project.getProjectImageList().stream()
                                     .map(ProjectFileResponseDto::new)
@@ -172,6 +175,7 @@ public class ProjectService {
                 project.getBudget(),
                 project.getDeadline(),
                 project.getCategory().name(),
+                project.getInitiator().getRole().name(),
                 project.getStatus().name(),
                 project.getProjectImageList().stream()
                         .map(ProjectFileResponseDto::new)
@@ -241,6 +245,7 @@ public class ProjectService {
                 project.getBudget(),
                 project.getDeadline(),
                 project.getCategory().name(),
+                project.getInitiator().getRole().name(),
                 project.getStatus().name(),
                 project.getProjectImageList().stream()
                         .map(ProjectFileResponseDto::new)
