@@ -59,8 +59,8 @@ public class Proposal extends BaseEntity {
         this.description = description;
         this.proposedAmount = proposedAmount;
         this.proposalStatus = proposalStatus;
-        this.portfolioFiles.clear();
-        if (newProposalFiles != null) {
+
+        if (newProposalFiles != null && !newProposalFiles.isEmpty()) {
             this.portfolioFiles.addAll(newProposalFiles);
         }
     }
