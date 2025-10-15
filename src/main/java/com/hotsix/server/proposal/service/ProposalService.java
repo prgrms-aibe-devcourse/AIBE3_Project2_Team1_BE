@@ -187,6 +187,23 @@ public class ProposalService {
         if(proposalStatus == ProposalStatus.ACCEPTED) {
             project.setParticipant(proposal.getSender());
             project.updateStatus(Status.IN_PROGRESS);
+
+
+            // 같은 프로젝트에 속한 다른 제안서들 조회
+            List<Proposal> otherProposals = proposalRepository.findByProject(project);
+
+            for (Proposal other : otherProposals) {
+                // 현재 수락된 제안서는 건너뜀
+                if (other.getProposalId().equals(proposalId)) continue;
+
+                // 다른 제안서 상태 변경
+                other.modify(ProposalStatus.REJECTED);
+
+                // 거절 알림 메시지
+                String rejectTitle = actor.getName() + ", " + project.getInitiator().getName();
+                String rejectContent = "귀하의 제안서는 다른 제안서가 수락되어 자동으로 거절되었습니다.";
+                messageService.sendMessage(other.getSender().getUserId(), rejectTitle, rejectContent);
+            }
         }
     }
 

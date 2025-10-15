@@ -1,5 +1,6 @@
 package com.hotsix.server.proposal.repository;
 
+import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.proposal.entity.Proposal;
 import com.hotsix.server.proposal.entity.ProposalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,6 @@ public interface ProposalRepository extends JpaRepository<Proposal, Long> {
         AND p.proposalStatus = 'SUBMITTED'
     """)
     List<Proposal> findProposalsReceivedByUser(Long receiverId);
+
+    List<Proposal> findByProject(Project project);
 }
