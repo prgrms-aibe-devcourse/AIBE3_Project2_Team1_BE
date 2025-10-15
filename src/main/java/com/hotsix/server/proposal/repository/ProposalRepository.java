@@ -16,6 +16,7 @@ public interface ProposalRepository extends JpaRepository<Proposal, Long> {
     SELECT p FROM Proposal p
     JOIN p.project pr
     WHERE pr.initiator.userId = :receiverId
+        AND p.proposalStatus = 'SUBMITTED'
     """)
     List<Proposal> findProposalsReceivedByUser(Long receiverId);
 }

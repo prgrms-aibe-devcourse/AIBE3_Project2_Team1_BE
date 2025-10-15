@@ -61,7 +61,7 @@ public class ProposalController {
     @Operation(summary = "내가 받은 제안서 조회")
     public CommonResponse<List<ProposalResponseDto>> getSendProposals() {
         return CommonResponse.success(
-                proposalService.getSendProposals()
+                proposalService.getReceiveProposals()
         );
     }
 

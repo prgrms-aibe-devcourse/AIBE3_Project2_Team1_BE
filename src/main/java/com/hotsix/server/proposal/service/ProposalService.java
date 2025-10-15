@@ -48,7 +48,7 @@ public class ProposalService {
 
 
     @Transactional(readOnly = true)
-    public List<ProposalResponseDto> getSendProposals() {
+    public List<ProposalResponseDto> getReceiveProposals() {
         User actor = rq.getUser();
         List<Proposal> proposals = proposalRepository.findProposalsReceivedByUser(actor.getUserId());
         return proposals.stream().map(ProposalResponseDto::new).toList();
@@ -131,6 +131,7 @@ public class ProposalService {
         proposalRepository.delete(proposal);
     }
 
+    // 제안서 송신자의 제안서 내용 변경
     @Transactional
     public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> files, ProposalStatus proposalStatus) {
         Proposal proposal = proposalRepository.findById(proposalId)
@@ -153,6 +154,7 @@ public class ProposalService {
         }
     }
 
+    //제안서 수신자의 제안서 status 변경
     @Transactional
     public void update(long proposalId, ProposalStatus proposalStatus) {
         Proposal proposal = proposalRepository.findById(proposalId)
@@ -172,7 +174,7 @@ public class ProposalService {
 
         String title = actor.getName() + ", " + project.getInitiator().getName();
         String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 " +  status +  " 확인해주세요.";
-        messageService.sendMessage(project.getInitiator().getUserId(), title, content);
+        messageService.sendMessage(proposal.getSender().getUserId(), title, content);
     }
 
     @Transactional
