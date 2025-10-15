@@ -175,6 +175,10 @@ public class ProposalService {
         String title = actor.getName() + ", " + project.getInitiator().getName();
         String content = actor.getName()+"님이 " + project.getTitle()  + " 프로젝트에 " + "제안서를 " +  status +  " 확인해주세요.";
         messageService.sendMessage(proposal.getSender().getUserId(), title, content);
+
+        if(proposalStatus == ProposalStatus.ACCEPTED) {
+            project.setParticipant(proposal.getSender());
+        }
     }
 
     @Transactional
