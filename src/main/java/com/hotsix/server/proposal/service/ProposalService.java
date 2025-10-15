@@ -151,6 +151,14 @@ public class ProposalService {
 
         // ✅ 기존 modify()는 clear() 하지 않으므로, 기존 파일 유지 + 새 파일만 추가
         proposal.modify(description, proposedAmount, proposalStatus, proposalFiles);
+
+        //임시저장은 상대방에게 안내문자 안보냄
+        if(!(proposal.getProposalStatus() == ProposalStatus.DRAFT)) {
+            Project project = proposal.getProject();
+            String title = actor.getName() + ", " + project.getInitiator().getName();
+            String content = actor.getName() + "님이 " + project.getTitle() + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getInitiator().getUserId(), title, content);
+        }
     }
 
     //제안서 수신자의 제안서 status 변경
