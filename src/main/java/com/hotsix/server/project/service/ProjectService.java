@@ -39,6 +39,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final AmazonS3Manager amazonS3Manager;
+    private final BookmarkService bookmarkService;
 
     @Transactional
     public ProjectResponseDto registerProject(Long currentUserId, ProjectRequestDto dto, List<MultipartFile> images) {
@@ -192,6 +193,7 @@ public class ProjectService {
             amazonS3Manager.deleteFile(image.getImageUrl());
         }
 
+        bookmarkService.deleteAllByProjectId(projectId);
         projectRepository.delete(project);
     }
 
