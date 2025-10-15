@@ -1,5 +1,6 @@
 package com.hotsix.server.user.dto;
 
+import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 
 import java.time.LocalDate;
@@ -10,7 +11,8 @@ public record UserInquiryDto(
         String phoneNumber,
         LocalDate birth,
         String email,
-        String ProfileImgUrl
+        String ProfileImgUrl,
+        Role role
 ) {
     public UserInquiryDto(User user){
         this(
@@ -19,7 +21,8 @@ public record UserInquiryDto(
                 user.getPhoneNumber(),
                 user.getBirthDate(),
                 user.getEmail(),
-                user.getPicture()
+                user.getPicture(),
+                user.getRole()
         );
     }
 }
