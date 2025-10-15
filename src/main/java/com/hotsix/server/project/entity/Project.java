@@ -28,6 +28,7 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "initiator_id", referencedColumnName = "userId", nullable = false)
     private User initiator;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "participant_id", referencedColumnName = "userId", nullable = true)
     private User participant;
@@ -86,10 +87,6 @@ public class Project extends BaseEntity {
 
     public void clearImages() {
         this.projectImageList.clear();
-    }
-
-    public void setParticipant(User participant) {
-        this.participant = participant;
     }
 
 
