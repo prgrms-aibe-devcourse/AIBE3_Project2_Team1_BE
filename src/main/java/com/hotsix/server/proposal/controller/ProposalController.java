@@ -57,6 +57,14 @@ public class ProposalController {
         );
     }
 
+    @GetMapping("/receive")
+    @Operation(summary = "내가 받은 제안서 조회")
+    public CommonResponse<List<ProposalResponseDto>> getSendProposals() {
+        return CommonResponse.success(
+                proposalService.getSendProposals()
+        );
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "제안서 생성")
     public CommonResponse<ProposalResponseDto> createProposal(

@@ -46,6 +46,14 @@ public class ProposalService {
         return proposals.stream().map(ProposalResponseDto::new).toList();
     }
 
+
+    @Transactional(readOnly = true)
+    public List<ProposalResponseDto> getSendProposals() {
+        User actor = rq.getUser();
+        List<Proposal> proposals = proposalRepository.findProposalsReceivedByUser(actor.getUserId());
+        return proposals.stream().map(ProposalResponseDto::new).toList();
+    }
+
     @Transactional(readOnly = true)
     public List<ProposalResponseDto> getDraftList() {
 
@@ -177,7 +185,6 @@ public class ProposalService {
                 .proposal(proposal)
                 .build();
     }
-
 
 
 }
