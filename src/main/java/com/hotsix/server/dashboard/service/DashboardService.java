@@ -1,51 +1,59 @@
 package com.hotsix.server.dashboard.service;
 
-import com.hotsix.server.dashboard.dto.DashboardProjectDto;
-import com.hotsix.server.dashboard.dto.DashboardResponseDto;
+import com.hotsix.server.dashboard.dto.*;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.repository.ProjectRepository;
+import com.hotsix.server.review.repository.ReviewRepository;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
 
     private final ProjectRepository projectRepository;
+    private final ReviewRepository reviewRepository;
 
-    public DashboardResponseDto getUserDashboard(User user) {
-        // initiator or participant 모두 포함된 프로젝트 조회
-        List<Project> allProjects = projectRepository.findByInitiatorOrParticipant(user, user);
+    /**
+     * ① 대시보드 요약 (프로젝트 상태별 개수 + 리뷰 개수)
+     */
+    public DashboardSummaryDto getDashboardSummary(User user) {
+        int openCount = projectRepository.findByInitiatorAndStatus(user, Status.OPEN).size()
+                + projectRepository.findByParticipantAndStatus(user, Status.OPEN).size();
 
-        // 상태별로 분류
-        Map<Status, List<Project>> grouped = allProjects.stream()
-                .collect(Collectors.groupingBy(Project::getStatus));
+        int inProgressCount = projectRepository.findByInitiatorAndStatus(user, Status.IN_PROGRESS).size()
+                + projectRepository.findByParticipantAndStatus(user, Status.IN_PROGRESS).size();
 
-        // 개수 계산
-        Map<String, Integer> counts = new HashMap<>();
-        counts.put("OPEN", grouped.getOrDefault(Status.OPEN, List.of()).size());
-        counts.put("IN_PROGRESS", grouped.getOrDefault(Status.IN_PROGRESS, List.of()).size());
-        counts.put("COMPLETED", grouped.getOrDefault(Status.COMPLETED, List.of()).size());
+        int completedCount = projectRepository.findByInitiatorAndStatus(user, Status.COMPLETED).size()
+                + projectRepository.findByParticipantAndStatus(user, Status.COMPLETED).size();
 
-        // 리스트 변환
-        Map<String, List<DashboardProjectDto>> lists = new HashMap<>();
-        for (Status status : Status.values()) {
-            List<DashboardProjectDto> dtos = grouped.getOrDefault(status, List.of())
-                    .stream()
-                    .map(DashboardProjectDto::from)
-                    .toList();
-            lists.put(status.name(), dtos);
-        }
+        int writtenReviewCount = reviewRepository.findByFromUser(user).size();
 
-        return new DashboardResponseDto(counts, lists);
+        return new DashboardSummaryDto(openCount, inProgressCount, completedCount, writtenReviewCount);
+    }
+
+    /**
+     * ② 상태별 프로젝트 리스트 조회
+     */
+    public List<DashboardProjectDto> getProjectsByStatus(User user, Status status) {
+        List<Project> projects = projectRepository.findByInitiatorAndStatus(user, status);
+        projects.addAll(projectRepository.findByParticipantAndStatus(user, status));
+
+        return projects.stream()
+                .map(DashboardProjectDto::from)
+                .toList();
+    }
+
+    /**
+     * ③ 내가 쓴 리뷰 목록
+     */
+    public List<DashboardReviewDto> getWrittenReviews(User user) {
+        return reviewRepository.findByFromUser(user).stream()
+                .map(DashboardReviewDto::from)
+                .toList();
     }
 }
-
-
-// TODO: ProjectRepository, ContractRepository, ReviewRepository, NotificationRepository 등의 주입으로 대시보드 구현
-// 실제 대시보드 관련 집계 로직 구현
