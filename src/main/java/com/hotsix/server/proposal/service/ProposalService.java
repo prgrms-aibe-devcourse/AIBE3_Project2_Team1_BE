@@ -34,6 +34,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProposalService {
     private final ProposalRepository proposalRepository;
+    private final ProposalFileRepository proposalFileRepository;
     private final Rq rq;
     private final ProjectService projectService;
     private final MessageService messageService;
@@ -134,24 +135,30 @@ public class ProposalService {
 
     // 제안서 송신자의 제안서 내용 변경
     @Transactional
-    public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> files, ProposalStatus proposalStatus) {
+    public void update(long proposalId, String description, Integer proposedAmount, List<MultipartFile> newFiles, ProposalStatus proposalStatus) {
         Proposal proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApplicationException(ProposalErrorCase.PROPOSAL_NOT_FOUND));
         User actor = rq.getUser();
         proposal.checkCanModify(actor);
-        //파일 처리
-        List<ProposalFile> oldFiles = new ArrayList<>(proposal.getPortfolioFiles());
-        // 파일 처리
+
+        // ✅ 새 파일 리스트 생성
         List<ProposalFile> proposalFiles = new ArrayList<>();
-        if (files != null) {
-            for (MultipartFile file : files) {
+        if (newFiles != null && !newFiles.isEmpty()) {
+            for (MultipartFile file : newFiles) {
                 ProposalFile pf = toProposalFile(file, proposal);
                 proposalFiles.add(pf);
             }
         }
+
+        // ✅ 기존 modify()는 clear() 하지 않으므로, 기존 파일 유지 + 새 파일만 추가
         proposal.modify(description, proposedAmount, proposalStatus, proposalFiles);
-        for (ProposalFile old : oldFiles) {
-            amazonS3Manager.deleteFile(old.getFileUrl());
+
+        //임시저장은 상대방에게 안내문자 안보냄
+        if(!(proposal.getProposalStatus() == ProposalStatus.DRAFT)) {
+            Project project = proposal.getProject();
+            String title = actor.getName() + ", " + project.getInitiator().getName();
+            String content = actor.getName() + "님이 " + project.getTitle() + " 프로젝트에 " + "제안서를 보냈습니다 확인해주세요.";
+            messageService.sendMessage(project.getInitiator().getUserId(), title, content);
         }
     }
 
@@ -195,4 +202,14 @@ public class ProposalService {
     }
 
 
+    @Transactional
+    public void deleteFile(String fileUrl) {
+        ProposalFile file = proposalFileRepository.findByFileUrl(fileUrl)
+                .orElseThrow(() -> new ApplicationException(ProposalErrorCase.FILE_NOT_FOUND));
+
+        // DB에서 제거
+        proposalFileRepository.delete(file);
+
+        amazonS3Manager.deleteFile(fileUrl);
+    }
 }
