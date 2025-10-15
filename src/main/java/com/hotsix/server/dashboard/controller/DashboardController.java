@@ -17,17 +17,13 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    /**
-     * ① 대시보드 요약
-     */
+    // ① 대시보드 요약
     @GetMapping("/summary")
     public DashboardSummaryDto getDashboardSummary(@AuthenticationPrincipal User user) {
         return dashboardService.getDashboardSummary(user);
     }
 
-    /**
-     * ② 상태별 프로젝트 리스트
-     */
+    // ② 상태별 프로젝트 리스트
     @GetMapping("/projects")
     public List<DashboardProjectDto> getProjectsByStatus(
             @AuthenticationPrincipal User user,
@@ -36,9 +32,7 @@ public class DashboardController {
         return dashboardService.getProjectsByStatus(user, status);
     }
 
-    /**
-     * ③ 내가 쓴 리뷰
-     */
+    // ③ 내가 쓴 리뷰
     @GetMapping("/reviews")
     public List<DashboardReviewDto> getWrittenReviews(
             @AuthenticationPrincipal User user,
