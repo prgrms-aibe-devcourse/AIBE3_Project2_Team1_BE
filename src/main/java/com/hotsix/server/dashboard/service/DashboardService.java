@@ -35,6 +35,7 @@ public class DashboardService {
     }
 
     /** 상태별 프로젝트 리스트 */
+    @Transactional(readOnly = true)
     public List<DashboardProjectDto> getProjectsByStatus(User user, Status status) {
         List<Project> projects = projectRepository.findByInitiatorOrParticipantAndStatus(user, status);
         return projects.stream()
