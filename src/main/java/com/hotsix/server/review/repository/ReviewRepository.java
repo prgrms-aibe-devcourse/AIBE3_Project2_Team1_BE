@@ -20,9 +20,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT COUNT(r) FROM Review r WHERE DATE(r.createdAt) = :date")
     long countByCreatedDate(@Param("date") LocalDate date);
 
-    // 내가 작성한 리뷰 조회
-    List<Review> findByFromUser(User fromUser);
+    /** 내가 쓴 리뷰 전체 리스트 */
+    List<Review> findByFromUser(User user);
 
-    // 내가 받은 리뷰 조회 (나중에 필요하면 사용)
-    List<Review> findByToUser(User toUser);
+    /** 내가 쓴 리뷰 개수 */
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.fromUser = :user")
+    int countByFromUser(@Param("user") User user);
 }

@@ -18,7 +18,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT p FROM Project p LEFT JOIN FETCH p.createdBy ORDER BY p.createdAt DESC")
     List<Project> findTop10ByOrderByCreatedAtDescWithUser(Pageable pageable);
 
-    List<Project> findByInitiatorAndStatus(User initiator, Status status);
-    List<Project> findByParticipantAndStatus(User participant, Status status);
-    List<Project> findByInitiatorOrParticipant(User initiator, User participant);
+    /** 상태별 count */
+    @Query("SELECT COUNT(p) FROM Project p " +
+            "WHERE (p.initiator = :user OR p.participant = :user) AND p.status = :status")
+    int countByInitiatorOrParticipantAndStatus(@Param("user") User user, @Param("status") Status status);
+
+    /** 상태별 리스트 */
+    @Query("SELECT p FROM Project p " +
+            "WHERE (p.initiator = :user OR p.participant = :user) AND p.status = :status")
+    List<Project> findByInitiatorOrParticipantAndStatus(@Param("user") User user, @Param("status") Status status);
 }
+

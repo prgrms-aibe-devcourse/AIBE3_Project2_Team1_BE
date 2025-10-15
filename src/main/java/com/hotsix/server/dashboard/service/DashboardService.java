@@ -1,6 +1,8 @@
 package com.hotsix.server.dashboard.service;
 
-import com.hotsix.server.dashboard.dto.*;
+import com.hotsix.server.dashboard.dto.DashboardProjectDto;
+import com.hotsix.server.dashboard.dto.DashboardReviewDto;
+import com.hotsix.server.dashboard.dto.DashboardSummaryDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.repository.ProjectRepository;
@@ -18,39 +20,27 @@ public class DashboardService {
     private final ProjectRepository projectRepository;
     private final ReviewRepository reviewRepository;
 
-    /**
-     * ① 대시보드 요약 (프로젝트 상태별 개수 + 리뷰 개수)
-     */
+    /** 대시보드 요약 */
     public DashboardSummaryDto getDashboardSummary(User user) {
-        int openCount = projectRepository.findByInitiatorAndStatus(user, Status.OPEN).size()
-                + projectRepository.findByParticipantAndStatus(user, Status.OPEN).size();
+        int openCount = projectRepository.countByInitiatorOrParticipantAndStatus(user, Status.OPEN);
+        int inProgressCount = projectRepository.countByInitiatorOrParticipantAndStatus(user, Status.IN_PROGRESS);
+        int completedCount = projectRepository.countByInitiatorOrParticipantAndStatus(user, Status.COMPLETED);
 
-        int inProgressCount = projectRepository.findByInitiatorAndStatus(user, Status.IN_PROGRESS).size()
-                + projectRepository.findByParticipantAndStatus(user, Status.IN_PROGRESS).size();
-
-        int completedCount = projectRepository.findByInitiatorAndStatus(user, Status.COMPLETED).size()
-                + projectRepository.findByParticipantAndStatus(user, Status.COMPLETED).size();
-
-        int writtenReviewCount = reviewRepository.findByFromUser(user).size();
+        // DB에서 바로 count
+        int writtenReviewCount = reviewRepository.countByFromUser(user);
 
         return new DashboardSummaryDto(openCount, inProgressCount, completedCount, writtenReviewCount);
     }
 
-    /**
-     * ② 상태별 프로젝트 리스트 조회
-     */
+    /** 상태별 프로젝트 리스트 */
     public List<DashboardProjectDto> getProjectsByStatus(User user, Status status) {
-        List<Project> projects = projectRepository.findByInitiatorAndStatus(user, status);
-        projects.addAll(projectRepository.findByParticipantAndStatus(user, status));
-
+        List<Project> projects = projectRepository.findByInitiatorOrParticipantAndStatus(user, status);
         return projects.stream()
                 .map(DashboardProjectDto::from)
                 .toList();
     }
 
-    /**
-     * ③ 내가 쓴 리뷰 목록
-     */
+    /** 내가 쓴 리뷰 */
     public List<DashboardReviewDto> getWrittenReviews(User user) {
         return reviewRepository.findByFromUser(user).stream()
                 .map(DashboardReviewDto::from)

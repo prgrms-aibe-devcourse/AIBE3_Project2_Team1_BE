@@ -1,12 +1,17 @@
 package com.hotsix.server.dashboard.controller;
 
-import com.hotsix.server.dashboard.dto.*;
+import com.hotsix.server.dashboard.dto.DashboardProjectDto;
+import com.hotsix.server.dashboard.dto.DashboardReviewDto;
+import com.hotsix.server.dashboard.dto.DashboardSummaryDto;
 import com.hotsix.server.dashboard.service.DashboardService;
+import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -16,29 +21,23 @@ import java.util.List;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final Rq rq;
 
-    // ① 대시보드 요약
     @GetMapping("/summary")
-    public DashboardSummaryDto getDashboardSummary(@AuthenticationPrincipal User user) {
+    public DashboardSummaryDto getDashboardSummary() {
+        User user = rq.getUser();
         return dashboardService.getDashboardSummary(user);
     }
 
-    // ② 상태별 프로젝트 리스트
     @GetMapping("/projects")
-    public List<DashboardProjectDto> getProjectsByStatus(
-            @AuthenticationPrincipal User user,
-            @RequestParam Status status
-    ) {
+    public List<DashboardProjectDto> getProjectsByStatus(@RequestParam Status status) {
+        User user = rq.getUser();
         return dashboardService.getProjectsByStatus(user, status);
     }
 
-    // ③ 내가 쓴 리뷰
     @GetMapping("/reviews")
-    public List<DashboardReviewDto> getWrittenReviews(
-            @AuthenticationPrincipal User user,
-            @RequestParam(defaultValue = "written") String type
-    ) {
-        // type 확장 여지를 위해 파라미터 유지
+    public List<DashboardReviewDto> getWrittenReviews() {
+        User user = rq.getUser();
         return dashboardService.getWrittenReviews(user);
     }
 }
