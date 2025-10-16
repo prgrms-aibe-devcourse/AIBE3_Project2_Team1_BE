@@ -95,7 +95,7 @@ springdoc:
 
 app:
   oauth2:
-    redirect-uri: ${OAUTH2_REDIRECT_URI}
+    redirect-uri: ${PROD_OAUTH2_REDIRECT_URI}
     cookie:
       access-token:
         name: accessToken
