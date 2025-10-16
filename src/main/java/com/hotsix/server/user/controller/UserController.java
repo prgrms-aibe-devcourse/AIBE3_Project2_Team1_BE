@@ -1,6 +1,7 @@
 package com.hotsix.server.user.controller;
 
 import com.hotsix.server.global.Rq.Rq;
+import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.global.rsData.RsData;
 import com.hotsix.server.user.dto.*;
 import com.hotsix.server.user.entity.Role;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -151,4 +153,14 @@ public class UserController {
                 "회원탈퇴가 완료되었습니다."
         );
     }
+
+    @PostMapping("/profile-image")
+    @Operation(summary = "프로필 이미지 업로드")
+    public CommonResponse<String> uploadProfileImage(@RequestParam("file") MultipartFile file) {
+        String imageUrl = userService.uploadProfileImage(file);
+        return CommonResponse.success(
+                imageUrl
+        );
+    }
+
 }
