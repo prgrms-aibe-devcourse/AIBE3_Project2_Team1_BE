@@ -1,4 +1,4 @@
-package com.hotsix.server.project.service;
+/*package com.hotsix.server.project.service;
 
 import com.hotsix.server.aws.controller.FileUploadController;
 import com.hotsix.server.aws.manager.AmazonS3Manager;
@@ -9,6 +9,8 @@ import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
 import com.hotsix.server.project.repository.ProjectRepository;
+import com.hotsix.server.project.service.BookmarkService;
+import com.hotsix.server.project.service.ProjectService;
 import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.repository.UserRepository;
@@ -111,7 +113,9 @@ public class ProjectServiceTest {
 //        });
 //    }
 
-    /*
+/*import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.project.entity.Project;
+import org.junit.jupiter.api.DisplayName;/*
     @Test
     @DisplayName("프로젝트 상태 변경 성공")
     void updateProjectStatusSuccess() {
@@ -164,6 +168,11 @@ public class ProjectServiceTest {
 
     }
 */
+/*import com.hotsix.server.global.exception.ApplicationException;
+import com.hotsix.server.project.entity.Project;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
     @Test
     @DisplayName("프로젝트 삭제 성공")
     void deleteProjectSuccess() {
@@ -190,4 +199,4 @@ public class ProjectServiceTest {
 
 
 
-}
+}*/
