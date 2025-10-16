@@ -42,7 +42,7 @@ public class User extends BaseEntity {
     @Builder.Default
     private String apiKey = UUID.randomUUID().toString();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
     @Enumerated(EnumType.STRING)
@@ -52,6 +52,7 @@ public class User extends BaseEntity {
 
     private String picture;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoomUser> chatRooms = new ArrayList<>();
 
@@ -75,11 +76,31 @@ public class User extends BaseEntity {
         this.apiKey = UUID.randomUUID().toString();
     }
 
-    @PrePersist
-    @PreUpdate
-    private void syncProfileRelation() {
-        if (profile != null && profile.getUser() != this) {
-            profile.assignUser(this);
+    public User(String email,
+                String password,
+                LocalDate birthDate,
+                String name,
+                String nickname,
+                String phoneNumber,
+                Role role,
+                String picture,
+                Provider provider) {
+        this.email = email;
+        this.password = password;
+        this.birthDate = birthDate;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.nickname = nickname;
+        this.role = role;
+        this.picture = picture;
+        this.provider = provider;
+        this.apiKey = UUID.randomUUID().toString();
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+        if (profile != null) {
+            profile.setUser(this);  // ✅ 양방향 연관관계 설정
         }
     }
 
@@ -98,5 +119,9 @@ public class User extends BaseEntity {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

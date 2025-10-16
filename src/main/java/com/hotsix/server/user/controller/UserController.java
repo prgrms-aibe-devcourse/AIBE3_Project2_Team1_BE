@@ -1,11 +1,10 @@
 package com.hotsix.server.user.controller;
 
 import com.hotsix.server.global.Rq.Rq;
+import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.global.rsData.RsData;
-import com.hotsix.server.user.dto.UserDto;
-import com.hotsix.server.user.dto.UserPasswordChangeRequestDto;
-import com.hotsix.server.user.dto.UserRegisterRequestDto;
-import com.hotsix.server.user.dto.UserUpdateRequestDto;
+import com.hotsix.server.user.dto.*;
+import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -55,13 +55,13 @@ public class UserController {
                     @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
             }
     )
-    public RsData<UserDto> getMyInfo() {
+    public RsData<UserInquiryDto> getMyInfo() {
         User currentUser = rq.getUser();
 
         return new RsData<>(
                 "200-5",
                 "내 정보 조회 성공",
-                new UserDto(currentUser)
+                new UserInquiryDto(currentUser)
         );
     }
 
@@ -87,6 +87,19 @@ public class UserController {
                 "200-3",
                 "회원정보가 수정되었습니다.",
                 new UserDto(updatedUser)
+        );
+    }
+
+    @PutMapping("/mode")
+    public RsData<UserDto> updateUserMode(@RequestParam("mode") Role role) {
+        User user = rq.getUser();
+        user.setRole(role);
+        userService.save(user);
+
+        return new RsData<>(
+                "200-1",
+                "모드가 변경되었습니다.",
+                new UserDto(user)
         );
     }
 
@@ -138,6 +151,15 @@ public class UserController {
         return new RsData<>(
                 "200-2",
                 "회원탈퇴가 완료되었습니다."
+        );
+    }
+
+    @PostMapping("/profile-image")
+    @Operation(summary = "프로필 이미지 업로드")
+    public CommonResponse<String> uploadProfileImage(@RequestParam("file") MultipartFile file) {
+        String imageUrl = userService.uploadProfileImage(file);
+        return CommonResponse.success(
+                imageUrl
         );
     }
 }

@@ -13,7 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "chat_room_user")
+@Table(
+        name = "chat_room_user",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"chat_room_id", "user_id"})
+        }
+)
 public class ChatRoomUser extends BaseEntity {
 
     @Id
@@ -25,7 +30,7 @@ public class ChatRoomUser extends BaseEntity {
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private User user;
 
     public static ChatRoomUser create(ChatRoom chatRoom, User user) {
