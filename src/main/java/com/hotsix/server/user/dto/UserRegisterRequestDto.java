@@ -31,6 +31,4 @@ public record UserRegisterRequestDto(
         @Schema(description = "역할 (CLIENT 또는 FREELANCER)", example = "CLIENT", allowableValues = {"CLIENT", "FREELANCER"}, defaultValue = "CLIENT")
         Role role
 
-) {
-
-}
+) {}
