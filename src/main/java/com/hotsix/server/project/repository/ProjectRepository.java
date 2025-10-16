@@ -27,5 +27,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT p FROM Project p " +
             "WHERE (p.initiator = :user OR p.participant = :user) AND p.status = :status")
     List<Project> findByInitiatorOrParticipantAndStatus(@Param("user") User user, @Param("status") Status status);
+
+    List<Project> findByInitiatorOrParticipant(User initiator, User participant);
 }
 
