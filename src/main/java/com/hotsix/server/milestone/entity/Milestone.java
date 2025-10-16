@@ -18,7 +18,7 @@ public class Milestone extends BaseEntity {
     private Long milestoneId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     private String title;

@@ -1,4 +1,4 @@
-/*package com.hotsix.server.project.service;
+package com.hotsix.server.project.service;
 
 import com.hotsix.server.aws.controller.FileUploadController;
 import com.hotsix.server.aws.manager.AmazonS3Manager;
@@ -26,7 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class ProjectServiceTest {
-
+    @Test
+    void contextLoads() {
+        //
+    }
+}
+/*
     private ProjectService projectService;
     private ProjectRepository projectRepository;
     private UserRepository userRepository;
@@ -113,9 +118,7 @@ public class ProjectServiceTest {
 //        });
 //    }
 
-/*import com.hotsix.server.global.exception.ApplicationException;
-import com.hotsix.server.project.entity.Project;
-import org.junit.jupiter.api.DisplayName;/*
+/*
     @Test
     @DisplayName("프로젝트 상태 변경 성공")
     void updateProjectStatusSuccess() {
@@ -140,7 +143,7 @@ import org.junit.jupiter.api.DisplayName;/*
         assertThat(project.getStatus()).isEqualTo(Status.COMPLETED);
     }
 
-
+*//*
     @Test
     @DisplayName("프로젝트 상세 조회 성공")
     void getProjectDetailSuccess() {
@@ -168,11 +171,7 @@ import org.junit.jupiter.api.DisplayName;/*
 
     }
 */
-/*import com.hotsix.server.global.exception.ApplicationException;
-import com.hotsix.server.project.entity.Project;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
+/*
     @Test
     @DisplayName("프로젝트 삭제 성공")
     void deleteProjectSuccess() {
