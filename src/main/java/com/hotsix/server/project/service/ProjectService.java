@@ -24,6 +24,10 @@ import com.hotsix.server.user.entity.Role;
 import com.hotsix.server.user.entity.User;
 import com.hotsix.server.user.exception.UserErrorCase;
 import com.hotsix.server.user.repository.UserRepository;
+
+import com.hotsix.server.milestone.entity.Milestone;
+import com.hotsix.server.milestone.repository.MilestoneRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +39,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+
+    private final MilestoneRepository milestoneRepository;
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -69,6 +75,7 @@ public class ProjectService {
         }
 
         Project saved = projectRepository.save(project);
+        Milestone milestone = milestoneRepository.save(new Milestone(saved));
 
         return new ProjectResponseDto(
                 saved.getProjectId(),
