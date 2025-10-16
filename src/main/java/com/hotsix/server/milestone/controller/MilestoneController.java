@@ -2,37 +2,34 @@ package com.hotsix.server.milestone.controller;
 
 import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.milestone.dto.*;
-import com.hotsix.server.milestone.entity.MilestoneFile;
-import com.hotsix.server.milestone.service.FileStorageService;
 import com.hotsix.server.milestone.service.MilestoneService;
+import com.hotsix.server.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
+import java.net.URI;
+import org.springframework.http.HttpHeaders;
+
 import java.util.List;
+
 @Tag(name = "MilestoneController", description = "마일스톤 관련 API 컨트롤러")
 @RestController
 @RequestMapping("/api/v1/milestones")
 @RequiredArgsConstructor
 public class MilestoneController {
-
     private final MilestoneService milestoneService;
-    private final FileStorageService fileStorageService;
     private final Rq rq;  // 현재 로그인 유저 가져오기
 
     //-- 조회 API --
+
     @Operation(summary = "마일스톤 정보 조회")
     @GetMapping("/{milestoneId}")
     public MilestoneResponseDto getMilestone(@PathVariable Long milestoneId) {
@@ -46,30 +43,62 @@ public class MilestoneController {
     }
 
 
-    @Operation(summary = "칸반 카드 목록 조회")
+    @Operation(summary = "칸반 카드 목록 조회 (ETag 지원)")
     @GetMapping("/{milestoneId}/cards")
-    public List<KanbanCardResponse> getCards(@PathVariable Long milestoneId) {
-        return milestoneService.getCards(milestoneId);
+    public ResponseEntity<List<KanbanCardResponse>> getCards(
+            @PathVariable Long milestoneId,
+            @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch
+            ) {
+        var list = milestoneService.getCards(milestoneId);
+        String etag = milestoneService.calcCardsEtag(milestoneId, list); // [ADD]
+        if (etag != null && etag.equals(ifNoneMatch)) {
+            return ResponseEntity.status(304).eTag(etag).build();
+        }
+        return ResponseEntity.ok().eTag(etag).body(list);
     }
 
 
 
-    @Operation(summary = "일정 목록 조회")
+    @Operation(summary = "일정 목록 조회(ETag 지원)")
     @GetMapping("/{milestoneId}/events")
-    public List<CalendarEventResponse> getEvents(@PathVariable Long milestoneId) {
-        return milestoneService.getEvents(milestoneId);
+    public ResponseEntity<List<CalendarEventResponse>> getEvents(
+            @PathVariable Long milestoneId,
+            @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch
+            ) {
+        var list = milestoneService.getEvents(milestoneId);
+        String etag = milestoneService.calcEventsEtag(milestoneId, list); // [ADD]
+        if (etag != null && etag.equals(ifNoneMatch)) {
+            return ResponseEntity.status(304).eTag(etag).build();
+        }
+        return ResponseEntity.ok().eTag(etag).body(list);
     }
 
-    @Operation(summary = "파일 목록 조회")
+    @Operation(summary = "파일 목록 조회(ETag 지원)")
     @GetMapping("/{milestoneId}/files")
-    public List<FileResponseDto> getFiles(@PathVariable Long milestoneId) {
-        return milestoneService.getFiles(milestoneId);
+    public ResponseEntity<List<FileResponseDto>> getFiles(
+            @PathVariable Long milestoneId,
+            @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch // [ADD]
+
+    ) {
+        var list = milestoneService.getFiles(milestoneId);
+
+        // [ADD] ETag 계산: updatedAt(없으면 id/size 조합) 기반으로 간단 해시
+        String currentEtag = milestoneService.calcFilesEtag(milestoneId, list);
+
+        // [ADD] 클라이언트와 동일하면 304
+        if (currentEtag != null && currentEtag.equals(ifNoneMatch)) {
+            return ResponseEntity.status(304).eTag(currentEtag).build();
+        }
+
+        return ResponseEntity.ok().eTag(currentEtag).body(list);
     }
 
     //-- 생성 API --
+
     @Operation(summary = "팀원 1명 추가")
-    @PostMapping("/{milestoneId}/team-members/one")
+    @PostMapping(value = "/{milestoneId}/team-members/one")
     public TeamMemberDto createOne(@PathVariable Long milestoneId, @RequestBody TeamMemberDto dto) {
+
         var user = rq.getUser();
         return milestoneService.createOneMember(milestoneId, dto, user);
     }
@@ -89,6 +118,7 @@ public class MilestoneController {
             @PathVariable Long milestoneId,
             @Valid @RequestBody EventRequestDto request
     ) {
+
         return milestoneService.createEvent(milestoneId, request);
     }
 
@@ -116,13 +146,12 @@ public class MilestoneController {
 
     @Operation(summary = "팀원 수정")
     @PatchMapping("/{milestoneId}/team-members/{memberId}")
-    public TeamMemberDto updateOne(@PathVariable Long milestoneId, @PathVariable Long memberId,
-                                   @RequestBody TeamMemberDto dto) {
+    public TeamMemberDto updateOne( @PathVariable Long milestoneId,
+                                    @PathVariable Long memberId,
+                                    @RequestBody TeamMemberDto dto) {
         var user = rq.getUser();
         return milestoneService.updateOneMember(milestoneId, memberId, dto, user);
     }
-
-
 
     @Operation(summary = "칸반 카드 수정")
     @PatchMapping("/{milestoneId}/cards/{cardId}")
@@ -181,36 +210,19 @@ public class MilestoneController {
     ) {
         milestoneService.deleteFile(milestoneId, fileId);
     }
+    // -- 파일 다운로드 추가 --
+    @Operation(summary = "파일 다운로드(302 리다이렉트)")
+    @GetMapping("/{milestoneId}/files/{fileId}/download")
+    public ResponseEntity<Void> downloadFile(
+            @PathVariable Long milestoneId,
+            @PathVariable Long fileId) {
+        // 서비스에서 S3 전체 URL을 받아오기
+        MilestoneService.FileDownload dto = milestoneService.getFileDownloadInfo(fileId);
 
-    @Operation(summary = "파일 다운")
-    @GetMapping("/files/download/{fileId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
-        try {
-            // 파일 정보 조회
-            MilestoneFile file = milestoneService.getFileById(fileId);
-
-            // 파일 로드
-            Path filePath = fileStorageService.loadFile(file.getFilePath());
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (!resource.exists()) {
-                throw new RuntimeException("파일을 찾을 수 없습니다: " + file.getFileName());
-            }
-
-            // Content-Disposition 헤더 설정 (한글 파일명 인코딩)
-            String encodedFileName = URLEncoder.encode(file.getFileName(), StandardCharsets.UTF_8)
-                    .replaceAll("\\+", "%20");
-            String contentDisposition = "attachment; filename=\"" + encodedFileName + "\"";
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(file.getFileType()))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .body(resource);
-
-        } catch (Exception e) {
-            throw new RuntimeException("파일 다운로드 중 오류가 발생했습니다: " + e.getMessage());
-        }
+        // 302 Found 로 S3로 이동
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(dto.getDownloadUrl()));
+        return ResponseEntity.status(302).headers(headers).build();
     }
-
 
 }
