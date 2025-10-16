@@ -2,14 +2,10 @@ package com.hotsix.server.global.config.security.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Collections;
 import java.util.Date;
 
 @Component
@@ -85,19 +81,5 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return true; // 토큰 파싱 실패 또는 만료 시 true 반환
         }
-    }
-
-    public Authentication getAuthentication(String token) {
-        if (!validateToken(token)) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-        }
-
-        Long userId = getUserId(token);
-        // 권한은 토큰에서 파싱하거나, 간단히 ROLE_USER 고정
-        return new UsernamePasswordAuthenticationToken(
-                userId, // Principal
-                null, // Credentials
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-        );
     }
 }
