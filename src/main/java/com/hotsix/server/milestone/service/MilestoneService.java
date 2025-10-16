@@ -410,6 +410,16 @@ public class MilestoneService {
                         HttpStatus.NOT_FOUND, "마일스톤을 찾을 수 없습니다. id=" + milestoneId));
     }
 
+    //프로젝트 ID로 마일스톤 조회
+    public MilestoneResponseDto getMilestoneByProjectId(Long projectId) {
+        Milestone milestone = milestoneRepository.findByProject_ProjectId(projectId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "해당 프로젝트의 마일스톤을 찾을 수 없습니다. projectId=" + projectId
+                ));
+        return MilestoneResponseDto.from(milestone);
+    }
+
     // deliverable 소속/타입 검증 공통
     private Deliverable getValidatedDeliverable(Long milestoneId, Long deliverableId, String requiredType) {
         Deliverable deliverable = deliverableRepository.findById(deliverableId)
@@ -428,7 +438,7 @@ public class MilestoneService {
     // 프리랜서 권한 확인
     private boolean isFreelancerOf(Milestone milestone, User currentUser) {
         try {
-            Project project = milestone.getContract().getProposal().getProject();
+            Project project = milestone.getProject();
             User freelancer = project.getInitiator();
             return freelancer != null &&
                     currentUser != null &&
