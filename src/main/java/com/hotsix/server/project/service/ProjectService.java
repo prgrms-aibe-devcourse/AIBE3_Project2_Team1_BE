@@ -2,7 +2,8 @@ package com.hotsix.server.project.service;
 
 
 import com.hotsix.server.aws.manager.AmazonS3Manager;
-import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.global.Rq.Rq;
+import com.hotsix.server.project.dto.*;
 import com.hotsix.server.project.entity.Category;
 import com.hotsix.server.project.entity.ProjectImage;
 import com.hotsix.server.project.exception.ProjectErrorCase;
@@ -10,11 +11,8 @@ import com.hotsix.server.proposal.dto.ProposalFileResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.hotsix.server.project.dto.ProjectFileResponseDto;
 
 import com.hotsix.server.global.exception.ApplicationException;
-import com.hotsix.server.project.dto.ProjectRequestDto;
-import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
 import com.hotsix.server.project.entity.Project;
 import com.hotsix.server.project.entity.Status;
@@ -35,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +45,7 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final AmazonS3Manager amazonS3Manager;
     private final BookmarkService bookmarkService;
+    private final Rq rq;
 
     @Transactional
     public ProjectResponseDto registerProject(Long currentUserId, ProjectRequestDto dto, List<MultipartFile> images) {
@@ -293,4 +293,12 @@ public class ProjectService {
         return project.getInitiator().getUserId();
     }
 
+    public List<ProjectSummaryResponse> getProjectsByUser() {
+        User actor = rq.getUser();
+        List<Project> projects = projectRepository.findByInitiatorOrParticipant(actor, actor);
+
+        return projects.stream()
+                .map(ProjectSummaryResponse::from)
+                .collect(Collectors.toList());
+    }
 }
