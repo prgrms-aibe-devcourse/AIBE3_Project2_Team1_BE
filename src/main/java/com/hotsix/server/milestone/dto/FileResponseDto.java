@@ -26,7 +26,7 @@ public class FileResponseDto {
                 .name(file.getFileName())
                 .size(file.getFileSize())
                 .type(file.getFileType())
-                .downloadUrl("/api/v1/milestones/files/download/" + file.getFileId())
+                .downloadUrl(file.getFilePath())
                 .createdAt(file.getCreatedAt() != null
                         ? file.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                         : null)
