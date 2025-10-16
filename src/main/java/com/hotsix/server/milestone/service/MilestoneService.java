@@ -428,7 +428,7 @@ public class MilestoneService {
     // 프리랜서 권한 확인
     private boolean isFreelancerOf(Milestone milestone, User currentUser) {
         try {
-            Project project = milestone.getContract().getProposal().getProject();
+            Project project = milestone.getProject();
             User freelancer = project.getInitiator();
             return freelancer != null &&
                     currentUser != null &&
