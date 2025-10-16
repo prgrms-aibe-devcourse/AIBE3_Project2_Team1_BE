@@ -14,6 +14,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import jakarta.servlet.http.Cookie;
 
 @Component
 @RequiredArgsConstructor
@@ -38,26 +39,42 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
             Object principal = auth.getPrincipal();
-            if (principal instanceof Long l) { return l; }
-            if (principal instanceof Integer i) { return i.longValue(); }
-            if (principal instanceof String s && s.chars().allMatch(Character::isDigit)) {
+            if (principal instanceof Long l) return l;
+            if (principal instanceof Integer i) return i.longValue();
+            if (principal instanceof String s && s.chars().allMatch(Character::isDigit))
                 return Long.parseLong(s);
-            }
+
             String name = auth.getName();
-            if (name != null && name.chars().allMatch(Character::isDigit)) {
+            if (name != null && name.chars().allMatch(Character::isDigit))
                 return Long.parseLong(name);
-            }
         }
 
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        String authz = request != null ? request.getHeader("Authorization") : null;
+        if (request == null) throw new ApplicationException(AuthErrorCase.UNAUTHORIZED);
+
+        String authz = request.getHeader("Authorization");
         if (StringUtils.hasText(authz) && authz.startsWith("Bearer ")) {
             String token = authz.substring(7);
             try {
                 Long userId = jwtTokenProvider.getUserId(token);
-                if (userId != null) { return userId; }
+                if (userId != null) return userId;
             } catch (IllegalArgumentException e) {
                 throw new ApplicationException(AuthErrorCase.UNAUTHORIZED);
+            }
+        }
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    String token = cookie.getValue();
+                    try {
+                        Long userId = jwtTokenProvider.getUserId(token);
+                        if (userId != null) return userId;
+                    } catch (IllegalArgumentException e) {
+                        throw new ApplicationException(AuthErrorCase.UNAUTHORIZED);
+                    }
+                }
             }
         }
 

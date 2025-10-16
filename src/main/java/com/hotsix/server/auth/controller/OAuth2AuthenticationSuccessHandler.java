@@ -72,7 +72,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         saveRefreshToken(user.getUserId(), refreshTokenValue, refreshTokenExpiry);
 
         addTokenCookie(response, accessTokenCookieName, accessToken, accessTokenMaxAge);
-        getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        // getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        response.sendRedirect("https://pickplezone.vercel.app/oauth/callback");
     }
 
     private void saveRefreshToken(Long userId, String token, Long expiry) {
