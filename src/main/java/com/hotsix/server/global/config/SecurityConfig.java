@@ -61,9 +61,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/login/basic",
                                 "/api/v1/users/signup",
                                 "/login/**",
-                                "/oauth2/**",
-                                "/api/v1/milestones/**"
-
+                                "/oauth2/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
