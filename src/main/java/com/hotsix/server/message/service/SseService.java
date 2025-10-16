@@ -39,7 +39,7 @@ public class SseService {
         try {
             emitter.send(SseEmitter.event()
                     .name("connect")
-                    .data("connected : userId=" + user.getName()));
+                    .data("connected : userId=" + user.getUserId()));
         } catch (IOException e) {
             emitterRepository.remove(chatRoomId, emitter);
         }
