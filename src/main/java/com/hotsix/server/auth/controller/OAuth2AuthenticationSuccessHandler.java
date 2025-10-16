@@ -102,14 +102,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     private void addTokenCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath(cookiePath);
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
-        log.info("Token cookie added: name={}, maxAge={}, secure={}, path={}",
-                name, maxAge, cookieSecure, cookiePath);
+        String cookieValue = String.format(
+                "%s=%s; Max-Age=%d; Path=%s; Secure; HttpOnly; SameSite=None",
+                name, value, maxAge, cookiePath
+        );
+        response.setHeader("Set-Cookie", cookieValue);
+
+        log.info("Token cookie added manually: {}", cookieValue);
     }
 
     private User createUserFromOAuth2User(OAuth2User oAuth2User, Provider provider, String providerId) {
