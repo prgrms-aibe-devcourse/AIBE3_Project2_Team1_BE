@@ -1,5 +1,7 @@
 package com.hotsix.server.user.service;
 
+import com.hotsix.server.aws.manager.AmazonS3Manager;
+import com.hotsix.server.global.Rq.Rq;
 import com.hotsix.server.global.config.security.jwt.JwtTokenProvider;
 import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.profile.entity.Profile;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -26,8 +29,8 @@ import java.time.LocalDate;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final ProfileRepository profileRepository;
+    private final AmazonS3Manager amazonS3Manager;
+    private final Rq rq;
 
     @Transactional
     public User signUp(String email,
@@ -114,5 +117,22 @@ public class UserService {
 
     public void save(User user) {
         userRepository.save(user);
+    }
+
+    @Transactional
+    public String uploadProfileImage(MultipartFile file) {
+        User user = rq.getUser();
+        if (file.isEmpty()) {
+            throw new ApplicationException(UserErrorCase.NO_USER_IMAGE_FILE);
+        }
+
+        // S3에 업로드
+        String fileUrl = amazonS3Manager.uploadFile(file);
+
+        // DB에 URL 저장
+        user.setPicture(fileUrl);
+        userRepository.save(user);
+
+        return fileUrl;
     }
 }
