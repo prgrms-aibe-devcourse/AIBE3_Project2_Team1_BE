@@ -1,7 +1,7 @@
 package com.hotsix.server.milestone.entity;
 
 import com.hotsix.server.global.entity.BaseEntity;
-import com.hotsix.server.proposal.entity.Contract;
+import com.hotsix.server.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +18,8 @@ public class Milestone extends BaseEntity {
     private Long milestoneId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", nullable = false)
-    private Contract contract;
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     private String title;
 
@@ -32,12 +32,18 @@ public class Milestone extends BaseEntity {
     private MilestoneStatus milestoneStatus;
 
     @Builder
-    public Milestone(Contract contract, String title, LocalDate dueDate, MilestoneStatus milestoneStatus) {
-        this.contract = contract;
+    public Milestone(Project project, String title, LocalDate dueDate, MilestoneStatus milestoneStatus) {
+        this.project = project;
         this.title = title;
         this.dueDate = dueDate;
         this.milestoneStatus = milestoneStatus;
     }
+    public Milestone(Project project) {
+        this.project = project;
+        this.title = "마일스톤"; // 기본 제목
+        this.milestoneStatus = MilestoneStatus.PENDING; // 기본 상태
+    }
+
     public void updateInfo(String title, String description, LocalDate dueDate, MilestoneStatus status) {
         if (title != null && !title.trim().isEmpty()) {
             this.title = title.trim();

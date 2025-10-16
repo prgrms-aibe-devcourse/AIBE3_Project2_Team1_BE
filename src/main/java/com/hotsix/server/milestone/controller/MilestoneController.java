@@ -92,6 +92,11 @@ public class MilestoneController {
 
         return ResponseEntity.ok().eTag(currentEtag).body(list);
     }
+    @Operation(summary = "프로젝트 ID로 마일스톤 조회")
+    @GetMapping("/project/{projectId}")
+    public MilestoneResponseDto getMilestoneByProjectId(@PathVariable Long projectId) {
+        return milestoneService.getMilestoneByProjectId(projectId);
+    }
 
     //-- 생성 API --
 

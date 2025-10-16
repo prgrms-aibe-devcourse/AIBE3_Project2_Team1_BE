@@ -30,9 +30,7 @@ public class MilestoneResponseDto {
         List<MemberInfo> members = new ArrayList<>();
 
         try {
-            Project project = milestone.getContract()
-                    .getProposal()
-                    .getProject();
+            Project project = milestone.getProject();
 
             // 클라이언트
             User client = project.getInitiator();
