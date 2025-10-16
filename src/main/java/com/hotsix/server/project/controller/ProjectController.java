@@ -7,6 +7,7 @@ import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.project.dto.ProjectRequestDto;
 import com.hotsix.server.project.dto.ProjectResponseDto;
 import com.hotsix.server.project.dto.ProjectStatusUpdateRequestDto;
+import com.hotsix.server.project.dto.ProjectSummaryResponse;
 import com.hotsix.server.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -125,4 +126,12 @@ public class ProjectController {
         Long creatorId = projectService.getProjectCreatorId(projectId);
         return CommonResponse.success(creatorId);
     }
+
+    @GetMapping("/me")
+    @Operation(summary = "내 프로젝트 목록 조회", description = "로그인한 사용자의 모든 프로젝트를 상태별로 반환합니다.")
+    public CommonResponse<List<ProjectSummaryResponse>> getMyProjects() {
+        List<ProjectSummaryResponse> myProjects = projectService.getProjectsByUser();
+        return CommonResponse.success(myProjects);
+    }
+
 }
