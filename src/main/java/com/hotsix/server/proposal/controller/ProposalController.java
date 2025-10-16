@@ -1,21 +1,14 @@
 package com.hotsix.server.proposal.controller;
-
-import com.hotsix.server.global.exception.ApplicationException;
 import com.hotsix.server.global.response.CommonResponse;
 import com.hotsix.server.proposal.dto.ProposalRequestBody;
 import com.hotsix.server.proposal.dto.ProposalRequestDto;
 import com.hotsix.server.proposal.dto.ProposalResponseDto;
-import com.hotsix.server.proposal.entity.Proposal;
-import com.hotsix.server.proposal.entity.ProposalFile;
 import com.hotsix.server.proposal.entity.ProposalStatus;
-import com.hotsix.server.proposal.exception.ProposalErrorCase;
 import com.hotsix.server.proposal.service.ProposalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -128,5 +121,14 @@ public class ProposalController {
     ){
         proposalService.update(proposalId, ProposalStatus.REJECTED);
         return CommonResponse.success("%d번 제안서를 거절하였습니다.".formatted(proposalId));
+    }
+
+    @DeleteMapping
+    @Operation(summary = "제안서 파일 삭제")
+    public CommonResponse<String> deleteFile(
+            @RequestParam("fileUrl") String fileUrl
+    ) {
+        proposalService.deleteFile(fileUrl);
+        return CommonResponse.success("파일이 삭제되었습니다.");
     }
 }

@@ -14,6 +14,7 @@ public record ProposalRequestBody (
         String description,
         @NotNull
         Integer proposedAmount,
-        ProposalStatus status
+        ProposalStatus status,
+        List<String> existingFileUrls
 ){
 }
